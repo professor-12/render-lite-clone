@@ -1,1 +1,1 @@
-echo "======Building projects.... Please wait....=======" && pnpm build
+echo "======Building projects.... Please wait....=======" && pnpm lint && pnpm build
