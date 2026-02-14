@@ -1,5 +1,6 @@
 import { error } from 'console';
 import { type NextFunction, type Request, type Response } from 'express';
+import { logger } from './httplogger.middleware.js';
 
 export const errorHandler = async (error: any, req: Request, res: Response, Next: NextFunction) => {
   if (error instanceof SyntaxError) {
@@ -11,6 +12,7 @@ export const errorHandler = async (error: any, req: Request, res: Response, Next
     });
   }
 
+  logger.error(JSON.stringify(error));
   res.status(500).json({
     message: 'Something went wrong!!!',
     data: null,
