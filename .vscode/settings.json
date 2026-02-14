@@ -3,5 +3,10 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
   },
-  "eslint.workingDirectories": [{ "mode": "auto" }]
+  "eslint.workingDirectories": [
+    {
+      "mode": "auto"
+    }
+  ],
+  "prisma.pinToPrisma6": false
 }

@@ -1,21 +1,16 @@
-import express from "express"
-import {config} from "dotenv"
+import express from 'express';
+import { config } from 'dotenv';
+import { errorHandler } from '../middlewares/error.middleware.js';
+import appRoute from './module/app/app.route.js';
+config();
+const PORT = process.env.PORT || 8080;
 
+const app = express();
 
-config({})
-const PORT = process.env.PORT || 8080
+app.use('/api/v1', appRoute);
 
+// app.use(errorHandler);
 
-
-const app = express()
-
-
-
-app.listen(PORT, (err) => {
-    if (err) {
-        console.log(err);
-        process.exit(1);
-    } else {
-        console.log("Server is running at port " + PORT + "!!!!");
-    }
+app.listen(PORT, () => {
+  console.log('Service is running at port ' + PORT + '!!!!');
 });
