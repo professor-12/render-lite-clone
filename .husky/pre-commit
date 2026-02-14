@@ -1,0 +1,3 @@
+echo "======Building projects.... Please wait....=======";
+
+pnpm build
