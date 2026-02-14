@@ -1,135 +1,178 @@
-# Turborepo starter
+# 🚀 RenderLite — Self-Hosted PaaS Platform
 
-This Turborepo starter is maintained by the Turborepo core team.
+> A production-inspired Platform-as-a-Service (PaaS) built to replicate core deployment workflows of modern cloud platforms.
 
-## Using this example
+RenderLite is a container-native hosting platform that automates Git-based deployments, Docker builds, service isolation, and dynamic routing — built from scratch to deeply understand infrastructure engineering.
 
-Run the following command:
+---
 
-```sh
-npx create-turbo@latest
-```
+## ✨ Highlights
 
-## What's inside?
+- 🔁 Git-based automated deployments
+- 🐳 Dynamic Docker build pipeline
+- 🌐 Automatic subdomain routing
+- 📦 Container isolation per service
+- 🧠 Monorepo architecture with Turborepo
+- ⚡ Type-safe backend using Prisma ORM
+- 🧪 CI-ready structure with task caching
 
-This Turborepo includes the following packages/apps:
+---
 
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
+## 🏗 Architecture Overview
 
 ```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+                        ┌──────────────┐
+                        │  Dashboard   │ (Next.js)
+                        └───────┬──────┘
+                                │
+                                ▼
+                      ┌──────────────────┐
+                      │  API Orchestrator │
+                      │  (Node.js)        │
+                      └───────┬──────────┘
+                              │
+                              ▼
+                     ┌───────────────────┐
+                     │ Docker Engine API │
+                     └───────┬───────────┘
+                             │
+                             ▼
+                 ┌────────────────────────┐
+                 │ Isolated App Containers │
+                 └────────────────────────┘
+                             │
+                             ▼
+                   Reverse Proxy (Nginx/Caddy)
+                             │
+                             ▼
+                 user-service.renderlite.dev
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+---
+
+## 🏗 Monorepo Structure
+
+Managed using **Turborepo** + **pnpm workspaces**.
 
 ```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+apps/
+  ├── web        → Next.js dashboard
+  └── server     → Deployment orchestrator & API
 
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
+packages/
+  ├── ui         → Shared UI components
+  └── config     → Shared lint + TS configs
 ```
 
-### Develop
+---
 
-To develop all apps and packages, run the following command:
+## 🛠 Tech Stack
 
-```
-cd my-turborepo
+- **Node.js 18+**
+- **Next.js**
+- **Docker**
+- **PostgreSQL**
+- **Prisma ORM**
+- **Turborepo**
+- **pnpm**
+- **Nginx / Caddy (planned)**
 
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
+---
 
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
+## ⚡ Quick Start
 
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+### 1️⃣ Install Dependencies
 
-```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+```bash
+pnpm install
 ```
 
-### Remote Caching
+---
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+### 2️⃣ Setup Infrastructure
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
+```bash
+cd apps/server
+docker-compose up -d
+pnpm dlx prisma db push
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+---
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+### 3️⃣ Start Development
 
-```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
+```bash
+cd ../..
+pnpm dev
 ```
 
-## Useful Links
+Dashboard available at:
 
-Learn more about the power of Turborepo:
+```
+http://localhost:3000
+```
 
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+---
+
+## 🛰 Database Management
+
+| Action | Command |
+|--------|----------|
+| Prisma Studio | `pnpm dlx prisma studio` |
+| Reset Database | `docker-compose down -v` |
+| New Migration | `pnpm dlx prisma migrate dev --name <name>` |
+
+---
+
+## 🔐 Engineering Decisions
+
+### Container Isolation
+Each deployment runs inside its own Docker container to prevent cross-service interference and ensure resource separation.
+
+### Dynamic Dockerfile Strategy
+- If `Dockerfile` exists → Use it
+- If JavaScript project → Auto-generate Dockerfile
+- Otherwise → Deployment fails
+
+This mirrors real-world PaaS buildpack behavior.
+
+### Monorepo Design
+Turborepo enables:
+- Cached builds
+- Shared types across frontend + backend
+- Faster CI pipelines
+- Strict internal version control
+
+---
+
+## 📈 Roadmap
+
+- [ ] Git webhook listeners for auto-deploy
+- [ ] Live log streaming (WebSockets)
+- [ ] Custom domain mapping
+- [ ] Horizontal scaling strategy
+- [ ] Background job queue for builds
+- [ ] Deployment rollback system
+- [ ] Metrics & observability dashboard
+
+---
+
+## 🎯 Why This Project Exists
+
+RenderLite is not just a clone — it is a systems engineering deep dive.
+
+The goal is to understand:
+
+- How PaaS platforms work internally
+- Docker orchestration
+- Reverse proxy routing
+- Build pipelines
+- Service isolation
+- Multi-tenant architecture
+- Infrastructure design tradeoffs
+
+---
+
+## 📄 License
+
+MIT
