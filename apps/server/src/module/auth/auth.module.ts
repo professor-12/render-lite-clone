@@ -1,6 +1,6 @@
-import { GithubService } from '../../libs/github-service.js';
-import { AuthController } from './auth.controller.js';
-import { AuthService } from './auth.service.js';
+import { GithubService } from '../../libs/github-service';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
 
 const githubService = new GithubService();
 const authService = new AuthService(githubService);

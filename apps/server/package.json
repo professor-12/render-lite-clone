@@ -1,7 +1,6 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "type": "module",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -18,7 +17,6 @@
     "@prisma/client": "^7.4.0",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^22.15.3",
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
@@ -31,6 +29,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@types/node": "^22.15.3",
     "nodemon": "^3.1.11",
     "ts-node": "^10.9.2",
     "tsx": "^4.21.0",
