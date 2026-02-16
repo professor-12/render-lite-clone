@@ -9,8 +9,7 @@ const PORT = process.env.PORT || 8080;
 const app = express();
 
 app.use('/api/v1', appRoute);
-
-// app.use(errorHandler);
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   logger.info('Service is running at port ' + PORT + '!!!!');
