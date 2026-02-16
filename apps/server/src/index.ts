@@ -1,9 +1,10 @@
 import express from 'express';
-import { config } from 'dotenv';
-import { errorHandler } from './middlewares/error.middleware.js';
-import appRoute from './module/app/app.route.js';
-import { logger } from './middlewares/httplogger.middleware.js';
-config();
+import dotEnv from 'dotenv';
+import { errorHandler } from './middlewares/error.middleware';
+import appRoute from './module/app/app.route';
+import { logger } from './middlewares/httplogger.middleware';
+
+dotEnv.config();
 const PORT = process.env.PORT || 8080;
 
 const app = express();

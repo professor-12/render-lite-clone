@@ -1,7 +1,6 @@
-import { AppError } from '../errors/Apperror.js';
-import { logger } from '../middlewares/httplogger.middleware.js';
-import type { GithubTokenResponse, GithubUserData } from '../types/github.types.js';
-
+import { AppError } from '../errors/Apperror';
+import { logger } from '../middlewares/httplogger.middleware';
+import type { GithubTokenResponse, GithubUserData } from '../types/github.types';
 
 export class GithubService {
   private readonly tokenUrl = 'https://github.com/login/oauth/access_token';

@@ -1,4 +1,7 @@
 import crypto from 'crypto';
+import dotEnv from 'dotenv';
+dotEnv.config();
+
 export function getEnv(key: string): string {
   const value = process.env[key];
 

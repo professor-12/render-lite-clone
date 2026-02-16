@@ -1,7 +1,7 @@
-import type { GithubService } from '../../libs/github-service.js';
-import { prisma } from '../../libs/prisma.js';
+import type { GithubService } from '../../libs/github-service';
+import { prisma } from '../../libs/prisma';
 import jwt from 'jsonwebtoken';
-import { encrypt, getEnv } from '../../utlis.js';
+import { encrypt, getEnv } from '../../utlis';
 export class AuthService {
   constructor(private githubService: GithubService) {}
 

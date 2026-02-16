@@ -1,7 +1,7 @@
 import { error } from 'console';
 import { type NextFunction, type Request, type Response } from 'express';
-import { logger } from './httplogger.middleware.js';
-import { AppError } from '../errors/Apperror.js';
+import { logger } from './httplogger.middleware';
+import { AppError } from '../errors/Apperror';
 
 export const errorHandler = async (error: any, req: Request, res: Response, Next: NextFunction) => {
   if (error instanceof SyntaxError) {
