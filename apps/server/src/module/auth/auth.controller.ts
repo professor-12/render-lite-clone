@@ -11,8 +11,16 @@ process.env.JWT_SECRET;
 
 export class AuthController {
   constructor(private authService: AuthService) {}
+  // public githubLogin:RequestHandler = asyncHandler(async(req:Request,res:Response)=>{
+  //   const githubUrl =`https://github.com/login/oauth/authorize?client_id=${getEnv(
+  //   'GITHUB_CLIENT_ID'
+  // )}&redirect_uri=${getEnv('GITHUB_CALLBACK_URL')}&scope=user:email`;
+  // res.redirect(githubUrl)
 
+
+  // })
   public githubCallback: RequestHandler = asyncHandler(async (req: Request, res: Response) => {
+
     const { code } = req.query;
 
     if (!code || typeof code !== 'string') {

@@ -2,6 +2,7 @@ import type { GithubService } from '../../libs/github-service';
 import { prisma } from '../../libs/prisma';
 import jwt from 'jsonwebtoken';
 import { encrypt, getEnv } from '../../utlis';
+import { logger } from '../../middlewares/httplogger.middleware';
 export class AuthService {
   constructor(private githubService: GithubService) {}
 
@@ -10,6 +11,7 @@ export class AuthService {
 
     // 2️⃣ Fetch GitHub user
     const githubUser = await this.githubService.getGithubUser(accessToken);
+    logger.debug(githubUser)
 
     const encryptedToken = encrypt(accessToken);
 
@@ -43,7 +45,7 @@ export class AuthService {
         data: {
           avatarUrl: githubUser.avatar_url,
           username: githubUser.login,
-          name: githubUser.name,
+          name: githubUser.name ?? "",
           email: githubUser.email ?? existingAccount.user.email,
         },
       });
@@ -61,7 +63,7 @@ export class AuthService {
       data: {
         email: githubUser.email ?? null,
         username: githubUser.login,
-        name: githubUser.name,
+        name: githubUser.name ?? "",
         avatarUrl: githubUser.avatar_url,
         accounts: {
           create: {
@@ -81,6 +83,7 @@ export class AuthService {
     };
   }
 
+  
   private generateJwt(userId: string) {
     return jwt.sign({ userId }, getEnv('JWT_SECRET'), { expiresIn: '1d' });
   }

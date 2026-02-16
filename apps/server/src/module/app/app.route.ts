@@ -2,6 +2,7 @@ import express, { Router } from 'express';
 import authRouter from '../auth/auth.route';
 import { authController } from '../auth/auth.module';
 
+
 const router: Router = express.Router();
 
 router.get('/health', (_req, res) => {
@@ -11,6 +12,5 @@ router.get('/health', (_req, res) => {
   });
 });
 
-router.get('/github/callback', authController.githubCallback);
-router.use(authRouter);
+router.use("",authRouter);
 export default router;
