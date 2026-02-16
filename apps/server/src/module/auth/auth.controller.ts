@@ -19,6 +19,16 @@ export class AuthController {
 
 
   // })
+  public gitLogout:RequestHandler = asyncHandler(async(req:Request,res:Response)=>{
+      res.clearCookie("renderLite",{
+        httpOnly:true,
+        secure: getEnv('NODE_ENV') === "production",
+        sameSite:'lax'
+      })
+      res.status(200).json({
+        message:"Cookies cleared successfully"
+      })
+  })
   public githubCallback: RequestHandler = asyncHandler(async (req: Request, res: Response) => {
 
     const { code } = req.query;
@@ -30,16 +40,23 @@ export class AuthController {
       });
     }
 
-    const { user, token } = await this.authService.registerUser({ code });
+    const { user, access_token,refresh_token } = await this.authService.registerUser({ code });
 
-    return res
-      .cookie('renderLite', token, {
+     res
+      .cookie('renderLite-access', access_token, {
         httpOnly: true,
         secure: getEnv('NODE_ENV') === 'production',
         sameSite: 'lax',
         maxAge: 1000 * 60 * 60 * 24, // 24 hours
       })
-      .status(200)
+
+  res.cookie("renderLite-refresh",refresh_token,{
+        httpOnly:true,
+        secure:getEnv('NODE_ENV')==="production",
+        sameSite:'lax',
+        maxAge:1000*60*60*24*4
+      })
+      return res.status(200)
       .json({
         success: true,
         message: 'User logged in successfully',

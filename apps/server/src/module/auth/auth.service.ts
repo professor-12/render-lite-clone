@@ -54,7 +54,8 @@ export class AuthService {
 
       return {
         user: existingAccount.user,
-        token: jwtToken,
+        access_token: jwtToken.access_token,
+        refresh_token:jwtToken.refresh_token
       };
     }
 
@@ -79,12 +80,19 @@ export class AuthService {
 
     return {
       user: newUser,
-      token: jwtToken,
+      access_token: jwtToken.access_token,
+      refresh_token:jwtToken.refresh_token
     };
   }
 
   
   private generateJwt(userId: string) {
-    return jwt.sign({ userId }, getEnv('JWT_SECRET'), { expiresIn: '1d' });
+    const access_token =jwt.sign({ userId }, getEnv('JWT_SECRET'), { expiresIn: '15m' });
+    const refresh_token =jwt.sign({ userId }, getEnv('JWT_SECRET'), { expiresIn: '2d' });
+    return {
+      access_token,
+      refresh_token
+    }
+     
   }
 }
