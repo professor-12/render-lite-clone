@@ -11,7 +11,7 @@ export class AuthService {
 
     // 2️⃣ Fetch GitHub user
     const githubUser = await this.githubService.getGithubUser(accessToken);
-    logger.debug(githubUser)
+    logger.debug(githubUser);
 
     const encryptedToken = encrypt(accessToken);
 
@@ -45,7 +45,7 @@ export class AuthService {
         data: {
           avatarUrl: githubUser.avatar_url,
           username: githubUser.login,
-          name: githubUser.name ?? "",
+          name: githubUser.name ?? '',
           email: githubUser.email ?? existingAccount.user.email,
         },
       });
@@ -55,7 +55,7 @@ export class AuthService {
       return {
         user: existingAccount.user,
         access_token: jwtToken.access_token,
-        refresh_token:jwtToken.refresh_token
+        refresh_token: jwtToken.refresh_token,
       };
     }
 
@@ -64,7 +64,7 @@ export class AuthService {
       data: {
         email: githubUser.email ?? null,
         username: githubUser.login,
-        name: githubUser.name ?? "",
+        name: githubUser.name ?? '',
         avatarUrl: githubUser.avatar_url,
         accounts: {
           create: {
@@ -81,18 +81,33 @@ export class AuthService {
     return {
       user: newUser,
       access_token: jwtToken.access_token,
-      refresh_token:jwtToken.refresh_token
+      refresh_token: jwtToken.refresh_token,
     };
   }
 
-  
   private generateJwt(userId: string) {
-    const access_token =jwt.sign({ userId }, getEnv('JWT_SECRET'), { expiresIn: '15m' });
-    const refresh_token =jwt.sign({ userId }, getEnv('JWT_SECRET'), { expiresIn: '2d' });
+    const access_token = jwt.sign({ userId }, getEnv('JWT_SECRET'), { expiresIn: '15m' });
+    const refresh_token = jwt.sign({ userId }, getEnv('JWT_SECRET'), { expiresIn: '30d' });
     return {
       access_token,
-      refresh_token
+      refresh_token,
+    };
+  }
+
+  public async refreshAccessToken(refresh_token: string) {
+    const { id } = this.verifyJwt(refresh_token);
+    const user = await prisma.user.findUnique({
+      where: { id },
+    });
+    if (!user) throw new Error('User does not exist');
+    const tokenObject = this.generateJwt(user.id)
+    return{
+      ...tokenObject
     }
-     
+  }
+
+  private verifyJwt(refresh_token: string) {
+    const data = jwt.verify(refresh_token, getEnv('JWT_SECRET')) as { id: string };
+    return data;
   }
 }
