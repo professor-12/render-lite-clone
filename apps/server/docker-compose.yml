@@ -8,9 +8,9 @@ services:
       POSTGRES_PASSWORD: devpassword
       POSTGRES_DB: devdb
     ports:
-      - '5432:5432'
+      - 5431:5431
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
 volumes:
-  - postgres_data:/var/lib/postgresql/data
+  postgres_data:
