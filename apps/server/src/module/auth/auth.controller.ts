@@ -11,13 +11,6 @@ process.env.JWT_SECRET;
 
 export class AuthController {
   constructor(private authService: AuthService) {}
-  // public githubLogin:RequestHandler = asyncHandler(async(req:Request,res:Response)=>{
-  //   const githubUrl =`https://github.com/login/oauth/authorize?client_id=${getEnv(
-  //   'GITHUB_CLIENT_ID'
-  // )}&redirect_uri=${getEnv('GITHUB_CALLBACK_URL')}&scope=user:email`;
-  // res.redirect(githubUrl)
-
-  // })
   public gitLogout: RequestHandler = asyncHandler(async (req: Request, res: Response) => {
     res.clearCookie('renderLite', {
       httpOnly: true,
@@ -52,7 +45,7 @@ export class AuthController {
       secure: getEnv('NODE_ENV') === 'production',
       sameSite: 'lax',
       maxAge: 1000 * 60 * 60 * 24 * 30,
-      path:"/refresh"
+      path: '/refresh',
     });
     return res.status(200).json({
       success: true,
@@ -62,35 +55,36 @@ export class AuthController {
   });
 
   public getRefreshToken: RequestHandler = asyncHandler(async (req: Request, res: Response) => {
-    try{
-         const { 'renderLite-refresh': old_refresh_token } = req.cookies;
-    if (!old_refresh_token) {
-      return res.status(401).json({
-        message: 'No refresh TOken provided',
-      });
-    }
-    const { access_token, refresh_token } =  await this.authService.refreshAccessToken(old_refresh_token);
-     res.cookie('renderLite-access', access_token, { 
-      httpOnly: true,
-      secure: getEnv('NODE_ENV') === 'production',
-      sameSite: 'lax',
-      maxAge: 1000 * 60 * 30, // 24 hours
-    });
-
-    res.cookie('renderLite-refresh', refresh_token, {
-      httpOnly: true,
-      secure: getEnv('NODE_ENV') === 'production',
-      sameSite: 'lax',
-      maxAge: 1000 * 60 * 60 * 24 * 30,
-      path:"/refresh"
-    });
-    return res.json({
-      message:"tokens refreshed"
-    })
-    }catch(err){
+    try {
+      const { 'renderLite-refresh': old_refresh_token } = req.cookies;
+      if (!old_refresh_token) {
         return res.status(401).json({
-          message:"Invalid refresh token"
-        })
+          message: 'No refresh TOken provided',
+        });
+      }
+      const { access_token, refresh_token } =
+        await this.authService.refreshAccessToken(old_refresh_token);
+      res.cookie('renderLite-access', access_token, {
+        httpOnly: true,
+        secure: getEnv('NODE_ENV') === 'production',
+        sameSite: 'lax',
+        maxAge: 1000 * 60 * 30, // 24 hours
+      });
+
+      res.cookie('renderLite-refresh', refresh_token, {
+        httpOnly: true,
+        secure: getEnv('NODE_ENV') === 'production',
+        sameSite: 'lax',
+        maxAge: 1000 * 60 * 60 * 24 * 30,
+        path: '/refresh',
+      });
+      return res.json({
+        message: 'tokens refreshed',
+      });
+    } catch (err) {
+      return res.status(401).json({
+        message: 'Invalid refresh token',
+      });
     }
   });
 }
