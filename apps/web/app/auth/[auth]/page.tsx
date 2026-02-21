@@ -1,13 +1,13 @@
 import Link from 'next/link';
-import { notFound, redirect } from 'next/navigation';
-import React from 'react';
+import { redirect } from 'next/navigation';
+
 import { FaGithub } from 'react-icons/fa6';
 
 const authOptions = ['login', 'register'] as const;
 
 const Login = async ({ params }: { params: Promise<{ auth: string }> }) => {
   const { auth } = await params;
-  if (!authOptions.includes(auth as any)) {
+  if (!authOptions.includes(auth as (typeof authOptions)[number])) {
     return redirect('/auth/login');
   }
   return (
