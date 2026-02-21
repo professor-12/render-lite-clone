@@ -1,10 +1,6 @@
 import type { Request, RequestHandler, Response } from 'express';
 import { asyncHandler } from '../../middlewares/asyncHandler';
 import type { AuthService } from './auth.service';
-import { logger } from '../../middlewares/httplogger.middleware';
-import { prisma } from '../../libs/prisma';
-import { success } from 'zod';
-import jwt from 'jsonwebtoken';
 import { getEnv } from '../../utlis';
 
 process.env.JWT_SECRET;

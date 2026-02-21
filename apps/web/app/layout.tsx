@@ -2,33 +2,81 @@ import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
 
-const geistSans = localFont({
-  src: './fonts/GeistVF.woff',
-  variable: '--font-geist-sans',
-});
-const geistMono = localFont({
-  src: './fonts/GeistMonoVF.woff',
-  variable: '--font-geist-mono',
-});
-
 const figtree = localFont({
   src: [
-    { path: './fonts/static/Figtree-Light.ttf', weight: '300', style: 'normal' },
-    { path: './fonts/static/Figtree-LightItalic.ttf', weight: '300', style: 'italic' },
-    { path: './fonts/static/Figtree-Regular.ttf', weight: '400', style: 'normal' },
-    { path: './fonts/static/Figtree-Italic.ttf', weight: '400', style: 'italic' },
-    { path: './fonts/static/Figtree-Medium.ttf', weight: '500', style: 'normal' },
-    { path: './fonts/static/Figtree-MediumItalic.ttf', weight: '500', style: 'italic' },
-    { path: './fonts/static/Figtree-SemiBold.ttf', weight: '600', style: 'normal' },
-    { path: './fonts/static/Figtree-SemiBoldItalic.ttf', weight: '600', style: 'italic' },
-    { path: './fonts/static/Figtree-Bold.ttf', weight: '700', style: 'normal' },
-    { path: './fonts/static/Figtree-BoldItalic.ttf', weight: '700', style: 'italic' },
-    { path: './fonts/static/Figtree-ExtraBold.ttf', weight: '800', style: 'normal' },
-    { path: './fonts/static/Figtree-ExtraBoldItalic.ttf', weight: '800', style: 'italic' },
-    { path: './fonts/static/Figtree-Black.ttf', weight: '900', style: 'normal' },
-    { path: './fonts/static/Figtree-BlackItalic.ttf', weight: '900', style: 'italic' },
+    {
+      path: './font/static/Figtree-Light.ttf',
+      weight: '300',
+      style: 'normal',
+    },
+    {
+      path: './font/static/Figtree-LightItalic.ttf',
+      weight: '300',
+      style: 'italic',
+    },
+    {
+      path: './font/static/Figtree-Regular.ttf',
+      weight: '400',
+      style: 'normal',
+    },
+    {
+      path: './font/static/Figtree-Italic.ttf',
+      weight: '400',
+      style: 'italic',
+    },
+    {
+      path: './font/static/Figtree-Medium.ttf',
+      weight: '500',
+      style: 'normal',
+    },
+    {
+      path: './font/static/Figtree-MediumItalic.ttf',
+      weight: '500',
+      style: 'italic',
+    },
+    {
+      path: './font/static/Figtree-SemiBold.ttf',
+      weight: '600',
+      style: 'normal',
+    },
+    {
+      path: './font/static/Figtree-SemiBoldItalic.ttf',
+      weight: '600',
+      style: 'italic',
+    },
+    {
+      path: './font/static/Figtree-Bold.ttf',
+      weight: '700',
+      style: 'normal',
+    },
+    {
+      path: './font/static/Figtree-BoldItalic.ttf',
+      weight: '700',
+      style: 'italic',
+    },
+    {
+      path: './font/static/Figtree-ExtraBold.ttf',
+      weight: '800',
+      style: 'normal',
+    },
+    {
+      path: './font/static/Figtree-ExtraBoldItalic.ttf',
+      weight: '800',
+      style: 'italic',
+    },
+    {
+      path: './font/static/Figtree-Black.ttf',
+      weight: '900',
+      style: 'normal',
+    },
+    {
+      path: './font/static/Figtree-BlackItalic.ttf',
+      weight: '900',
+      style: 'italic',
+    },
   ],
   variable: '--font-figtree',
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -43,9 +91,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} ${figtree.variable}`}>
-        {children}
-      </body>
+      <body className={`${figtree.variable} antialiased`}>{children}</body>
     </html>
   );
 }
