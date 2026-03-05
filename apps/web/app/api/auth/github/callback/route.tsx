@@ -8,19 +8,52 @@ export async function GET(request: NextRequest) {
   const loginUrl = new URL('/auth/login', request.nextUrl.origin);
   if (error) {
     loginUrl.searchParams.set('error', error);
-    return NextResponse.redirect(loginUrl);
+    return new NextResponse(
+      `
+      <script>
+        window.opener.postMessage(
+          { type: "oauth_error", error: "${error || 'missing_code'}" },
+          window.location.origin
+        );
+        window.close();
+      </script>
+      `,
+      { headers: { 'Content-Type': 'text/html' } },
+    );
   }
 
   if (!code) {
     loginUrl.searchParams.set('error', 'missing_code');
-    return NextResponse.redirect(loginUrl);
+    return new NextResponse(
+      `
+      <script>
+        window.opener.postMessage(
+          { type: "oauth_error", error: "${'missing_code'}" },
+          window.location.origin
+        );
+        window.close();
+      </script>
+      `,
+      { headers: { 'Content-Type': 'text/html' } },
+    );
   }
 
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
   if (!backendUrl) {
     console.error('[GithubCallback] BACKEND_URL environment variable is not set');
     loginUrl.searchParams.set('error', 'server_misconfiguration');
-    return NextResponse.redirect(loginUrl);
+    return new NextResponse(
+      `
+      <script>
+        window.opener.postMessage(
+          { type: "oauth_error", error: "${error || 'server_misconfiguration'}" },
+          window.location.origin
+        );
+        window.close();
+      </script>
+      `,
+      { headers: { 'Content-Type': 'text/html' } },
+    );
   }
 
   let response: Response;
@@ -33,7 +66,18 @@ export async function GET(request: NextRequest) {
   } catch (err) {
     console.error('[GithubCallback] Failed to reach auth backend:', err);
     loginUrl.searchParams.set('error', 'server_unreachable');
-    return NextResponse.redirect(loginUrl);
+    return new NextResponse(
+      `
+      <script>
+        window.opener.postMessage(
+          { type: "oauth_error", error: "${error || 'server_unreachable'}" },
+          window.location.origin
+        );
+        window.close();
+      </script>
+      `,
+      { headers: { 'Content-Type': 'text/html' } },
+    );
   }
 
   if (!response.ok) {
@@ -46,15 +90,40 @@ export async function GET(request: NextRequest) {
     }
     console.error(`[GithubCallback] Backend returned ${response.status}: ${errorCode}`);
     loginUrl.searchParams.set('error', errorCode);
-    return NextResponse.redirect(loginUrl);
+    return new NextResponse(
+      `
+      <script>
+        window.opener.postMessage(
+          { type: "oauth_error", error: "${errorCode || 'missing_code'}" },
+          window.location.origin
+        );
+        window.close();
+      </script>
+      `,
+      { headers: { 'Content-Type': 'text/html' } },
+    );
   }
   const successUrl = new URL('/?auth_status=success', request.nextUrl.origin);
   const redirectResponse = NextResponse.redirect(successUrl);
 
   const setCookieHeaders = response.headers.getSetCookie();
+  const html = `
+    <script>
+      window.opener.postMessage(
+        { type: "oauth_success" },
+        window.location.origin
+      );
+      window.close();
+    </script>
+  `;
+
+  const res = new NextResponse(html, {
+    headers: { 'Content-Type': 'text/html' },
+  });
+
   for (const cookie of setCookieHeaders) {
-    redirectResponse.headers.append('Set-Cookie', cookie);
+    res.headers.append('Set-Cookie', cookie);
   }
 
-  return redirectResponse;
+  return res;
 }

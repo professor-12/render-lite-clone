@@ -100,10 +100,10 @@ export class AuthService {
       where: { id },
     });
     if (!user) throw new Error('User does not exist');
-    const tokenObject = this.generateJwt(user.id)
-    return{
-      ...tokenObject
-    }
+    const tokenObject = this.generateJwt(user.id);
+    return {
+      ...tokenObject,
+    };
   }
 
   private verifyJwt(refresh_token: string) {

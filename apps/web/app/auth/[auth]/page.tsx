@@ -1,18 +1,46 @@
-import Link from 'next/link';
+'use client';
 import { redirect } from 'next/navigation';
+import { useState } from 'react';
 
 import { FaGithub } from 'react-icons/fa6';
 
 const authOptions = ['login', 'register'] as const;
 
 const Login = async ({ params }: { params: Promise<{ auth: string }> }) => {
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
   const { auth } = await params;
   if (!authOptions.includes(auth as (typeof authOptions)[number])) {
     return redirect('/auth/login');
   }
+  function openAuthWindow(url: string) {
+    if (isAuthenticating) return;
+    const width = 500;
+    const height = 600;
+    const left = window.screen.width / 2 - width / 2;
+    const top = window.screen.height / 2 - height / 2;
+
+    window.open(
+      url,
+      'GoogleSignIn',
+      `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes`,
+    );
+    window.addEventListener('message', (event) => {
+      if (event.origin !== window.location.origin) return;
+
+      if (event.data.type === 'oauth_success') {
+        console.log('Login successful');
+        window.location.href = '/';
+      }
+
+      if (event.data.type === 'oauth_error') {
+        alert('Authentication failed: ' + event.data.error);
+        console.error('OAuth error:', event.data.error);
+      }
+    });
+  }
   return (
     <div className="space-y-5 text-sm w-full text-center text-white max-w-sm">
-      <h1 className="text-3xl">Log in</h1>
+      <h1 className="text-3xl">{auth == 'login' ? 'Log in' : 'Register'}</h1>
       <button className="w-full p-2 flex items-center justify-center gap-2 border rounded-lg">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -52,15 +80,19 @@ const Login = async ({ params }: { params: Promise<{ auth: string }> }) => {
         </svg>
         Continue with Google
       </button>
-      <Link
-        href={`https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID}&scope=repo read:user&redirect_uri=${process.env.NEXT_PUBLIC_REDIRECT_URI}`}
+      <div
+        onClick={() => {
+          openAuthWindow(
+            `https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID}&scope=repo read:user&redirect_uri=${process.env.NEXT_PUBLIC_REDIRECT_URI}`,
+          );
+        }}
         className="w-full cursor-pointer"
       >
         <button className="w-full p-2 flex items-center cursor-pointer justify-center gap-2 border rounded-lg">
           <FaGithub size={20} />
           Continue with Github
         </button>
-      </Link>
+      </div>
     </div>
   );
 };
