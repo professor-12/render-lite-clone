@@ -59,3 +59,14 @@ model Session {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+
+model GithubInstallation {
+  id             String   @id @default(cuid())
+  installationId Int      @unique
+  accountLogin   String
+  accountId      Int
+  accountType    String
+  createdAt      DateTime @default(now())
+}
+
