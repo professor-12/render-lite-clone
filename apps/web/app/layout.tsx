@@ -1,6 +1,11 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
+import QueryProvider from '@/providers/QueryProvider';
+import { Inter } from 'next/font/google';
+import { cn } from '@/lib/utils';
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 const figtree = localFont({
   src: [
@@ -90,8 +95,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${figtree.variable} antialiased`}>{children}</body>
+    <html lang="en" className={cn('font-sans', inter.variable)}>
+      <body className={`${figtree.variable} antialiased selection:bg-black selection:text-white`}>
+        <QueryProvider>{children}</QueryProvider>
+      </body>
     </html>
   );
 }
