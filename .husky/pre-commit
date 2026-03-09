@@ -1,1 +1,1 @@
-echo "Please wait.." && pnpm lint
+echo "Please wait.." && pnpm lint && echo "Building codebase" && pnpm build
