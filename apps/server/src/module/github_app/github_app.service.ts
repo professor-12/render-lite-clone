@@ -19,8 +19,6 @@ export default class GithubAppService {
 
     const data = await response.json();
 
-    console.log({ data });
-
     const installation = await prisma.githubInstallation.create({
       data: {
         installationId: data.id,
