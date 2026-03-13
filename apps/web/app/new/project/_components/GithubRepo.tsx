@@ -1,7 +1,9 @@
-import React from 'react';
-
 const GithubRepo = () => {
-  return <div>GithubRepo</div>;
+  return (
+    <div>
+      <h1>Import Git Repository</h1>
+    </div>
+  );
 };
 
 export default GithubRepo;
