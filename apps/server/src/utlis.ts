@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import dotEnv from 'dotenv';
+import jwt from 'jsonwebtoken';
 dotEnv.config();
 
 export function getEnv(key: string): string {
@@ -42,4 +43,9 @@ export function decrypt(encryptedText: string): string {
   const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
 
   return decrypted.toString('utf8');
+}
+
+export function verifyJwt(token:string){
+  const data = jwt.verify(token, getEnv('JWT_SECRET')) as { userId: string };
+      return data;
 }

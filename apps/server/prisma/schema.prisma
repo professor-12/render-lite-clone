@@ -44,8 +44,9 @@ model Account {
   expiresAt             Int?   
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
-
+   githubInstallations  GithubInstallation[]  
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
 
   @@unique([provider, providerAccountId])
 }
@@ -65,8 +66,10 @@ model GithubInstallation {
   id             String   @id @default(cuid())
   installationId Int      @unique
   accountLogin   String
-  accountId      Int
+  accountId      Int       @unique
+  accId          String
   accountType    String
+  account    Account   @relation(fields: [accId],references: [id])
   createdAt      DateTime @default(now())
 }
 
