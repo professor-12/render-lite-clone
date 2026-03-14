@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL!;
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
   if (!backendUrl) {
     console.error('[GithubCallback] BACKEND_URL environment variable is not set');
     loginUrl.searchParams.set('error', 'server_misconfiguration');
