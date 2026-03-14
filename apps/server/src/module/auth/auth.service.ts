@@ -95,7 +95,7 @@ export class AuthService {
   }
 
   public async refreshAccessToken(refresh_token: string) {
-    const { userId:id } = this.verifyJwt(refresh_token);
+    const { id } = this.verifyJwt(refresh_token);
     const user = await prisma.user.findUnique({
       where: { id },
     });
@@ -106,8 +106,8 @@ export class AuthService {
     };
   }
 
-  public verifyJwt(refresh_token: string) {
-    const data = jwt.verify(refresh_token, getEnv('JWT_SECRET')) as { userId: string };
+  private verifyJwt(refresh_token: string) {
+    const data = jwt.verify(refresh_token, getEnv('JWT_SECRET')) as { id: string };
     return data;
   }
 }
