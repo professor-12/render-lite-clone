@@ -11,7 +11,7 @@ export class AuthService {
 
     // 2️⃣ Fetch GitHub user
     const githubUser = await this.githubService.getGithubUser(accessToken);
-    logger.debug(githubUser);
+    logger.debug({ githubUser: { id: githubUser.id, login: githubUser.login } }, 'GitHub user fetched');
 
     const encryptedToken = encrypt(accessToken);
 
@@ -95,7 +95,7 @@ export class AuthService {
   }
 
   public async refreshAccessToken(refresh_token: string) {
-    const { userId:id } = this.verifyJwt(refresh_token);
+    const { userId: id } = this.verifyJwt(refresh_token);
     const user = await prisma.user.findUnique({
       where: { id },
     });

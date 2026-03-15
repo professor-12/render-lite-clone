@@ -1,104 +1,188 @@
 'use client';
-import { redirect } from 'next/navigation';
-import { use, useState } from 'react';
 
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { use, useEffect, useRef, useState } from 'react';
 import { FaGithub } from 'react-icons/fa6';
 
-const authOptions = ['login', 'register'] as const;
+const AUTH_OPTIONS = ['login', 'register'] as const;
 
-const Login = ({ params }: { params: Promise<{ auth: string }> }) => {
-  const [isAuthenticating, setIsAuthenticating] = useState(false);
+const POPUP_WIDTH = 500;
+const POPUP_HEIGHT = 600;
 
+function GoogleIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      className={className}
+      aria-hidden
+    >
+      <path
+        fill="#4285F4"
+        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+      />
+    </svg>
+  );
+}
+
+export default function AuthPage({ params }: { params: Promise<{ auth: string }> }) {
   const { auth } = use(params);
-  if (!authOptions.includes(auth as (typeof authOptions)[number])) {
-    return redirect('/auth/login');
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const popupCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  if (!AUTH_OPTIONS.includes(auth as (typeof AUTH_OPTIONS)[number])) {
+    redirect('/auth/login');
   }
-  function openAuthWindow(url: string) {
-    if (isAuthenticating) return;
-    const width = 500;
-    const height = 600;
-    const left = window.screen.width / 2 - width / 2;
-    const top = window.screen.height / 2 - height / 2;
 
-    window.open(
-      url,
-      'GoogleSignIn',
-      `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes`,
-    );
-    window.addEventListener('message', (event) => {
+  const isLogin = auth === 'login';
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
       if (event.origin !== window.location.origin) return;
-
-      if (event.data.type === 'oauth_success') {
-        console.log('Login successful');
+      if (event.data?.type === 'oauth_success') {
+        if (popupCheckRef.current) clearInterval(popupCheckRef.current);
+        popupCheckRef.current = null;
+        setIsAuthenticating(false);
         window.location.href = '/';
       }
-
-      if (event.data.type === 'oauth_error') {
-        alert('Authentication failed: ' + event.data.error);
-        console.error('OAuth error:', event.data.error);
+      if (event.data?.type === 'oauth_error') {
+        if (popupCheckRef.current) clearInterval(popupCheckRef.current);
+        popupCheckRef.current = null;
+        setIsAuthenticating(false);
+        setError(event.data?.error ?? 'Authentication failed');
       }
+    };
 
+    window.addEventListener('message', handleMessage);
+    return () => {
+      window.removeEventListener('message', handleMessage);
+      if (popupCheckRef.current) clearInterval(popupCheckRef.current);
+    };
+  }, []);
+
+  function openAuthWindow(url: string) {
+    if (isAuthenticating) return;
+    setError(null);
+    setIsAuthenticating(true);
+
+    const left = Math.round(window.screen.width / 2 - POPUP_WIDTH / 2);
+    const top = Math.round(window.screen.height / 2 - POPUP_HEIGHT / 2);
+    const features = `width=${POPUP_WIDTH},height=${POPUP_HEIGHT},top=${top},left=${left},resizable=yes,scrollbars=yes`;
+
+    const popup = window.open(url, 'OAuthPopup', features);
+    if (popup) {
+      popupCheckRef.current = setInterval(() => {
+        if (popup.closed) {
+          if (popupCheckRef.current) clearInterval(popupCheckRef.current);
+          popupCheckRef.current = null;
+          setIsAuthenticating(false);
+        }
+      }, 200);
+    } else {
       setIsAuthenticating(false);
-    });
+    }
   }
+
+  const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID}&scope=repo%20read:user&redirect_uri=${encodeURIComponent(process.env.NEXT_PUBLIC_REDIRECT_URI ?? '')}`;
+
   return (
-    <div className="space-y-5 text-sm w-full text-center text-white max-w-sm">
-      <h1 className="text-3xl">{auth == 'login' ? 'Log in' : 'Register'}</h1>
-      <button className="w-full p-2 flex items-center justify-center gap-2 border rounded-lg">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 201 205"
-          fill="none"
-        >
-          <g clip-path="url(#clip0_106_2044)">
-            <path
-              d="M200.92 104.941C200.92 98.0524 200.253 90.9413 199.142 84.2747H102.92V123.608H158.031C155.809 136.275 148.475 147.386 137.587 154.497L170.475 180.052C189.809 162.052 200.92 135.83 200.92 104.941Z"
-              fill="#4280EF"
-            />
-            <path
-              d="M102.92 204.497C130.476 204.497 153.587 195.386 170.475 179.83L137.587 154.497C128.476 160.719 116.698 164.275 102.92 164.275C76.2533 164.275 53.8088 146.275 45.5866 122.275L11.8088 148.275C29.1422 182.719 64.2533 204.497 102.92 204.497Z"
-              fill="#34A353"
-            />
-            <path
-              d="M45.5867 122.053C41.3645 109.386 41.3645 95.6084 45.5867 82.9417L11.8089 56.7195C-2.63552 85.6084 -2.63552 119.608 11.8089 148.275L45.5867 122.053Z"
-              fill="#F6B704"
-            />
-            <path
-              d="M102.92 40.9418C117.364 40.7195 131.587 46.2751 142.031 56.2751L171.142 26.9418C152.698 9.6084 128.253 0.275064 102.92 0.497287C64.2533 0.497287 29.1422 22.2751 11.8088 56.7195L45.5866 82.9418C53.8088 58.7195 76.2533 40.9418 102.92 40.9418Z"
-              fill="#E54335"
-            />
-          </g>
-          <defs>
-            <clipPath id="clip0_106_2044">
-              <rect
-                width="200"
-                height="204.444"
-                fill="white"
-                transform="translate(0.920166 0.275146)"
-              />
-            </clipPath>
-          </defs>
-        </svg>
-        Continue with Google
-      </button>
-      <div
-        onClick={() => {
-          openAuthWindow(
-            `https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID}&scope=repo read:user&redirect_uri=${process.env.NEXT_PUBLIC_REDIRECT_URI}`,
-          );
-          setIsAuthenticating(true);
-        }}
-        className="w-full cursor-pointer"
-      >
-        <button className="w-full p-2 flex items-center cursor-pointer justify-center gap-2 border rounded-lg">
-          <FaGithub size={20} />
-          Continue with Github
-        </button>
+    <div className="flex flex-col items-center justify-center w-full max-w-[90%] px-4 py-8">
+      <div className="w-full max-w-[400px]">
+        {/* Card */}
+        <div className="rounded-2xl border border-white/[0.08] bg-[#0d1117]/80 backdrop-blur-sm shadow-[0_0_0_1px_rgba(255,255,255,0.03)] p-8">
+          {/* Heading */}
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-semibold tracking-tight text-white">
+              {isLogin ? 'Welcome back' : 'Create an account'}
+            </h1>
+            <p className="mt-2 text-[13px] text-[#8b949e]">
+              {isLogin
+                ? 'Sign in to deploy and manage your projects.'
+                : 'Get started with Render Lite in seconds.'}
+            </p>
+          </div>
+
+          {/* Error */}
+          {error && (
+            <div
+              className="mb-4 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-[13px] text-red-400"
+              role="alert"
+            >
+              {error}
+            </div>
+          )}
+
+          {/* Providers */}
+          <div className="space-y-3">
+            <button
+              type="button"
+              onClick={() => openAuthWindow(githubAuthUrl)}
+              disabled={isAuthenticating}
+              className="w-full flex items-center justify-center gap-3 h-12 px-4 rounded-xl border border-white/[0.12] bg-white/[0.04] text-[14px] font-medium text-white hover:bg-white/[0.08] hover:border-white/[0.18] focus:outline-none focus:ring-2 focus:ring-white/20 focus:ring-offset-2 focus:ring-offset-[#060B10] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+            >
+              {isAuthenticating ? (
+                <>
+                  <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin shrink-0" />
+                  <span>Connecting…</span>
+                </>
+              ) : (
+                <>
+                  <FaGithub className="w-5 h-5 shrink-0 text-[#e6edf3]" />
+                  <span>Continue with GitHub</span>
+                </>
+              )}
+            </button>
+
+            <div className="relative flex items-center gap-3 py-1">
+              <span className="flex-1 h-px bg-white/[0.08]" />
+              <span className="text-[11px] font-medium uppercase tracking-wider text-[#6e7681]">
+                or
+              </span>
+              <span className="flex-1 h-px bg-white/[0.08]" />
+            </div>
+
+            <button
+              type="button"
+              disabled={isAuthenticating}
+              className="w-full flex items-center justify-center gap-3 h-12 px-4 rounded-xl border border-white/[0.08] bg-transparent text-[14px] font-medium text-[#c9d1d9] hover:bg-white/[0.04] hover:border-white/[0.12] focus:outline-none focus:ring-2 focus:ring-white/10 focus:ring-offset-2 focus:ring-offset-[#060B10] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+            >
+              <GoogleIcon />
+              <span>Continue with Google</span>
+            </button>
+          </div>
+
+          {/* Footer note */}
+          <p className="mt-6 text-center text-[11px] text-[#6e7681]">
+            By continuing, you agree to our terms and privacy policy.
+          </p>
+        </div>
+
+        {/* Back link */}
+        <p className="mt-6 text-center">
+          <Link
+            href="/"
+            className="text-[13px] text-[#8b949e] hover:text-white transition-colors underline underline-offset-2"
+          >
+            ← Back to home
+          </Link>
+        </p>
       </div>
     </div>
   );
-};
-
-export default Login;
+}

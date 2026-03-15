@@ -1,41 +1,41 @@
-"use client";
+'use client';
 
-import { useRef, useEffect, useState } from "react";
-
+import { useRef, useEffect, useState } from 'react';
 
 type StepsProps = {
-    num:string,
-    title:string,
-    desc:string,
-    delay?:number
-}
+  num: string;
+  title: string;
+  desc: string;
+  delay?: number;
+};
 const STEPS = [
   {
-    num: "01",
-    title: "Connect your repo",
-    desc: "Link your GitHub account and select a repository. We detect your framework and configure build settings automatically.",
+    num: '01',
+    title: 'Connect your repo',
+    desc: 'Link your GitHub account and select a repository. We detect your framework and configure build settings automatically.',
   },
   {
-    num: "02",
-    title: "Configure & build",
-    desc: "Set environment variables, build commands, and target regions. We handle Docker, Node, Python, Go, and more natively.",
+    num: '02',
+    title: 'Configure & build',
+    desc: 'Set environment variables, build commands, and target regions. We handle Docker, Node, Python, Go, and more natively.',
   },
   {
-    num: "03",
-    title: "Go live instantly",
-    desc: "Your app gets a public URL the moment the build completes. Add your custom domain in one click — SSL included, always.",
+    num: '03',
+    title: 'Go live instantly',
+    desc: 'Your app gets a public URL the moment the build completes. Add your custom domain in one click — SSL included, always.',
   },
 ];
 
-
-function Step({ num, title, desc, delay }:StepsProps) {
+function Step({ num, title, desc, delay }: StepsProps) {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) setVisible(true); },
-      { threshold: 0.2 }
+      ([e]) => {
+        if (e.isIntersecting) setVisible(true);
+      },
+      { threshold: 0.2 },
     );
     if (ref.current) obs.observe(ref.current);
     return () => obs.disconnect();
@@ -47,7 +47,7 @@ function Step({ num, title, desc, delay }:StepsProps) {
       className="text-center"
       style={{
         opacity: visible ? 1 : 0,
-        transform: visible ? "none" : "translateY(20px)",
+        transform: visible ? 'none' : 'translateY(20px)',
         transition: `opacity 0.6s ${delay}ms ease, transform 0.6s ${delay}ms ease`,
       }}
     >
@@ -97,20 +97,32 @@ export default function HowItWorks() {
             <span className="font-mono text-[11px] text-[#888] ml-1">renderlite.config.js</span>
           </div>
           <pre className="font-mono text-[13px] text-[#f0f0f0] px-5 py-5 leading-[1.85] overflow-x-auto">
-{`/** @type {import('renderlite').Config} */
+            {`/** @type {import('renderlite').Config} */
 const config = {
-  name: `}<span className="text-[#e8ff57]">"my-app"</span>{`,
-  region: `}<span className="text-[#57d9ff]">["iad1", "cdg1", "sin1"]</span>{`,
+  name: `}
+            <span className="text-[#e8ff57]">"my-app"</span>
+            {`,
+  region: `}
+            <span className="text-[#57d9ff]">["iad1", "cdg1", "sin1"]</span>
+            {`,
   env: {
-    NODE_ENV: `}<span className="text-[#e8ff57]">"production"</span>{`,
+    NODE_ENV: `}
+            <span className="text-[#e8ff57]">"production"</span>
+            {`,
   },
   build: {
-    command: `}<span className="text-[#e8ff57]">"pnpm build"</span>{`,
-    output:  `}<span className="text-[#e8ff57]">".next"</span>{`,
+    command: `}
+            <span className="text-[#e8ff57]">"pnpm build"</span>
+            {`,
+    output:  `}
+            <span className="text-[#e8ff57]">".next"</span>
+            {`,
   },
 };
 
-`}<span className="text-[#888]">export default</span>{` config;`}
+`}
+            <span className="text-[#888]">export default</span>
+            {` config;`}
           </pre>
         </div>
       </div>

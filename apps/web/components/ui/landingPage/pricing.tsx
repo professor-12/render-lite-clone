@@ -1,91 +1,92 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import Link from "next/link";
+import { useState } from 'react';
+import Link from 'next/link';
 
 const PLANS = [
   {
-    name: "Hobby",
+    name: 'Hobby',
     price: { monthly: 0, annual: 0 },
-    desc: "Perfect for side projects and prototypes.",
+    desc: 'Perfect for side projects and prototypes.',
     features: [
-      { text: "3 projects", included: true },
-      { text: "100 GB bandwidth / mo", included: true },
-      { text: "Shared compute", included: true },
-      { text: "Community support", included: true },
-      { text: "Custom domains", included: false },
-      { text: "Team members", included: false },
+      { text: '3 projects', included: true },
+      { text: '100 GB bandwidth / mo', included: true },
+      { text: 'Shared compute', included: true },
+      { text: 'Community support', included: true },
+      { text: 'Custom domains', included: false },
+      { text: 'Team members', included: false },
     ],
-    cta: "Get started free",
-    href: "/auth/login",
+    cta: 'Get started free',
+    href: '/auth/login',
     featured: false,
   },
   {
-    name: "Pro",
+    name: 'Pro',
     price: { monthly: 18, annual: 14 },
-    desc: "For developers and small teams shipping fast.",
+    desc: 'For developers and small teams shipping fast.',
     features: [
-      { text: "Unlimited projects", included: true },
-      { text: "500 GB bandwidth / mo", included: true },
-      { text: "Dedicated compute", included: true },
-      { text: "Priority support", included: true },
-      { text: "Custom domains + SSL", included: true },
-      { text: "Up to 5 team members", included: true },
+      { text: 'Unlimited projects', included: true },
+      { text: '500 GB bandwidth / mo', included: true },
+      { text: 'Dedicated compute', included: true },
+      { text: 'Priority support', included: true },
+      { text: 'Custom domains + SSL', included: true },
+      { text: 'Up to 5 team members', included: true },
     ],
-    cta: "Start free trial",
-    href: "/auth/login",
+    cta: 'Start free trial',
+    href: '/auth/login',
     featured: true,
-    badge: "Most popular",
+    badge: 'Most popular',
   },
   {
-    name: "Team",
+    name: 'Team',
     price: { monthly: 49, annual: 39 },
-    desc: "For growing teams with production workloads.",
+    desc: 'For growing teams with production workloads.',
     features: [
-      { text: "Unlimited projects", included: true },
-      { text: "2 TB bandwidth / mo", included: true },
-      { text: "Autoscaling compute", included: true },
-      { text: "Slack + email support", included: true },
-      { text: "Custom domains + SSL", included: true },
-      { text: "Unlimited team members", included: true },
+      { text: 'Unlimited projects', included: true },
+      { text: '2 TB bandwidth / mo', included: true },
+      { text: 'Autoscaling compute', included: true },
+      { text: 'Slack + email support', included: true },
+      { text: 'Custom domains + SSL', included: true },
+      { text: 'Unlimited team members', included: true },
     ],
-    cta: "Contact sales",
-    href: "/auth/login",
+    cta: 'Contact sales',
+    href: '/auth/login',
     featured: false,
   },
 ];
 type Feature = {
-    text:string,
-    included:boolean
-}
+  text: string;
+  included: boolean;
+};
 type PriceObject = {
-    monthly:number,
-    annual:number
-}
-type PlanProps  = {
-    name:string,
-    price:PriceObject,
-    desc:string,
-    features: Feature[],
-    cta:string,
-    href:string,
-    featured:boolean
-    badge?:string
-}
+  monthly: number;
+  annual: number;
+};
+type PlanProps = {
+  name: string;
+  price: PriceObject;
+  desc: string;
+  features: Feature[];
+  cta: string;
+  href: string;
+  featured: boolean;
+  badge?: string;
+};
 type PlanCardProps = {
-    plan:PlanProps
-    annual:boolean
-}
+  plan: PlanProps;
+  annual: boolean;
+};
 
-function PlanCard({ plan, annual }:PlanCardProps) {
+function PlanCard({ plan, annual }: PlanCardProps) {
   const price = annual ? plan.price.annual : plan.price.monthly;
 
   return (
     <div
       className={`relative rounded-xl p-8 border transition-all duration-300 hover:-translate-y-1
-        ${plan.featured
-          ? "border-[rgba(232,255,87,0.4)] bg-linear-b from-[rgba(232,255,87,0.05)] to-[#111111] hover:border-[#e8ff57]"
-          : "border-white/8 bg-[#111111] hover:border-white/[0.14]"
+        ${
+          plan.featured
+            ? 'border-[rgba(232,255,87,0.4)] bg-linear-b from-[rgba(232,255,87,0.05)] to-[#111111] hover:border-[#e8ff57]'
+            : 'border-white/8 bg-[#111111] hover:border-white/[0.14]'
         }`}
     >
       {plan.badge && (
@@ -100,8 +101,14 @@ function PlanCard({ plan, annual }:PlanCardProps) {
 
       <div className="mb-1">
         <span className="text-[38px] font-bold text-white tracking-[-0.04em]">
-          {price === 0 ? "Free" : (
-            <><sup className="text-[20px] font-normal align-super">$</sup>{price}<sub className="text-[14px] text-[#888] font-normal">/mo</sub></>
+          {price === 0 ? (
+            'Free'
+          ) : (
+            <>
+              <sup className="text-[20px] font-normal align-super">$</sup>
+              {price}
+              <sub className="text-[14px] text-[#888] font-normal">/mo</sub>
+            </>
           )}
         </span>
       </div>
@@ -118,10 +125,12 @@ function PlanCard({ plan, annual }:PlanCardProps) {
           <li
             key={f.text}
             className={`flex items-start gap-2.5 py-2 border-b border-white/6 text-[13.5px] last:border-b-0
-              ${f.included ? "text-[#888]" : "text-[#555]"}`}
+              ${f.included ? 'text-[#888]' : 'text-[#555]'}`}
           >
-            <span className={`mt-0.5 text-[12px] shrink-0 ${f.included ? "text-[#e8ff57]" : "text-white/20"}`}>
-              {f.included ? "✓" : "—"}
+            <span
+              className={`mt-0.5 text-[12px] shrink-0 ${f.included ? 'text-[#e8ff57]' : 'text-white/20'}`}
+            >
+              {f.included ? '✓' : '—'}
             </span>
             {f.text}
           </li>
@@ -131,9 +140,10 @@ function PlanCard({ plan, annual }:PlanCardProps) {
       <Link
         href={plan.href}
         className={`block w-full text-center py-2.5 rounded-lg text-[13.5px] font-semibold border transition-all
-          ${plan.featured
-            ? "bg-[#e8ff57] text-black border-[#e8ff57] hover:bg-[#d4eb4f]"
-            : "bg-transparent text-[#f0f0f0] border-white/[0.14] hover:border-white/30 hover:bg-white/5"
+          ${
+            plan.featured
+              ? 'bg-[#e8ff57] text-black border-[#e8ff57] hover:bg-[#d4eb4f]'
+              : 'bg-transparent text-[#f0f0f0] border-white/[0.14] hover:border-white/30 hover:bg-white/5'
           }`}
       >
         {plan.cta}
@@ -166,7 +176,7 @@ export default function Pricing() {
             <button
               onClick={() => setAnnual(false)}
               className={`px-4 py-1.5 rounded-full text-[13px] font-medium transition-all ${
-                !annual ? "bg-white text-black" : "text-[#888] hover:text-white"
+                !annual ? 'bg-white text-black' : 'text-[#888] hover:text-white'
               }`}
             >
               Monthly
@@ -174,7 +184,7 @@ export default function Pricing() {
             <button
               onClick={() => setAnnual(true)}
               className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-[13px] font-medium transition-all ${
-                annual ? "bg-white text-black" : "text-[#888] hover:text-white"
+                annual ? 'bg-white text-black' : 'text-[#888] hover:text-white'
               }`}
             >
               Annual

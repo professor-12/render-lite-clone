@@ -7,12 +7,11 @@ export class GithuAppController {
 
   public installGithubApp = asyncHandler(async (req, res) => {
     const { installation_id, code } = req.query;
-    const {"renderLite-access":token} = req.cookies
-    const userId = req.userId
-    if(!userId){
-      throw new AppError("User id not found",404)
+    const { 'renderLite-access': token } = req.cookies;
+    const userId = req.userId;
+    if (!userId) {
+      throw new AppError('User id not found', 404);
     }
-
 
     if (!installation_id || !code) {
       return res.status(400).json({
@@ -26,42 +25,20 @@ export class GithuAppController {
       code as string,
     );
 
-    return res.send(`
-      <script>
-        window.opener.postMessage(
-          {
-            type: "github_install_success",
-            installationId: "${installation.installationId}",
-            account: "${installation.accountLogin}"
-          },
-          window.location.origin
-        );
-        window.close();
-      </script>
-    `);
+    return res.status(200).json({
+      message: 'GitHub app installed successfully',
+      installationId: installation.installationId,
+      account: installation.accountLogin,
+    });
   });
 
   public getInstallRepos = asyncHandler(async (req, res) => {
-    const {"renderLite-access":jwt_token} = req.cookies
-    console.log(jwt_token)
-    // const  installation_id  = req.query.installation_id as string
-    // console.log(installation_id)
+    const { 'renderLite-access': jwt_token } = req.cookies;
 
-    //   if(Array.isArray(installation_id)){
-    //       console.log(installation_id[0])
-    //   }else{
-    //     console.log(installation_id)
-    //   }
-    // if (!installation_id) {
-    //   return res.status(400).json({
-    //     message: 'Installation ID is requirzed',
-    //   });
-    // }
-    if(!jwt_token){
+    if (!jwt_token) {
       res.status(401).json({
-        message:"Unathorized access"
-      }
-      )
+        message: 'Unathorized access',
+      });
     }
     const repos = await this.githubService.getInstallationRepos(jwt_token);
     return res.status(200).json({
@@ -69,7 +46,5 @@ export class GithuAppController {
       repositories: repos,
     });
   });
-  public getInstallationId = asyncHandler(async (req,res)=>{
-    
-  })
+  public getInstallationId = asyncHandler(async (req, res) => {});
 }

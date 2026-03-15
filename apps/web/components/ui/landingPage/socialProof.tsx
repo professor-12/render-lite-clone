@@ -1,6 +1,14 @@
 const FRAMEWORKS = [
-  "Next.js", "Django", "FastAPI", "React", "Express",
-  "Laravel", "Rails", "Go", "Rust", "Nuxt",
+  'Next.js',
+  'Django',
+  'FastAPI',
+  'React',
+  'Express',
+  'Laravel',
+  'Rails',
+  'Go',
+  'Rust',
+  'Nuxt',
 ];
 
 export default function SocialProof() {
@@ -12,7 +20,10 @@ export default function SocialProof() {
         </p>
         <div className="flex flex-wrap items-center justify-center gap-8 opacity-40">
           {FRAMEWORKS.map((fw) => (
-            <span key={fw} className="font-mono text-[13px] text-[#f0f0f0] tracking-[0.05em] font-medium">
+            <span
+              key={fw}
+              className="font-mono text-[13px] text-[#f0f0f0] tracking-[0.05em] font-medium"
+            >
               {fw}
             </span>
           ))}

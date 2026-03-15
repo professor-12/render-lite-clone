@@ -1,114 +1,114 @@
-'use client';
+import { cookies } from 'next/headers';
+import { FiGithub } from 'react-icons/fi';
+import GithubRepoList from './GithubRepoList';
+import ConnectGitHubPopupButton from './ConnectGitHubPopupButton';
+import type { RepoItem } from './GithubRepoList';
 
-import { useGetUserRepos } from '@/app/queries/github.query';
-import { useState } from 'react';
-import { FiGithub, FiLock, FiSearch } from 'react-icons/fi';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-const MOCK_REPOS = [
-  { name: 'my-nextjs-app',     lang: 'TypeScript', updated: '2h ago',   private: false },
-  { name: 'api-server',        lang: 'Python',     updated: '1d ago',   private: false },
-  { name: 'dashboard-ui',      lang: 'TypeScript', updated: '3d ago',   private: true  },
-  { name: 'mobile-app',        lang: 'JavaScript', updated: '1w ago',   private: false },
-  { name: 'ml-pipeline',       lang: 'Python',     updated: '2w ago',   private: true  },
-  { name: 'landing-page',      lang: 'TypeScript', updated: '3w ago',   private: false },
-];
-
-const LANG_COLORS: Record<string, string> = {
-  TypeScript: '#3178c6',
-  JavaScript: '#f7df1e',
-  Python:     '#3572A5',
-  Go:         '#00add8',
-  Rust:       '#dea584',
+type GitHubRepoApi = {
+  name: string;
+  language: string | null;
+  updated_at: string;
+  private: boolean;
 };
 
-export default function GithubRepo() {
-  const [search, setSearch] = useState('')
-  const {data} = useGetUserRepos()
-  console.log(data)
+type BackendResponse = {
+  repositories?: { repositories?: GitHubRepoApi[] } | GitHubRepoApi[];
+};
 
-  const [importing, setImporting] = useState<string | null>(null);
+function normalizeRepos(payload: BackendResponse): RepoItem[] {
+  const raw = payload.repositories;
+  if (!raw) return [];
+  const list = Array.isArray(raw) ? raw : (raw.repositories ?? []);
+  return list
+    .map((r: GitHubRepoApi) => ({
+      name: r.name,
+      language: r.language ?? null,
+      updatedAt: r.updated_at,
+      private: r.private ?? false,
+    }))
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+    .slice(0, 5);
+}
 
-  const filtered = MOCK_REPOS.filter((r) =>
-    r.name.toLowerCase().includes(search.toLowerCase())
-  );
+async function fetchUserRepos(): Promise<RepoItem[]> {
+  if (!BACKEND_URL) {
+    throw new Error('Backend URL is not configured');
+  }
 
-  const handleImport = (name: string) => {
-    setImporting(name);
-    setTimeout(() => setImporting(null), 1500);
-  };
+  const cookieStore = await cookies();
+  const token = cookieStore.get('renderLite-access')?.value;
+  if (!token) {
+    return [];
+  }
+
+  const res = await fetch(`${BACKEND_URL}/api/v1/github/repositories`, {
+    headers: {
+      Cookie: `renderLite-access=${token}`,
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    next: { revalidate: 60 },
+  });
+
+  if (!res.ok) {
+    if (res.status === 401) {
+      return [];
+    }
+    const body = await res.text();
+    console.log({ body });
+    let message = `Failed to load repositories (${res.status})`;
+    try {
+      const json = JSON.parse(body) as { message?: string };
+      if (json.message) message = json.message;
+    } catch {
+      if (body) message = body.slice(0, 200);
+    }
+    throw new Error(message);
+  }
+
+  const data = (await res.json()) as BackendResponse;
+  return normalizeRepos(data);
+}
+
+export default async function GithubRepo() {
+  let repos: RepoItem[];
+
+  try {
+    repos = await fetchUserRepos();
+    console.log({ repos });
+  } catch (error) {
+    return (
+      <div className="p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <FiGithub className="text-[17px] text-[#888]" />
+          <h2 className="text-[13px] font-semibold text-[#f0f0f0] tracking-tight">
+            Import Git Repository
+          </h2>
+        </div>
+        <div className="rounded-lg border border-red-500/20 bg-red-500/5 px-4 py-3 text-[13px] text-red-400">
+          <p className="font-medium">Could not load repositories</p>
+          <p className="mt-1 text-red-400/90">
+            {error instanceof Error ? error.message : 'An unexpected error occurred.'}
+          </p>
+        </div>
+        <ConnectGitHubPopupButton className="mt-3 cursor-pointer w-full text-[13px] font-medium text-[#a0a0a0] hover:text-white py-2.5 border border-dashed border-white/20 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/30 transition-colors disabled:opacity-70">
+          + Connect your GitHub account
+        </ConnectGitHubPopupButton>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
-      {/* Section heading */}
       <div className="flex items-center gap-2 mb-4">
         <FiGithub className="text-[17px] text-[#888]" />
         <h2 className="text-[13px] font-semibold text-[#f0f0f0] tracking-tight">
           Import Git Repository
         </h2>
       </div>
-
-      {/* Search */}
-      <div className="flex items-center gap-2 border border-white/[0.08] bg-[#0a0a0a] rounded-lg px-3 py-2 mb-3 focus-within:ring-2 focus-within:ring-white/10 focus-within:border-white/20 transition-all">
-        <FiSearch className="text-[#555] text-[15px] flex-shrink-0" />
-        <input
-          type="text"
-          placeholder="Search repositories…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 text-[13px] bg-transparent focus:outline-none placeholder:text-[#444] text-[#f0f0f0]"
-        />
-      </div>
-
-      {/* Repo list */}
-      <ul className="divide-y divide-white/[0.05]">
-        {filtered.length === 0 && (
-          <li className="py-8 text-center text-[13px] text-[#555]">
-            No repositories found.
-          </li>
-        )}
-        {filtered.map((repo) => (
-          <li key={repo.name} className="flex items-center justify-between py-3 group">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <span
-                className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                style={{ background: LANG_COLORS[repo.lang] ?? '#555' }}
-              />
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[13px] font-medium text-[#f0f0f0] truncate">
-                    {repo.name}
-                  </span>
-                  {repo.private && (
-                    <FiLock className="text-[11px] text-[#555] flex-shrink-0" />
-                  )}
-                </div>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="text-[11px] text-[#555]">{repo.lang}</span>
-                  <span className="text-[#444] text-[10px]">·</span>
-                  <span className="text-[11px] text-[#555]">{repo.updated}</span>
-                </div>
-              </div>
-            </div>
-
-            <button
-              onClick={() => handleImport(repo.name)}
-              disabled={importing === repo.name}
-              className={`ml-3 flex-shrink-0 text-[12px] font-medium px-3.5 py-1.5 rounded-md border transition-all
-                ${importing === repo.name
-                  ? 'bg-[rgba(74,222,128,0.08)] border-[rgba(74,222,128,0.2)] text-[#4ade80] cursor-default'
-                  : 'bg-transparent border-white/[0.1] text-[#888] hover:bg-white hover:text-black hover:border-white'
-                }`}
-            >
-              {importing === repo.name ? '✓ Importing…' : 'Import'}
-            </button>
-          </li>
-        ))}
-      </ul>
-
-      {/* Connect more */}
-      <button className="mt-3 w-full text-[12px] text-[#555] hover:text-[#888] py-2 border border-dashed border-white/[0.07] rounded-lg hover:border-white/[0.14] transition-colors">
-        + Connect another GitHub account
-      </button>
+      <GithubRepoList repos={repos} />
     </div>
   );
 }

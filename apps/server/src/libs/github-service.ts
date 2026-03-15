@@ -31,16 +31,14 @@ export class GithubService {
       });
 
       if (!response.ok) {
-        logger.error('GitHub token request failed');
-
+        logger.warn({ status: response.status }, 'GitHub token request failed');
         throw new AppError('Failed to fetch GitHub token', 502);
       }
 
       const data: GithubTokenResponse = await response.json();
 
       if (data.error) {
-        logger.error('GitHub OAuth error');
-
+        logger.warn({ error: data.error, description: data.error_description }, 'GitHub OAuth error');
         throw new AppError(data.error_description || 'GitHub authentication failed', 401);
       }
 
@@ -52,7 +50,7 @@ export class GithubService {
 
       return data.access_token;
     } catch (error) {
-      logger.error('Unexpected GitHub OAuth error');
+      logger.error({ err: error }, 'Unexpected GitHub OAuth error');
       throw error;
     }
   }
@@ -64,7 +62,7 @@ export class GithubService {
       },
     });
     if (!response.ok) {
-      logger.error('GitHub user fetch failed');
+      logger.warn({ status: response.status }, 'GitHub user fetch failed');
       throw new AppError('Failed to fetch GitHub user', 502);
     }
 
