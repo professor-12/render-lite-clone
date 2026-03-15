@@ -35,16 +35,28 @@ export class GithuAppController {
   public getInstallRepos = asyncHandler(async (req, res) => {
     const { 'renderLite-access': jwt_token } = req.cookies;
 
+    const {q:repo_name_query} = req.query
+ 
     if (!jwt_token) {
       res.status(401).json({
         message: 'Unathorized access',
       });
     }
-    const repos = await this.githubService.getInstallationRepos(jwt_token);
+    if(repo_name_query){
+        const repo  = await this.githubService.getInstallationRepos(jwt_token,String(repo_name_query))
+      return res.status(200).json({
+        message:"Repo fetched successfully",
+        repositories: repo
+      })
+
+    }else{
+        const repos = await this.githubService.getInstallationRepos(jwt_token);
     return res.status(200).json({
       messages: 'Repos fetched successfully ',
       repositories: repos,
     });
+    }
+  
   });
   public getInstallationId = asyncHandler(async (req, res) => {});
 }

@@ -85,7 +85,7 @@ export default class GithubAppService {
     return data.token;
   }
 
-  async getInstallationRepos(jwt_token: string) {
+  async getInstallationRepos(jwt_token: string,repo_name_query?:string) {
     const { userId: id } = this.authService.verifyJwt(jwt_token);
     const user = await this.db.user.findUnique({
       where: {
@@ -103,27 +103,41 @@ export default class GithubAppService {
       throw new AppError('User not found', 404);
     }
     const installation_id = user.accounts?.[0]?.githubInstallations?.[0]?.installationId;
-
     if (!installation_id) {
       logger.error('Github app not installed');
       throw new AppError('Github app not installed', 404);
     }
-
     const token = await this.getinstallationToken(String(installation_id));
-
-    const res = await fetch('https://api.github.com/installation/repositories', {
+ if(repo_name_query){
+      const res = await fetch(`https://api.github.com/installation/repositories?q=${repo_name_query}`,{
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: 'application/vnd.github+json',
         'X-Github-Api-Version': '2022-11-28',
       },
-      // body: JSON.stringify({
-        
-      // }),
+    })
+    const data = await res.json()
+    logger.info({data})
+    return data
+    }else{
+          const res = await fetch('https://api.github.com/installation/repositories', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/vnd.github+json',
+        'X-Github-Api-Version': '2022-11-28',
+      },
     });
     const data = await res.json();
-    console.log({data})
+       console.log({data})
     logger.info({ data });
     return data;
+    }
+
+
+
+
+
+   
+   
   }
 }
