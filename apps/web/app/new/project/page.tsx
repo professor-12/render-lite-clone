@@ -7,7 +7,11 @@ export const metadata: Metadata = {
   title: 'New project | RenderLite',
 };
 
-export default function NewProjectPage() {
+export default function NewProjectPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string>>;
+}) {
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
       {/* Top nav bar */}
@@ -31,7 +35,7 @@ export default function NewProjectPage() {
       </header>
 
       <div className="pt-14">
-        <NewProjectContent />
+        <NewProjectContent searchParams={searchParams} />
       </div>
     </div>
   );

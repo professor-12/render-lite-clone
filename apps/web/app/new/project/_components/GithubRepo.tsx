@@ -28,11 +28,11 @@ function normalizeRepos(payload: BackendResponse): RepoItem[] {
       updatedAt: r.updated_at,
       private: r.private ?? false,
     }))
-    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-    .slice(0, 5);
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 }
 
-async function fetchUserRepos(): Promise<RepoItem[]> {
+async function fetchUserRepos(q: string): Promise<RepoItem[]> {
+  console.log({ q });
   if (!BACKEND_URL) {
     throw new Error('Backend URL is not configured');
   }
@@ -42,14 +42,13 @@ async function fetchUserRepos(): Promise<RepoItem[]> {
   if (!token) {
     return [];
   }
-
-  const res = await fetch(`${BACKEND_URL}/api/v1/github/repositories`, {
+  const res = await fetch(`${BACKEND_URL}/api/v1/github/repositories?q=${encodeURIComponent(q)}`, {
     headers: {
       Cookie: `renderLite-access=${token}`,
       Accept: 'application/json',
       'Content-Type': 'application/json',
     },
-    next: { revalidate: 60 },
+    next: { revalidate: 0 },
   });
 
   if (!res.ok) {
@@ -72,12 +71,15 @@ async function fetchUserRepos(): Promise<RepoItem[]> {
   return normalizeRepos(data);
 }
 
-export default async function GithubRepo() {
+export default async function GithubRepo({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string>>;
+}) {
   let repos: RepoItem[];
-
+  const { q = '' } = (await searchParams) || {};
   try {
-    repos = await fetchUserRepos();
-    console.log({ repos });
+    repos = await fetchUserRepos(q);
   } catch (error) {
     return (
       <div className="p-6">

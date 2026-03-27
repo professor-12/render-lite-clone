@@ -59,7 +59,7 @@ export default function AuthPage({ params }: { params: Promise<{ auth: string }>
         if (popupCheckRef.current) clearInterval(popupCheckRef.current);
         popupCheckRef.current = null;
         setIsAuthenticating(false);
-        window.location.href = '/';
+        window.location.href = '/dashboard';
       }
       if (event.data?.type === 'oauth_error') {
         if (popupCheckRef.current) clearInterval(popupCheckRef.current);
@@ -105,7 +105,7 @@ export default function AuthPage({ params }: { params: Promise<{ auth: string }>
     <div className="flex flex-col items-center justify-center w-full max-w-[90%] px-4 py-8">
       <div className="w-full max-w-[400px]">
         {/* Card */}
-        <div className="rounded-2xl border border-white/[0.08] bg-[#0d1117]/80 backdrop-blur-sm shadow-[0_0_0_1px_rgba(255,255,255,0.03)] p-8">
+        <div className="rounded-2xl border border-white/8 bg-[#0d1117]/80 backdrop-blur-sm shadow-[0_0_0_1px_rgba(255,255,255,0.03)] p-8">
           {/* Heading */}
           <div className="text-center mb-8">
             <h1 className="text-2xl font-semibold tracking-tight text-white">
@@ -134,7 +134,7 @@ export default function AuthPage({ params }: { params: Promise<{ auth: string }>
               type="button"
               onClick={() => openAuthWindow(githubAuthUrl)}
               disabled={isAuthenticating}
-              className="w-full flex items-center justify-center gap-3 h-12 px-4 rounded-xl border border-white/[0.12] bg-white/[0.04] text-[14px] font-medium text-white hover:bg-white/[0.08] hover:border-white/[0.18] focus:outline-none focus:ring-2 focus:ring-white/20 focus:ring-offset-2 focus:ring-offset-[#060B10] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              className="w-full flex items-center justify-center gap-3 h-12 px-4 rounded-xl border border-white/12 bg-white/4 text-[14px] font-medium text-white hover:bg-white/8 hover:border-white/18 focus:outline-none focus:ring-2 focus:ring-white/20 focus:ring-offset-2 focus:ring-offset-[#060B10] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
               {isAuthenticating ? (
                 <>
@@ -150,17 +150,17 @@ export default function AuthPage({ params }: { params: Promise<{ auth: string }>
             </button>
 
             <div className="relative flex items-center gap-3 py-1">
-              <span className="flex-1 h-px bg-white/[0.08]" />
+              <span className="flex-1 h-px bg-white/8" />
               <span className="text-[11px] font-medium uppercase tracking-wider text-[#6e7681]">
                 or
               </span>
-              <span className="flex-1 h-px bg-white/[0.08]" />
+              <span className="flex-1 h-px bg-white/8" />
             </div>
 
             <button
               type="button"
               disabled={isAuthenticating}
-              className="w-full flex items-center justify-center gap-3 h-12 px-4 rounded-xl border border-white/[0.08] bg-transparent text-[14px] font-medium text-[#c9d1d9] hover:bg-white/[0.04] hover:border-white/[0.12] focus:outline-none focus:ring-2 focus:ring-white/10 focus:ring-offset-2 focus:ring-offset-[#060B10] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              className="w-full flex items-center justify-center gap-3 h-12 px-4 rounded-xl border border-white/8 bg-transparent text-[14px] font-medium text-[#c9d1d9] hover:bg-white/4 hover:border-white/12 focus:outline-none focus:ring-2 focus:ring-white/10 focus:ring-offset-2 focus:ring-offset-[#060B10] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
               <GoogleIcon />
               <span>Continue with Google</span>

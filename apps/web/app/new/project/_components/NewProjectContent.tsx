@@ -4,7 +4,11 @@ import GithubRepoSkeleton from './GithubRepoSkeleton';
 import DeployUrlInput from './DeployUrlInput';
 import Template from './Template';
 
-export default function NewProjectContent() {
+export default function NewProjectContent({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string>>;
+}) {
   return (
     <main className="bg-[#0a0a0a] min-h-screen py-12 pt-20">
       <div className="max-w-5xl w-full mx-auto px-6">
@@ -20,7 +24,7 @@ export default function NewProjectContent() {
         <div className="mt-14 border border-white/[0.08] rounded-xl overflow-hidden bg-[#111111] divide-x divide-white/[0.06] flex min-h-[420px]">
           <div className="flex-1 min-w-0">
             <Suspense fallback={<GithubRepoSkeleton />}>
-              <GithubRepo />
+              <GithubRepo searchParams={searchParams} />
             </Suspense>
           </div>
           <div className="flex-1 min-w-0">

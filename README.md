@@ -72,6 +72,7 @@ packages/
 - **Next.js**
 - **Docker**
 - **PostgreSQL**
+- **RabbitMQ**
 - **Prisma ORM**
 - **Turborepo**
 - **pnpm**
@@ -96,6 +97,29 @@ cd apps/server
 docker-compose up -d
 pnpm dlx prisma db push
 ```
+
+RabbitMQ Management UI:
+
+```
+http://localhost:15672
+```
+
+Default credentials:
+
+```
+guest / guest
+```
+
+### Worker Queues (RabbitMQ)
+
+RenderLite server now boots queue consumers for:
+
+- `renderlite.repo.sync.requested`
+- `renderlite.build.requested`
+- `renderlite.deploy.requested`
+- `renderlite.domain.provision.requested`
+
+Workers are started automatically when RabbitMQ is reachable on server startup.
 
 ---
 

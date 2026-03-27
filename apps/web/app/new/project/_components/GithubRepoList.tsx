@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useDebounce } from '@/hooks/useDebounce';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { FiLock, FiSearch } from 'react-icons/fi';
 
 const LANG_COLORS: Record<string, string> = {
@@ -10,6 +12,8 @@ const LANG_COLORS: Record<string, string> = {
   Go: '#00add8',
   Rust: '#dea584',
 };
+
+const LANGICON = {};
 
 export type RepoItem = {
   name: string;
@@ -46,12 +50,24 @@ export default function GithubRepoList({ repos }: GithubRepoListProps) {
   const [search, setSearch] = useState('');
   const [importing, setImporting] = useState<string | null>(null);
   const [isInstallingApp, setIsInstallingApp] = useState(false);
+  const router = useRouter();
+  const debouncesearch = useDebounce(search, 1000);
+  const searchParams = useSearchParams();
 
-  const filtered = repos.filter((r) => r.name.toLowerCase().includes(search.toLowerCase().trim()));
+  const filtered = repos;
 
-  const handleImport = (name: string) => {
-    setImporting(name);
-    setTimeout(() => setImporting(null), 1500);
+  useEffect(() => {
+    if (!debouncesearch) return;
+    const newSearchParams = new URLSearchParams();
+    newSearchParams.append('q', debouncesearch);
+    router.push(`/new/project?q=${debouncesearch}`);
+  }, [debouncesearch]);
+
+  const handleImport = (repo: GithubRepoListProps['repos'][0]) => {
+    const metaDataparams = {
+      name: repo.name,
+    };
+    alert(JSON.stringify({ repo }));
   };
 
   const handleInstallApp = () => {
@@ -90,14 +106,16 @@ export default function GithubRepoList({ repos }: GithubRepoListProps) {
           type="text"
           placeholder="Search repositories…"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value);
+          }}
           className="flex-1 text-[13px] bg-transparent focus:outline-none placeholder:text-[#444] text-[#f0f0f0]"
           aria-label="Search repositories"
         />
       </div>
 
       {/* Repo list */}
-      <ul className="divide-y divide-white/[0.05]">
+      <ul className="divide-y divide-white/5">
         {filtered.length === 0 && (
           <li className="py-8 text-center text-[13px] text-[#555]">
             {repos.length === 0
@@ -109,7 +127,7 @@ export default function GithubRepoList({ repos }: GithubRepoListProps) {
           <li key={repo.name} className="flex items-center justify-between py-3 group">
             <div className="flex items-center gap-2.5 min-w-0">
               <span
-                className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                className="w-2.5 h-2.5 rounded-full shrink-0"
                 style={{
                   background: LANG_COLORS[repo.language ?? ''] ?? '#555',
                 }}
@@ -119,7 +137,7 @@ export default function GithubRepoList({ repos }: GithubRepoListProps) {
                   <span className="text-[13px] font-medium text-[#f0f0f0] truncate">
                     {repo.name}
                   </span>
-                  {repo.private && <FiLock className="text-[11px] text-[#555] flex-shrink-0" />}
+                  {repo.private && <FiLock className="text-[11px] text-[#555] shrink-0" />}
                 </div>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span className="text-[11px] text-[#555]">{repo.language ?? '—'}</span>
@@ -133,13 +151,13 @@ export default function GithubRepoList({ repos }: GithubRepoListProps) {
 
             <button
               type="button"
-              onClick={() => handleImport(repo.name)}
+              onClick={() => handleImport(repo)}
               disabled={importing === repo.name}
-              className={`ml-3 flex-shrink-0 text-[12px] font-medium px-3.5 py-1.5 rounded-md border transition-all
+              className={`ml-3 shrink-0 text-[12px] font-medium px-3.5 py-1.5 rounded-md border transition-all
                 ${
                   importing === repo.name
                     ? 'bg-[rgba(74,222,128,0.08)] border-[rgba(74,222,128,0.2)] text-[#4ade80] cursor-default'
-                    : 'bg-transparent border-white/[0.1] text-[#888] hover:bg-white hover:text-black hover:border-white'
+                    : 'bg-transparent border-white/10 text-[#888] hover:bg-white hover:text-black hover:border-white'
                 }`}
             >
               {importing === repo.name ? '✓ Importing…' : 'Import'}
