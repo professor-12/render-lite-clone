@@ -7,7 +7,6 @@ export class GithuAppController {
 
   public installGithubApp = asyncHandler(async (req, res) => {
     const { installation_id, code } = req.query;
-    const { 'renderLite-access': token } = req.cookies;
     const userId = req.userId;
     if (!userId) {
       throw new AppError('User id not found', 404);
@@ -35,28 +34,20 @@ export class GithuAppController {
   public getInstallRepos = asyncHandler(async (req, res) => {
     const { 'renderLite-access': jwt_token } = req.cookies;
 
-    const {q:repo_name_query} = req.query
- 
+    const { q: repo_name_query } = req.query;
+    console.log({ repo_name_query });
+
     if (!jwt_token) {
       res.status(401).json({
         message: 'Unathorized access',
       });
     }
-    if(repo_name_query){
-        const repo  = await this.githubService.getInstallationRepos(jwt_token,String(repo_name_query))
-      return res.status(200).json({
-        message:"Repo fetched successfully",
-        repositories: repo
-      })
 
-    }else{
-        const repos = await this.githubService.getInstallationRepos(jwt_token);
+    const repo = await this.githubService.getInstallationRepos(jwt_token, String(repo_name_query));
+
     return res.status(200).json({
-      messages: 'Repos fetched successfully ',
-      repositories: repos,
+      message: 'Repo fetched successfully',
+      repositories: repo,
     });
-    }
-  
   });
-  public getInstallationId = asyncHandler(async (req, res) => {});
 }

@@ -5,6 +5,7 @@ import appRoute from './module/app/app.route';
 import { logger } from './middlewares/httplogger.middleware';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import { rabbitMQService } from './libs/rabbitmq';
 dotEnv.config();
 const PORT = process.env.PORT || 8080;
 
@@ -21,6 +22,26 @@ app.use(
 app.use('/api/v1', appRoute);
 app.use(errorHandler);
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   logger.info({ port: PORT }, 'Server listening');
+  rabbitMQService.connect().catch((error) => {
+    logger.warn({ err: error }, 'RabbitMQ unavailable at startup. Will reconnect on first use.');
+  });
+});
+
+async function shutdown(signal: string) {
+  logger.info({ signal }, 'Shutting down server');
+  await rabbitMQService.close();
+  server.close(() => {
+    logger.info('HTTP server closed');
+    process.exit(0);
+  });
+}
+
+process.on('SIGINT', () => {
+  void shutdown('SIGINT');
+});
+
+process.on('SIGTERM', () => {
+  void shutdown('SIGTERM');
 });

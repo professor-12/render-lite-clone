@@ -11,7 +11,10 @@ export class AuthService {
 
     // 2️⃣ Fetch GitHub user
     const githubUser = await this.githubService.getGithubUser(accessToken);
-    logger.debug({ githubUser: { id: githubUser.id, login: githubUser.login } }, 'GitHub user fetched');
+    logger.debug(
+      { githubUser: { id: githubUser.id, login: githubUser.login } },
+      'GitHub user fetched',
+    );
 
     const encryptedToken = encrypt(accessToken);
 
@@ -86,7 +89,7 @@ export class AuthService {
   }
 
   private generateJwt(userId: string) {
-    const access_token = jwt.sign({ userId }, getEnv('JWT_SECRET'), { expiresIn: '15m' });
+    const access_token = jwt.sign({ userId }, getEnv('JWT_SECRET'), { expiresIn: '30d' });
     const refresh_token = jwt.sign({ userId }, getEnv('JWT_SECRET'), { expiresIn: '30d' });
     return {
       access_token,

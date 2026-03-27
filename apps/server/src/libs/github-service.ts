@@ -38,7 +38,10 @@ export class GithubService {
       const data: GithubTokenResponse = await response.json();
 
       if (data.error) {
-        logger.warn({ error: data.error, description: data.error_description }, 'GitHub OAuth error');
+        logger.warn(
+          { error: data.error, description: data.error_description },
+          'GitHub OAuth error',
+        );
         throw new AppError(data.error_description || 'GitHub authentication failed', 401);
       }
 

@@ -1,0 +1,131 @@
+import amqp, { type Channel, type ChannelModel, type ConsumeMessage, type Options } from 'amqplib';
+import { logger } from './logger';
+
+type ConsumerHandler<T> = (payload: T, rawMessage: ConsumeMessage) => Promise<void> | void;
+
+export class RabbitMQService {
+  private connection: ChannelModel | null = null;
+  private channel: Channel | null = null;
+  private connectingPromise: Promise<Channel> | null = null;
+
+  constructor(
+    private readonly url: string = process.env.RABBITMQ_URL ?? 'amqp://guest:guest@localhost:5672',
+    private readonly prefetch: number = RabbitMQService.resolvePrefetch(),
+  ) {}
+
+  private static resolvePrefetch() {
+    const value = Number(process.env.RABBITMQ_PREFETCH ?? '10');
+    return Number.isFinite(value) && value > 0 ? value : 10;
+  }
+
+  public async connect(): Promise<Channel> {
+    if (this.channel) return this.channel;
+    if (this.connectingPromise) return this.connectingPromise;
+
+    this.connectingPromise = (async () => {
+      const connection = await amqp.connect(this.url);
+      this.connection = connection;
+
+      connection.on('error', (error: Error) => {
+        logger.error({ err: error }, 'RabbitMQ connection error');
+      });
+
+      connection.on('close', () => {
+        logger.warn('RabbitMQ connection closed');
+        this.connection = null;
+        this.channel = null;
+        this.connectingPromise = null;
+      });
+
+      const channel = await connection.createChannel();
+      await channel.prefetch(this.prefetch);
+      this.channel = channel;
+      logger.info({ url: this.url, prefetch: this.prefetch }, 'RabbitMQ connected');
+
+      return channel;
+    })();
+
+    return this.connectingPromise;
+  }
+
+  public async assertQueue(
+    queueName: string,
+    options: Options.AssertQueue = { durable: true },
+  ) {
+    const channel = await this.connect();
+    return channel.assertQueue(queueName, options);
+  }
+
+  public async publish(
+    queueName: string,
+    payload: unknown,
+    options: Options.Publish = { persistent: true },
+  ) {
+    const channel = await this.connect();
+    await this.assertQueue(queueName);
+
+    const serializedPayload =
+      typeof payload === 'string' ? payload : JSON.stringify(payload);
+    const sent = channel.sendToQueue(queueName, Buffer.from(serializedPayload), options);
+
+    if (!sent) {
+      logger.warn({ queueName }, 'RabbitMQ internal write buffer is full');
+    }
+  }
+
+  public async consume<T = unknown>(
+    queueName: string,
+    handler: ConsumerHandler<T>,
+    options?: Options.Consume,
+  ) {
+    const channel = await this.connect();
+    await this.assertQueue(queueName);
+
+    await channel.consume(
+      queueName,
+      async (message: ConsumeMessage | null) => {
+        if (!message) return;
+
+        try {
+          const content = message.content.toString();
+          const parsed = this.tryParseJson<T>(content);
+          await handler(parsed, message);
+          channel.ack(message);
+        } catch (error) {
+          logger.error({ err: error, queueName }, 'RabbitMQ consumer handler failed');
+          channel.nack(message, false, false);
+        }
+      },
+      options,
+    );
+  }
+
+  public async close() {
+    try {
+      if (this.channel) {
+        await this.channel.close();
+        this.channel = null;
+      }
+
+      if (this.connection) {
+        await this.connection.close();
+        this.connection = null;
+      }
+
+      this.connectingPromise = null;
+      logger.info('RabbitMQ connection closed cleanly');
+    } catch (error) {
+      logger.error({ err: error }, 'Failed to close RabbitMQ cleanly');
+    }
+  }
+
+  private tryParseJson<T>(content: string): T {
+    try {
+      return JSON.parse(content) as T;
+    } catch {
+      return content as unknown as T;
+    }
+  }
+}
+
+export const rabbitMQService = new RabbitMQService();

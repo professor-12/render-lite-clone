@@ -44,7 +44,7 @@ model Account {
   expiresAt             Int?   
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
-   githubInstallations  GithubInstallation[]  
+  githubInstallations  GithubInstallation[]  
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
  
 

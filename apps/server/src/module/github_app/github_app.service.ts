@@ -36,10 +36,23 @@ export default class GithubAppService {
     if (!user) {
       throw new AppError('User not found', 404);
     }
-    // Current accoumt , function call can be changed later to allow for dynamic settings for now only one account is being used
-    const accountId = user.accounts?.[0].id;
-    const installation = await prisma.githubInstallation.create({
-      data: {
+    const githubAccount = user.accounts.find((acc) => acc.provider === 'github');
+
+    if (!githubAccount) {
+      throw new AppError('GitHub account not linked', 400);
+    }
+    const accountId = githubAccount.id;
+    const installation = await prisma.githubInstallation.upsert({
+      where: {
+        installationId: data.id
+      },
+      update: {
+        accountLogin: data.account.login,
+        accountId: data.account.id,
+        accId: accountId,
+        accountType: data.account.type,
+      },
+      create: {
         installationId: data.id,
         accountLogin: data.account.login,
         accountId: data.account.id,
@@ -85,7 +98,7 @@ export default class GithubAppService {
     return data.token;
   }
 
-  async getInstallationRepos(jwt_token: string,repo_name_query?:string) {
+  async getInstallationRepos(jwt_token: string, repo_name_query: string) {
     const { userId: id } = this.authService.verifyJwt(jwt_token);
     const user = await this.db.user.findUnique({
       where: {
@@ -108,19 +121,7 @@ export default class GithubAppService {
       throw new AppError('Github app not installed', 404);
     }
     const token = await this.getinstallationToken(String(installation_id));
- if(repo_name_query){
-      const res = await fetch(`https://api.github.com/installation/repositories?q=${repo_name_query}`,{
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/vnd.github+json',
-        'X-Github-Api-Version': '2022-11-28',
-      },
-    })
-    const data = await res.json()
-    logger.info({data})
-    return data
-    }else{
-          const res = await fetch('https://api.github.com/installation/repositories', {
+    const res = await fetch(`https://api.github.com/installation/repositories`, {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: 'application/vnd.github+json',
@@ -128,16 +129,11 @@ export default class GithubAppService {
       },
     });
     const data = await res.json();
-       console.log({data})
     logger.info({ data });
-    return data;
-    }
+    const filtered = data.repositories.filter((repo: any) =>
+      repo.name.toLowerCase().includes(repo_name_query?.toLowerCase()),
+    );
 
-
-
-
-
-   
-   
+    return filtered;
   }
 }
