@@ -6,6 +6,7 @@ import { logger } from './middlewares/httplogger.middleware';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { rabbitMQService } from './libs/rabbitmq';
+import { renderLiteWorkerRegistry } from './workers/workers.module';
 dotEnv.config();
 const PORT = process.env.PORT || 8080;
 
@@ -24,9 +25,14 @@ app.use(errorHandler);
 
 const server = app.listen(PORT, () => {
   logger.info({ port: PORT }, 'Server listening');
-  rabbitMQService.connect().catch((error) => {
-    logger.warn({ err: error }, 'RabbitMQ unavailable at startup. Will reconnect on first use.');
-  });
+  rabbitMQService
+    .connect()
+    .then(async () => {
+      await renderLiteWorkerRegistry.startAll();
+    })
+    .catch((error) => {
+      logger.warn({ err: error }, 'RabbitMQ unavailable at startup. Workers will remain paused.');
+    });
 });
 
 async function shutdown(signal: string) {
@@ -39,9 +45,9 @@ async function shutdown(signal: string) {
 }
 
 process.on('SIGINT', () => {
-  void shutdown('SIGINT');
+   shutdown('SIGINT');
 });
 
 process.on('SIGTERM', () => {
-  void shutdown('SIGTERM');
+   shutdown('SIGTERM');
 });

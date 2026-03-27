@@ -9,8 +9,10 @@ export class RabbitMQService {
   private connectingPromise: Promise<Channel> | null = null;
 
   constructor(
-    private readonly url: string = process.env.RABBITMQ_URL ?? 'amqp://guest:guest@localhost:5672',
-    private readonly prefetch: number = RabbitMQService.resolvePrefetch(),
+    private readonly config: {
+      url?: string;
+      prefetch?: number;
+    } = {},
   ) {}
 
   private static resolvePrefetch() {
@@ -18,12 +20,25 @@ export class RabbitMQService {
     return Number.isFinite(value) && value > 0 ? value : 10;
   }
 
+  private getUrl() {
+    return this.config.url ?? process.env.RABBITMQ_URL ?? 'amqp://guest:guest@localhost:5672';
+  }
+
+  private getPrefetch() {
+    if (typeof this.config.prefetch === 'number' && this.config.prefetch > 0) {
+      return this.config.prefetch;
+    }
+    return RabbitMQService.resolvePrefetch();
+  }
+
   public async connect(): Promise<Channel> {
     if (this.channel) return this.channel;
     if (this.connectingPromise) return this.connectingPromise;
 
     this.connectingPromise = (async () => {
-      const connection = await amqp.connect(this.url);
+      const url = this.getUrl();
+      const prefetch = this.getPrefetch();
+      const connection = await amqp.connect(url);
       this.connection = connection;
 
       connection.on('error', (error: Error) => {
@@ -38,9 +53,9 @@ export class RabbitMQService {
       });
 
       const channel = await connection.createChannel();
-      await channel.prefetch(this.prefetch);
+      await channel.prefetch(prefetch);
       this.channel = channel;
-      logger.info({ url: this.url, prefetch: this.prefetch }, 'RabbitMQ connected');
+      logger.info({ url, prefetch }, 'RabbitMQ connected');
 
       return channel;
     })();
