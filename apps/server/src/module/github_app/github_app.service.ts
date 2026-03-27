@@ -1,30 +1,48 @@
 import { prisma } from '../../libs/prisma';
-import jwt from 'jsonwebtoken';
 import { AuthService } from '../auth/auth.service';
-import { nextTick } from 'process';
 import { AppError } from '../../errors/Apperror';
 import { logger } from '../../libs/logger';
+import type { GithubClientService } from '../github_client/github_client.service';
+import { githubClientService } from '../github_client/github_client.module';
+
+type InstallationPayload = Awaited<ReturnType<GithubClientService['getAppInstallation']>>;
+type InstallationAccount = NonNullable<InstallationPayload['account']>;
+
+function installationAccountFields(account: InstallationAccount) {
+  if ('login' in account && typeof account.login === 'string') {
+    return {
+      login: account.login,
+      id: account.id,
+      accountType: 'type' in account && typeof account.type === 'string' ? account.type : 'User',
+    };
+  }
+  if ('slug' in account && typeof account.slug === 'string') {
+    return {
+      login: account.slug,
+      id: account.id,
+      accountType: 'Organization',
+    };
+  }
+  throw new AppError('Unsupported GitHub installation account shape', 400);
+}
+
 export default class GithubAppService {
   constructor(
     private authService: AuthService,
     private db = prisma,
   ) {}
 
-  async createInstallation(installationId: number, userId: string, code: string) {
-    const token = this.getAppToken();
-
-    const response = await fetch(`https://api.github.com/app/installations/${installationId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/vnd.github+json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch installation details: ${response.statusText}`);
+  async createInstallation(installationId: number, userId: string, _code: string) {
+    const data = await githubClientService.getAppInstallation(installationId);
+    if (!data.account) {
+      throw new AppError('Installation has no linked account', 400);
     }
+    const {
+      login: accountLogin,
+      id: accountGithubId,
+      accountType,
+    } = installationAccountFields(data.account);
 
-    const data = await response.json();
     const user = await prisma.user.findUnique({
       where: {
         id: userId,
@@ -44,58 +62,24 @@ export default class GithubAppService {
     const accountId = githubAccount.id;
     const installation = await prisma.githubInstallation.upsert({
       where: {
-        installationId: data.id
+        installationId: data.id,
       },
       update: {
-        accountLogin: data.account.login,
-        accountId: data.account.id,
+        accountLogin,
+        accountId: accountGithubId,
         accId: accountId,
-        accountType: data.account.type,
+        accountType,
       },
       create: {
         installationId: data.id,
-        accountLogin: data.account.login,
-        accountId: data.account.id,
+        accountLogin,
+        accountId: accountGithubId,
         accId: accountId,
-        accountType: data.account.type,
+        accountType,
       },
     });
 
     return installation;
-  }
-
-  public getAppToken = () => {
-    const now = Math.floor(Date.now() / 1000);
-
-    const payload = {
-      iat: Math.floor(Date.now() / 1000),
-      exp: Math.floor(Date.now() / 1000) + 10 * 60, // expires in 10 minutes
-      iss: process.env.GITHUB_APP_ID, // GitHub App ID
-    };
-
-    const token = jwt.sign(payload, process.env.GITHUB_PRIVATE_KEY as string as string, {
-      algorithm: 'RS256',
-    });
-
-    return token;
-  };
-
-  async getinstallationToken(installation_id: string) {
-    const appJwt = this.getAppToken();
-    const res = await fetch(
-      `https://api.github.com/app/installations/${installation_id}/access_tokens`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${appJwt}`,
-          Accept: 'application/vnd.github+json',
-          'X-GitHub-Api-Version': '2022-11-28',
-        },
-      },
-    );
-    const data = await res.json();
-
-    return data.token;
   }
 
   async getInstallationRepos(jwt_token: string, repo_name_query: string) {
@@ -108,6 +92,7 @@ export default class GithubAppService {
         accounts: {
           select: {
             githubInstallations: true,
+            provider: true,
           },
         },
       },
@@ -115,25 +100,17 @@ export default class GithubAppService {
     if (!user) {
       throw new AppError('User not found', 404);
     }
-    const installation_id = user.accounts?.[0]?.githubInstallations?.[0]?.installationId;
+    const installation_id = user.accounts
+      ?.find((acc) => acc.provider === 'github')
+      ?.githubInstallations?.find((installation) => installation.installationId)?.installationId;
     if (!installation_id) {
       logger.error('Github app not installed');
       throw new AppError('Github app not installed', 404);
     }
-    const token = await this.getinstallationToken(String(installation_id));
-    const res = await fetch(`https://api.github.com/installation/repositories`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/vnd.github+json',
-        'X-Github-Api-Version': '2022-11-28',
-      },
-    });
-    const data = await res.json();
-    logger.info({ data });
-    const filtered = data.repositories.filter((repo: any) =>
-      repo.name.toLowerCase().includes(repo_name_query?.toLowerCase()),
-    );
 
-    return filtered;
+    return githubClientService.listInstallationRepositories(
+      installation_id,
+      String(repo_name_query ?? ''),
+    );
   }
 }

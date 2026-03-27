@@ -20,5 +20,5 @@ export interface GithubUserData {
   login: string;
   avatar_url: string;
   name: string;
-  email: null;
+  email: string | null;
 }
