@@ -115,10 +115,7 @@ export class GithubClientService {
 
     try {
       const { data } = await octokit.rest.users.getAuthenticated();
-      logger.debug(
-        { githubUser: { id: data.id, login: data.login } },
-        'GitHub user fetched',
-      );
+      logger.debug({ githubUser: { id: data.id, login: data.login } }, 'GitHub user fetched');
 
       return {
         id: data.id,

@@ -9,7 +9,6 @@ const baseOptions: pino.LoggerOptions = {
   timestamp: pino.stdTimeFunctions.isoTime,
 };
 
-
 const logger = isProd
   ? pino(baseOptions)
   : pino({
