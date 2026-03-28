@@ -11,6 +11,10 @@ type GitHubRepoApi = {
   language: string | null;
   updated_at: string;
   private: boolean;
+  html_url: string;
+  default_branch: string;
+  root_dir: string;
+  
 };
 
 type BackendResponse = {
@@ -21,12 +25,16 @@ function normalizeRepos(payload: BackendResponse): RepoItem[] {
   const raw = payload.repositories;
   if (!raw) return [];
   const list = Array.isArray(raw) ? raw : (raw.repositories ?? []);
+  console.log({ list });
   return list
     .map((r: GitHubRepoApi) => ({
       name: r.name,
       language: r.language ?? null,
       updatedAt: r.updated_at,
       private: r.private ?? false,
+      url: r.html_url,
+      branch: r.default_branch,
+      rootDir: r.root_dir, 
     }))
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 }
@@ -56,7 +64,7 @@ async function fetchUserRepos(q: string): Promise<RepoItem[]> {
       return [];
     }
     const body = await res.text();
-    console.log({ body });
+
     let message = `Failed to load repositories (${res.status})`;
     try {
       const json = JSON.parse(body) as { message?: string };

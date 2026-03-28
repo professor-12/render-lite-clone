@@ -20,10 +20,14 @@ export type RepoItem = {
   language: string | null;
   updatedAt: string;
   private: boolean;
+  url: string;
+  branch: string;
+  rootDir: string;
 };
 
 type GithubRepoListProps = {
   repos: RepoItem[];
+
 };
 
 function formatRelativeTime(dateStr: string): string {
@@ -64,10 +68,7 @@ export default function GithubRepoList({ repos }: GithubRepoListProps) {
   }, [debouncesearch]);
 
   const handleImport = (repo: GithubRepoListProps['repos'][0]) => {
-    const metaDataparams = {
-      name: repo.name,
-    };
-    alert(JSON.stringify({ repo }));
+    router.push(`/new/import?repo=${encodeURIComponent(repo.name)}&url=${encodeURIComponent(repo.url)}&branch=${encodeURIComponent(repo.branch)}&rootDir=${encodeURIComponent(repo.rootDir)}`);
   };
 
   const handleInstallApp = () => {
