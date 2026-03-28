@@ -74,11 +74,30 @@ export default function GithubRepoList({ repos }: GithubRepoListProps) {
     setIsInstallingApp(true);
     const features =
       'width=500,height=600,resizable=yes,scrollbars=yes,status=yes,toolbar=yes,menubar=yes';
-    window.open(
+    const popup = window.open(
       'https://github.com/apps/renderlite/installations/select_target',
       'emmanuel-github-app-install',
       features,
     );
+    if (popup) {
+      popup.addEventListener('close', () => {
+        setIsInstallingApp(false);
+      });
+      popup.addEventListener('message', (event) => {
+        if (event.origin !== window.location.origin) return;
+        if (event.data.type === 'github_install_success') {
+          setIsInstallingApp(false);
+        }
+        if (event.data.type === 'github_install_error') {
+          setIsInstallingApp(false);
+          alert('Error installing GitHub app: ' + event.data.error);
+        }
+        if (event.data.type === 'github_install_cancel') {
+          setIsInstallingApp(false);
+          alert('Installation cancelled');
+        }
+      });
+    }
     window.addEventListener('close', () => {
       setIsInstallingApp(false);
     });
@@ -154,10 +173,9 @@ export default function GithubRepoList({ repos }: GithubRepoListProps) {
               onClick={() => handleImport(repo)}
               disabled={importing === repo.name}
               className={`ml-3 shrink-0 text-[12px] font-medium px-3.5 py-1.5 rounded-md border transition-all
-                ${
-                  importing === repo.name
-                    ? 'bg-[rgba(74,222,128,0.08)] border-[rgba(74,222,128,0.2)] text-[#4ade80] cursor-default'
-                    : 'bg-transparent border-white/10 text-[#888] hover:bg-white hover:text-black hover:border-white'
+                ${importing === repo.name
+                  ? 'bg-[rgba(74,222,128,0.08)] border-[rgba(74,222,128,0.2)] text-[#4ade80] cursor-default'
+                  : 'bg-transparent border-white/10 text-[#888] hover:bg-white hover:text-black hover:border-white'
                 }`}
             >
               {importing === repo.name ? '✓ Importing…' : 'Import'}

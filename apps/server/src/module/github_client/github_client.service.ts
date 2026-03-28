@@ -1,60 +1,80 @@
-import { createAppAuth } from '@octokit/auth-app';
-import { RequestError } from '@octokit/request-error';
-import { Octokit } from '@octokit/rest';
+import jwt from 'jsonwebtoken';
 import { AppError } from '../../errors/Apperror';
 import { logger } from '../../libs/logger';
-import type { GithubTokenResponse, GithubUserData } from '../../types/github.types';
+import type {
+  GithubInstallationReposResponse,
+  GithubInstallationResponse,
+  GithubInstallationTokenResponse,
+  GithubRepository,
+  GithubTokenResponse,
+  GithubUserData,
+  GithubUserResponse,
+} from '../../types/github.types';
 
-type OctokitRestClient = InstanceType<typeof Octokit>;
-type ListInstallationReposResult = Awaited<
-  ReturnType<OctokitRestClient['rest']['apps']['listReposAccessibleToInstallation']>
->;
-type InstallationRepository = NonNullable<
-  ListInstallationReposResult['data']['repositories']
->[number];
+const GITHUB_API = 'https://api.github.com';
+const API_VERSION = '2022-11-28';
 
-/**
- * GitHub API via Octokit. We use `@octokit/rest` + `@octokit/auth-app` instead of the
- * `octokit` meta-package so `tsx`/Node can resolve modules (the meta-package pulls
- * `@octokit/app`, which breaks under this project's loader).
- */
 export class GithubClientService {
   private readonly oauthTokenUrl = 'https://github.com/login/oauth/access_token';
-  private appOctokit: OctokitRestClient | null = null;
 
   private requireAppCredentials() {
     const appId = process.env.GITHUB_APP_ID;
-    const privateKey = process.env.GITHUB_PRIVATE_KEY;
+    const privateKey = process.env.GITHUB_PRIVATE_KEY?.replace(/\\n/g, '\n');
     if (!appId || !privateKey) {
       throw new AppError('GitHub App is not configured', 500);
     }
     return { appId, privateKey };
   }
 
-  private getAppOctokit(): OctokitRestClient {
-    if (!this.appOctokit) {
-      const { appId, privateKey } = this.requireAppCredentials();
-      this.appOctokit = new Octokit({
-        authStrategy: createAppAuth,
-        auth: {
-          appId,
-          privateKey,
-        },
-      });
-    }
-    return this.appOctokit;
+  private signAppJwt(): string {
+    const { appId, privateKey } = this.requireAppCredentials();
+    const now = Math.floor(Date.now() / 1000);
+    return jwt.sign(
+      { iss: appId, iat: now - 60, exp: now + 10 * 60 },
+      privateKey,
+      { algorithm: 'RS256' },
+    );
   }
 
-  private createInstallationOctokit(installationId: number): OctokitRestClient {
-    const { appId, privateKey } = this.requireAppCredentials();
-    return new Octokit({
-      authStrategy: createAppAuth,
-      auth: {
-        appId,
-        privateKey,
-        installationId,
+  private async githubFetch<T>(url: string, token: string, tokenType: 'Bearer' | 'token' = 'Bearer'): Promise<T> {
+    const res = await fetch(url, {
+      headers: {
+        Authorization: `${tokenType} ${token}`,
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': API_VERSION,
       },
     });
+
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      logger.warn({ status: res.status, url, body }, 'GitHub API request failed');
+      throw new AppError(`GitHub API error (${res.status})`, 502);
+    }
+
+    return res.json() as Promise<T>;
+  }
+
+  private async getInstallationToken(installationId: number): Promise<string> {
+    const appJwt = this.signAppJwt();
+    const url = `${GITHUB_API}/app/installations/${installationId}/access_tokens`;
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${appJwt}`,
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': API_VERSION,
+      },
+    });
+
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      logger.warn({ status: res.status, installationId, body }, 'Failed to get installation token');
+      throw new AppError('Failed to get GitHub installation token', 502);
+    }
+
+    const data = (await res.json()) as GithubInstallationTokenResponse;
+    return data.token;
   }
 
   public async exchangeOAuthCodeForToken(code: string): Promise<string> {
@@ -111,10 +131,12 @@ export class GithubClientService {
   }
 
   public async getAuthenticatedUser(oauthToken: string): Promise<GithubUserData> {
-    const octokit = new Octokit({ auth: oauthToken });
-
     try {
-      const { data } = await octokit.rest.users.getAuthenticated();
+      const data = await this.githubFetch<GithubUserResponse>(
+        `${GITHUB_API}/user`,
+        oauthToken,
+        'token',
+      );
       logger.debug({ githubUser: { id: data.id, login: data.login } }, 'GitHub user fetched');
 
       return {
@@ -125,38 +147,35 @@ export class GithubClientService {
         email: data.email ?? null,
       };
     } catch (error) {
-      if (error instanceof RequestError) {
-        logger.warn({ status: error.status, message: error.message }, 'GitHub user fetch failed');
-        throw new AppError('Failed to fetch GitHub user', 502);
+      if (error instanceof AppError) {
+        throw error;
       }
-      throw error;
+      logger.warn({ err: error }, 'GitHub user fetch failed');
+      throw new AppError('Failed to fetch GitHub user', 502);
     }
   }
 
-  public async getAppInstallation(installationId: number) {
-    const octokit = this.getAppOctokit();
-    const { data } = await octokit.rest.apps.getInstallation({
-      installation_id: installationId,
-    });
-    return data;
+  public async getAppInstallation(installationId: number): Promise<GithubInstallationResponse> {
+    logger.debug({ installationId }, 'Getting app installation');
+    const appJwt = this.signAppJwt();
+    return this.githubFetch<GithubInstallationResponse>(
+      `${GITHUB_API}/app/installations/${installationId}`,
+      appJwt,
+    );
   }
 
-  public async getInstallationOctokit(installationId: number) {
-    return this.createInstallationOctokit(installationId);
-  }
-
-  public async listInstallationRepositories(installationId: number, repoNameQuery: string) {
-    const octokit = this.createInstallationOctokit(installationId);
+  public async listInstallationRepositories(installationId: number, repoNameQuery: string): Promise<GithubRepository[]> {
+    const token = await this.getInstallationToken(installationId);
     const q = (repoNameQuery ?? '').toLowerCase();
-    const allRepos: InstallationRepository[] = [];
+    const allRepos: GithubRepository[] = [];
 
     let page = 1;
     const perPage = 100;
     while (true) {
-      const { data } = await octokit.rest.apps.listReposAccessibleToInstallation({
-        per_page: perPage,
-        page,
-      });
+      const data = await this.githubFetch<GithubInstallationReposResponse>(
+        `${GITHUB_API}/installation/repositories?per_page=${perPage}&page=${page}`,
+        token,
+      );
       allRepos.push(...data.repositories);
       if (data.repositories.length < perPage) {
         break;

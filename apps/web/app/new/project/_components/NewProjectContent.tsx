@@ -21,7 +21,7 @@ export default function NewProjectContent({
 
         <DeployUrlInput />
 
-        <div className="mt-14 border border-white/[0.08] rounded-xl overflow-hidden bg-[#111111] divide-x divide-white/[0.06] flex min-h-[420px]">
+        <div className="mt-14 border border-white/8 rounded-xl overflow-hidden bg-[#111111] divide-x divide-white/6 flex min-h-[420px]">
           <div className="flex-1 min-w-0">
             <Suspense fallback={<GithubRepoSkeleton />}>
               <GithubRepo searchParams={searchParams} />

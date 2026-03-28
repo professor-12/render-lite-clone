@@ -4,7 +4,7 @@ const isProd = process.env.NODE_ENV === 'production';
 const logLevel = process.env.LOG_LEVEL ?? (isProd ? 'info' : 'debug');
 
 const baseOptions: pino.LoggerOptions = {
-  // level: logLevel,
+  level: logLevel,
   base: { pid: process.pid },
   timestamp: pino.stdTimeFunctions.isoTime,
 };

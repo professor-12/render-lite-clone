@@ -13,7 +13,7 @@ export const errorHandler = async (error: unknown, req: Request, res: Response, 
   }
 
   if (error instanceof AppError) {
-    return res.status(400).json({
+    return res.status(error.statusCode).json({
       message: error.message,
       data: null,
       success: false,

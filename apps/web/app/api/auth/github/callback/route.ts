@@ -81,12 +81,12 @@ export async function GET(request: NextRequest) {
   }
 
   if (!response.ok) {
-    let errorCode = 'oauth_failed';
+    let errorCode = 'Something went wrong. Please try again later.';
     try {
       const body = await response.json();
       if (body?.error) errorCode = body.error;
     } catch {
-      // ignore parse errors — fall back to generic error code
+      errorCode = 'Something went wrong. Please try again later.';
     }
     console.error(`[GithubCallback] Backend returned ${response.status}: ${errorCode}`);
     loginUrl.searchParams.set('error', errorCode);

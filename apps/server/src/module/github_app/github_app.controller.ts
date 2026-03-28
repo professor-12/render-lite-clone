@@ -1,4 +1,5 @@
 import { AppError } from '../../errors/Apperror';
+import { logger } from '../../libs/logger';
 import { asyncHandler } from '../../middlewares/asyncHandler';
 import GithubAppService from './github_app.service';
 
@@ -6,13 +7,14 @@ export class GithuAppController {
   constructor(private githubService: GithubAppService) {}
 
   public installGithubApp = asyncHandler(async (req, res) => {
+    logger.debug('Installing GitHub app');
     const { installation_id, code } = req.query;
     const userId = req.userId;
     if (!userId) {
       throw new AppError('User id not found', 404);
     }
 
-    if (!installation_id || !code) {
+    if (!installation_id) {
       return res.status(400).json({
         message: 'Installation ID and code are required',
       });
@@ -23,6 +25,8 @@ export class GithuAppController {
       userId,
       code as string,
     );
+
+    logger.debug({ installation }, 'GitHub app installed successfully');
 
     return res.status(200).json({
       message: 'GitHub app installed successfully',

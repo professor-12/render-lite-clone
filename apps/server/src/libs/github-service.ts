@@ -3,7 +3,7 @@ import type { GithubUserData } from '../types/github.types';
 
 /**
  * Facade kept for existing DI (`AuthService`); all GitHub HTTP calls go through
- * `GithubClientService` (Octokit).
+ * `GithubClientService`.
  */
 export class GithubService {
   public getGithubToken(code: string): Promise<string> {

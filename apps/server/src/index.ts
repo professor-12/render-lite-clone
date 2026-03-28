@@ -2,7 +2,7 @@ import express from 'express';
 import dotEnv from 'dotenv';
 import { errorHandler } from './middlewares/error.middleware';
 import appRoute from './module/app/app.route';
-import { logger } from './middlewares/httplogger.middleware';
+import { logger, httpLogger } from './middlewares/httplogger.middleware';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { rabbitMQService } from './libs/rabbitmq';
@@ -19,7 +19,7 @@ app.use(
     credentials:true
   }),
 );
-// app.use()
+app.use(httpLogger);
 app.use('/api/v1', appRoute);
 app.use(errorHandler);
 

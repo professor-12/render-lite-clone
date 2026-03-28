@@ -22,7 +22,7 @@ export const authenticateJwtFromCookies = (cookieName: string) => {
       const { userId } = verifyJwt(token);
 
       if (!userId) {
-        throw new AppError('User not found', 400);
+        throw new AppError('User not found', 401);
       }
 
       req.userId = userId;

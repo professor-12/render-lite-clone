@@ -3,7 +3,6 @@ import authRouter from '../auth/auth.route';
 import githubAppRouter from '../github_app/github_app.route';
 const router: Router = express.Router();
 
-
 router.get('/health', (_req, res) => {
   return res.status(200).json({
     status: 'ok',

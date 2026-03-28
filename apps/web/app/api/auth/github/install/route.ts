@@ -8,35 +8,32 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get('code');
 
   if (!BACKEND_URL) {
-    return NextResponse.json(
-      { success: false, error: 'Server misconfiguration' },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: 'Server misconfiguration' }, { status: 500 });
   }
 
-  if (!installationId || !code) {
+  if (!installationId) {
+    console.error('Installation ID and code are required');
     return NextResponse.json(
       { success: false, error: 'Installation ID and code are required' },
       { status: 400 },
     );
   }
-
   const cookieHeader = request.headers.get('cookie') ?? '';
   const token = cookieHeader
     .split(';')
-    .map((c) => c.trim().split('='))
+    .map((c) => {
+      const idx = c.indexOf('=');
+      return idx === -1 ? [c.trim(), ''] : [c.slice(0, idx).trim(), c.slice(idx + 1)];
+    })
     .find(([name]) => name === 'renderLite-access')?.[1];
 
   if (!token) {
-    return NextResponse.json(
-      { success: false, error: 'Unauthorized' },
-      { status: 401 },
-    );
+    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
     const res = await fetch(
-      `${BACKEND_URL}/api/v1/github/install?installation_id=${encodeURIComponent(installationId)}&code=${encodeURIComponent(code)}`,
+      `${BACKEND_URL}/api/v1/github/install?installation_id=${encodeURIComponent(installationId)}&code=${encodeURIComponent(code ?? '')}`,
       {
         method: 'GET',
         cache: 'no-store',
@@ -63,9 +60,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (err) {
     console.error('[GitHub install] Backend request failed:', err);
-    return NextResponse.json(
-      { success: false, error: 'Failed to reach server' },
-      { status: 502 },
-    );
+    return NextResponse.json({ success: false, error: 'Failed to reach server' }, { status: 502 });
   }
 }

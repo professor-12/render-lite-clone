@@ -91,7 +91,7 @@ export default async function GithubRepo({
         </div>
         <div className="rounded-lg border border-red-500/20 bg-red-500/5 px-4 py-3 text-[13px] text-red-400">
           <p className="font-medium">Could not load repositories</p>
-          <p className="mt-1 text-red-400/90">
+          <p className="mt-1 text-red-400/90 text-xs">
             {error instanceof Error ? error.message : 'An unexpected error occurred.'}
           </p>
         </div>
