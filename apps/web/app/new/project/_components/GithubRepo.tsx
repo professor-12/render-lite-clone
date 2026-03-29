@@ -3,6 +3,7 @@ import { FiGithub } from 'react-icons/fi';
 import GithubRepoList from './GithubRepoList';
 import ConnectGitHubPopupButton from './ConnectGitHubPopupButton';
 import type { RepoItem } from './GithubRepoList';
+import { revalidatePath } from 'next/cache';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -14,7 +15,7 @@ type GitHubRepoApi = {
   html_url: string;
   default_branch: string;
   root_dir: string;
-  
+
 };
 
 type BackendResponse = {
@@ -34,7 +35,7 @@ function normalizeRepos(payload: BackendResponse): RepoItem[] {
       private: r.private ?? false,
       url: r.html_url,
       branch: r.default_branch,
-      rootDir: r.root_dir, 
+      rootDir: r.root_dir,
     }))
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 }

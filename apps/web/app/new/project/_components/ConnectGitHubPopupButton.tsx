@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useEffect, useState } from 'react';
+import { revalidatePaths } from '@/app/actions/revalidatePaths';
 
 const GITHUB_INSTALL_URL = 'https://github.com/apps/renderlite/installations/select_target';
 const POPUP_NAME = 'github-app-install';
@@ -10,13 +11,11 @@ const POPUP_HEIGHT = 600;
 type ConnectGitHubPopupButtonProps = {
   className?: string;
   children: React.ReactNode;
-  onSuccess?: () => void;
 };
 
 export default function ConnectGitHubPopupButton({
   className,
   children,
-  onSuccess,
 }: ConnectGitHubPopupButtonProps) {
   const [isOpening, setIsOpening] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -29,7 +28,7 @@ export default function ConnectGitHubPopupButton({
         if (intervalRef.current) clearInterval(intervalRef.current);
         intervalRef.current = null;
         setIsOpening(false);
-        onSuccess?.();
+        revalidatePaths('/new/project');
       }
       if (t === 'github_install_error' || t === 'github_install_cancel') {
         if (intervalRef.current) clearInterval(intervalRef.current);
@@ -42,7 +41,7 @@ export default function ConnectGitHubPopupButton({
       window.removeEventListener('message', handleMessage);
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [onSuccess]);
+  }, []);
 
   const openPopup = () => {
     if (isOpening) return;
