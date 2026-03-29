@@ -2,11 +2,7 @@
 // Email: badejoemmanuel805@gmail.com
 // Phone Number: 07041664688
 
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
   provider = "prisma-client"
@@ -30,6 +26,8 @@ model User {
 
   accounts      Account[]
   sessions      Session[]
+
+  projects Project[]
 }
 
 model Account {
@@ -73,3 +71,55 @@ model GithubInstallation {
   createdAt      DateTime @default(now())
 }
 
+
+
+model Project {
+  id String @id @default(cuid())
+  name String
+  repoUrl String
+  branch String
+  rootDir String
+  buildCommand String
+  startCommand String
+  env String[]
+  image String
+  domain String? @unique
+  port Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId String 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  deployments Deployment[]
+}
+   
+
+model Deployment {
+  id String @id @default(cuid())
+  name String
+  description String?
+  repoUrl String
+  branch String
+  rootDir String
+  buildCommand String
+  startCommand String
+  env String[]
+  image String
+  port Int
+  status String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  projectId String
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  deploymentLogs DeploymentLog[]
+}
+
+model DeploymentLog {
+  id String @id @default(cuid())
+  deploymentId String
+  log String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deployment Deployment @relation(fields: [deploymentId], references: [id], onDelete: Cascade)
+  type String // stdout or stderr
+}

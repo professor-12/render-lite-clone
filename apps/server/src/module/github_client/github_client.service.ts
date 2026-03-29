@@ -13,6 +13,12 @@ import type {
 
 const GITHUB_API = 'https://api.github.com';
 const API_VERSION = '2022-11-28';
+export interface GithubRepositoryContentResponse {
+  content: {
+    path: string;
+    url: string;
+  }[];
+}
 
 export class GithubClientService {
   private readonly oauthTokenUrl = 'https://github.com/login/oauth/access_token';
@@ -190,5 +196,11 @@ export class GithubClientService {
     }
 
     return allRepos.filter((repo) => repo.name.toLowerCase().includes(q));
+  }
+
+  public async getBuildCommand(accessToken: string, repo_name: string, branch: string, rootDir: string): Promise<string> {
+    const url = `${GITHUB_API}/repos/${repo_name}/contents/${rootDir}`;
+    const data = await this.githubFetch<GithubRepositoryContentResponse>(url, accessToken);
+    return data.content.map((content) => content.path).join('\n') + '\n' + `git clone ${url} && cd ${repo_name} && git checkout ${branch} && ${data.content.map((content) => content.path).join('\n')}` + '\n' + `npm install` + '\n' + `npm run build` + '\n' + `npm start`;
   }
 }

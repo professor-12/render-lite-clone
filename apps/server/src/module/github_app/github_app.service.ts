@@ -34,7 +34,7 @@ export default class GithubAppService {
     logger.debug({ installationId }, 'Creating GitHub installation');
     const data = await githubClientService.getAppInstallation(installationId);
     logger.debug({ data }, 'GitHub installation data');
- 
+
     if (!data.account) {
       console.log('Installation has no linked account');
       throw new AppError('Installation has no linked account', 400);
@@ -110,7 +110,6 @@ export default class GithubAppService {
       throw new AppError('Github app not installed', 404);
     }
 
-    console.log({ installation_id });
     return githubClientService.listInstallationRepositories(
       installation_id,
       String(repo_name_query ?? ''),

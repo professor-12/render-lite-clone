@@ -48,7 +48,7 @@ export class GithuAppController {
     }
 
     const repo = await this.githubService.getInstallationRepos(jwt_token, String(repo_name_query));
-
+    logger.debug(repo);
     return res.status(200).json({
       message: 'Repo fetched successfully',
       repositories: repo,
