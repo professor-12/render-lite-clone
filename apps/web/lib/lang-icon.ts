@@ -56,7 +56,7 @@ import {
   SiDocker,
   SiKubernetes,
 } from 'react-icons/si';
-import { TbBrandCSharp, TbBrandDjango } from "react-icons/tb";
+import { TbBrandCSharp } from "react-icons/tb";
 import { FaJava } from "react-icons/fa";
 
 

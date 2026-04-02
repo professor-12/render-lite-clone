@@ -2,7 +2,12 @@ import { type NextFunction, type Request, type Response } from 'express';
 import { logger } from './httplogger.middleware';
 import { AppError } from '../errors/Apperror';
 
-export const errorHandler = async (error: unknown, req: Request, res: Response, Next: NextFunction) => {
+export const errorHandler = async (
+  error: unknown,
+  req: Request,
+  res: Response,
+  Next: NextFunction,
+) => {
   if (error instanceof SyntaxError) {
     return res.status(400).json({
       message: 'Invalid json syntax. check your request body....',

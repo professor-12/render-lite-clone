@@ -1,9 +1,12 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useDetectService } from '@/app/queries/github.query';
 import { DeployProjectFooter } from './_components/DeployProjectFooter';
+import { ImportBuildMetadataSkeleton } from './_components/ImportBuildMetadataSkeleton';
 import { ImportDeployForm, type ImportFormState } from './_components/ImportDeployForm';
+import { ImportDetectServiceError } from './_components/ImportDetectServiceError';
 import { ImportHeader } from './_components/ImportHeader';
 import { ImportPageIntro } from './_components/ImportPageIntro';
 import { RepositorySummary } from './_components/RepositorySummary';
@@ -13,38 +16,59 @@ export default function ImportPage() {
 
   const repoName = searchParams.get('repo') ?? '';
   const repoUrl = searchParams.get('url') ?? '';
+
   const [form, setForm] = useState<ImportFormState>({
     name: repoName,
     gitUrl: repoUrl,
     branch: 'main',
     rootDir: './',
+    installCommand: '',
     buildCommand: 'npm run build',
     startCommand: 'npm start',
+    useDockerCommands: false,
   });
-  const [buildCommand, setBuildCommand] = useState<string>('');
+
+  const { data: detectServiceData, isPending, isError } = useDetectService(form.gitUrl);
 
   useEffect(() => {
-    const fetchBuildCommand = async () => {
-      const response = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + '/api/v1/detect-service', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        body: JSON.stringify({ githubUrl: form.gitUrl }),
-        credentials: 'include',
-      });
-      console.log(response);
-      const data = await response.json();
-      setBuildCommand(data.buildCommand);
-      setForm((prev) => ({ ...prev, buildCommand: data.buildCommand }));
-    };
-    fetchBuildCommand();
-  }, [form.gitUrl]);
+    if (!detectServiceData?.buildCommand) return;
+    const bc = detectServiceData.buildCommand;
+    setForm((prev) => ({
+      ...prev,
+      installCommand: bc.installCommand ?? '',
+      buildCommand: bc.buildCommand ?? prev.buildCommand,
+      startCommand: bc.startCommand ?? prev.startCommand,
+      useDockerCommands: bc.runtime === 'docker',
+    }));
+  }, [detectServiceData]);
+
+  const handleUseDockerCommandsChange = useCallback(
+    (useDocker: boolean) => {
+      if (!detectServiceData?.buildCommand) return;
+      const bc = detectServiceData.buildCommand;
+      setForm((prev) => ({
+        ...prev,
+        useDockerCommands: useDocker,
+        ...(useDocker
+          ? {
+              installCommand: bc.installCommand ?? '',
+              buildCommand: bc.buildCommand ?? '',
+              startCommand: bc.startCommand ?? '',
+            }
+          : {
+              installCommand: 'npm install',
+              buildCommand: 'npm run build',
+              startCommand: 'npm start',
+            }),
+      }));
+    },
+    [detectServiceData],
+  );
 
   const [deploying, setDeploying] = useState(false);
 
   const canDeploy = form.name.trim().length > 0 && form.gitUrl.trim().length > 0;
+  const hasRepoUrl = form.gitUrl.trim().length > 0;
 
   const updateField = <K extends keyof ImportFormState>(field: K, value: ImportFormState[K]) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -54,6 +78,8 @@ export default function ImportPage() {
     if (!canDeploy) return;
     setDeploying(true);
   };
+
+  const detectedBuild = detectServiceData?.buildCommand;
 
   return (
     <div className="min-h-screen pt-12 bg-[#0a0a0a]">
@@ -65,13 +91,23 @@ export default function ImportPage() {
 
           <RepositorySummary gitUrl={form.gitUrl} branch={form.branch} />
 
-          <ImportDeployForm state={form} onChange={updateField} />
-
-          <DeployProjectFooter
-            canDeploy={canDeploy}
-            deploying={deploying}
-            onDeploy={handleDeploy}
-          />
+          {hasRepoUrl && isPending && <ImportBuildMetadataSkeleton />}
+          {hasRepoUrl && isError && !isPending && <ImportDetectServiceError />}
+          {detectedBuild && (
+            <>
+              <ImportDeployForm
+                state={form}
+                onChange={updateField}
+                detectedBuild={detectedBuild}
+                onUseDockerCommandsChange={handleUseDockerCommandsChange}
+              />
+              <DeployProjectFooter
+                canDeploy={canDeploy}
+                deploying={deploying}
+                onDeploy={handleDeploy}
+              />
+            </>
+          )}
         </div>
       </main>
     </div>

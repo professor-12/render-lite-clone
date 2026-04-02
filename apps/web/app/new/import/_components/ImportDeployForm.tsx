@@ -1,5 +1,6 @@
 import { BranchRootFields } from './BranchRootFields';
-import { BuildStartCommands } from './BuildStartCommands';
+import { BuildInstallStartSection } from './BuildInstallStartSection';
+import type { DetectedBuildConfig } from './detected-build.types';
 import { GitUrlField } from './GitUrlField';
 import { ProjectNameField } from './ProjectNameField';
 
@@ -8,17 +9,31 @@ export type ImportFormState = {
   gitUrl: string;
   branch: string;
   rootDir: string;
+  installCommand: string;
   buildCommand: string;
   startCommand: string;
+  useDockerCommands: boolean;
 };
 
 type ImportDeployFormProps = {
   state: ImportFormState;
   onChange: <K extends keyof ImportFormState>(field: K, value: ImportFormState[K]) => void;
+  detectedBuild: DetectedBuildConfig;
+  onUseDockerCommandsChange: (useDocker: boolean) => void;
 };
 
-export function ImportDeployForm({ state, onChange }: ImportDeployFormProps) {
-  const { name, gitUrl, branch, rootDir, buildCommand, startCommand } = state;
+export function ImportDeployForm({
+  state,
+  onChange,
+  detectedBuild,
+  onUseDockerCommandsChange,
+}: ImportDeployFormProps) {
+  const { name, gitUrl, branch, rootDir, installCommand, buildCommand, startCommand, useDockerCommands } = state;
+
+  const detection: DetectedBuildConfig = {
+    ...detectedBuild,
+    reason: detectedBuild.reason ?? [],
+  };
 
   return (
     <div className="mt-8 space-y-6">
@@ -30,11 +45,16 @@ export function ImportDeployForm({ state, onChange }: ImportDeployFormProps) {
         onBranchChange={(v) => onChange('branch', v)}
         onRootDirChange={(v) => onChange('rootDir', v)}
       />
-      <BuildStartCommands
+      <BuildInstallStartSection
+        installCommand={installCommand}
         buildCommand={buildCommand}
         startCommand={startCommand}
+        onInstallCommandChange={(v) => onChange('installCommand', v)}
         onBuildCommandChange={(v) => onChange('buildCommand', v)}
         onStartCommandChange={(v) => onChange('startCommand', v)}
+        detectedBuild={detection}
+        useDockerCommands={useDockerCommands}
+        onUseDockerCommandsChange={onUseDockerCommandsChange}
       />
     </div>
   );
