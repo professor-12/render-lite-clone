@@ -79,6 +79,8 @@ model Project {
   repoUrl String
   branch String
   rootDir String
+  installCommand String @default("")
+  outDir String?
   buildCommand String
   startCommand String
   env String[]
@@ -101,6 +103,8 @@ model Deployment {
   repoUrl String
   branch String
   rootDir String
+  installCommand String @default("")
+  outDir String?
   buildCommand String
   startCommand String
   env String[]

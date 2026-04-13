@@ -2,6 +2,7 @@ import express, { Router } from 'express';
 import authRouter from '../auth/auth.route';
 import githubAppRouter from '../github_app/github_app.route';
 import detectServiceRouter from '../detect-service/detect-service.route';
+import deployServiceRoute from '../deploy-service/deploy-service.route';
 const router: Router = express.Router();
 
 router.get('/health', (_req, res) => {
@@ -14,4 +15,5 @@ router.get('/health', (_req, res) => {
 router.use('/auth', authRouter);
 router.use('/github', githubAppRouter);
 router.use('/', detectServiceRouter);
+router.use('/project', deployServiceRoute);
 export default router;

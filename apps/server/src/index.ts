@@ -26,12 +26,12 @@ app.use(
   }),
 );
 app.use(httpLogger);
-app.use(errorHandler);
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(defaultJsonContentType);
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use('/api/v1', appRoute);
+app.use(errorHandler);
 
 const server = app.listen(PORT, () => {
   logger.info({ port: PORT }, 'Server listening');

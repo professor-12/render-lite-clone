@@ -16,19 +16,13 @@ export abstract class BaseWorker<TPayload> {
     await rabbitMQService.consume<TPayload>(
       this.queueName,
       async (payload, message) => {
-        logger.info(
-          { worker: this.workerName, queue: this.queueName },
-          'Worker received message',
-        );
+        logger.info({ worker: this.workerName, queue: this.queueName }, 'Worker received message');
         await this.process(payload, message);
       },
       { noAck: false },
     );
 
     this.started = true;
-    logger.info(
-      { worker: this.workerName, queue: this.queueName },
-      'Worker consumer started',
-    );
+    logger.info({ worker: this.workerName, queue: this.queueName }, 'Worker consumer started');
   }
 }

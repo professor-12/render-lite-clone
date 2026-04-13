@@ -5,9 +5,7 @@ function FieldSkeleton({ withHint }: { withHint?: boolean }) {
       <div className="w-full h-[42px] rounded-lg border border-white/8 bg-[#111111] px-3.5 flex items-center">
         <div className="h-3.5 flex-1 max-w-[min(100%,20rem)] rounded bg-white/6 animate-pulse" />
       </div>
-      {withHint ? (
-        <div className="mt-1.5 h-3 w-48 rounded bg-white/5 animate-pulse" />
-      ) : null}
+      {withHint ? <div className="mt-1.5 h-3 w-48 rounded bg-white/5 animate-pulse" /> : null}
     </div>
   );
 }

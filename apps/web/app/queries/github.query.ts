@@ -1,5 +1,5 @@
 import api from '@/app/client/client';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 export const useGetUserRepos = () => {
   return useQuery({
@@ -23,3 +23,22 @@ export const useDetectService = (githubUrl: string) => {
     retry: 2,
   });
 };
+
+export const useCreateProject = (projectData: ImportFormState) => {
+  return useMutation({
+    mutationFn: async () => {
+      const { data } = await api.post('/project/create', projectData);
+      return data.data;
+    },
+  });
+};
+interface ImportFormState {
+  name: string;
+  gitUrl: string;
+  branch: string;
+  rootDir: string;
+  installCommand: string;
+  buildCommand: string;
+  startCommand: string;
+  useDockerCommands: boolean;
+}

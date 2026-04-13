@@ -2,7 +2,7 @@
 
 import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
-import { useDetectService } from '@/app/queries/github.query';
+import { useCreateProject, useDetectService } from '@/app/queries/github.query';
 import { DeployProjectFooter } from './_components/DeployProjectFooter';
 import { ImportBuildMetadataSkeleton } from './_components/ImportBuildMetadataSkeleton';
 import { ImportDeployForm, type ImportFormState } from './_components/ImportDeployForm';
@@ -22,6 +22,7 @@ export default function ImportPage() {
     gitUrl: repoUrl,
     branch: 'main',
     rootDir: './',
+    outDir: '',
     installCommand: '',
     buildCommand: 'npm run build',
     startCommand: 'npm start',
@@ -29,6 +30,12 @@ export default function ImportPage() {
   });
 
   const { data: detectServiceData, isPending, isError } = useDetectService(form.gitUrl);
+  const {
+    mutate: createProject,
+    isPending: isCreatingProject,
+    isSuccess: isProjectCreated,
+    error: createProjectError,
+  } = useCreateProject(form);
 
   useEffect(() => {
     if (!detectServiceData?.buildCommand) return;
@@ -65,8 +72,6 @@ export default function ImportPage() {
     [detectServiceData],
   );
 
-  const [deploying, setDeploying] = useState(false);
-
   const canDeploy = form.name.trim().length > 0 && form.gitUrl.trim().length > 0;
   const hasRepoUrl = form.gitUrl.trim().length > 0;
 
@@ -76,7 +81,7 @@ export default function ImportPage() {
 
   const handleDeploy = () => {
     if (!canDeploy) return;
-    setDeploying(true);
+    createProject();
   };
 
   const detectedBuild = detectServiceData?.buildCommand;
@@ -103,7 +108,7 @@ export default function ImportPage() {
               />
               <DeployProjectFooter
                 canDeploy={canDeploy}
-                deploying={deploying}
+                deploying={isCreatingProject}
                 onDeploy={handleDeploy}
               />
             </>

@@ -2,6 +2,7 @@ import { BranchRootFields } from './BranchRootFields';
 import { BuildInstallStartSection } from './BuildInstallStartSection';
 import type { DetectedBuildConfig } from './detected-build.types';
 import { GitUrlField } from './GitUrlField';
+import { OutDirField } from './OutDirField';
 import { ProjectNameField } from './ProjectNameField';
 
 export type ImportFormState = {
@@ -9,6 +10,7 @@ export type ImportFormState = {
   gitUrl: string;
   branch: string;
   rootDir: string;
+  outDir: string;
   installCommand: string;
   buildCommand: string;
   startCommand: string;
@@ -28,7 +30,8 @@ export function ImportDeployForm({
   detectedBuild,
   onUseDockerCommandsChange,
 }: ImportDeployFormProps) {
-  const { name, gitUrl, branch, rootDir, installCommand, buildCommand, startCommand, useDockerCommands } = state;
+  const { name, gitUrl, branch, rootDir, outDir, installCommand, buildCommand, startCommand, useDockerCommands } =
+    state;
 
   const detection: DetectedBuildConfig = {
     ...detectedBuild,
@@ -45,6 +48,7 @@ export function ImportDeployForm({
         onBranchChange={(v) => onChange('branch', v)}
         onRootDirChange={(v) => onChange('rootDir', v)}
       />
+      <OutDirField value={outDir} onChange={(v) => onChange('outDir', v)} />
       <BuildInstallStartSection
         installCommand={installCommand}
         buildCommand={buildCommand}

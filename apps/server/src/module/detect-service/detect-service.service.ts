@@ -38,7 +38,6 @@ class DetectServiceService {
     });
     return {
       buildCommand,
-      repository,
     };
   };
   private extractOwnerAndRepo(githubUrl: string) {
