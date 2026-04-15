@@ -1,6 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { useCreateProject, useDetectService } from '@/app/queries/github.query';
 import { DeployProjectFooter } from './_components/DeployProjectFooter';
@@ -12,6 +13,7 @@ import { ImportPageIntro } from './_components/ImportPageIntro';
 import { RepositorySummary } from './_components/RepositorySummary';
 
 export default function ImportPage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
 
   const repoName = searchParams.get('repo') ?? '';
@@ -35,6 +37,7 @@ export default function ImportPage() {
     isPending: isCreatingProject,
     isSuccess: isProjectCreated,
     error: createProjectError,
+    data: createdProject,
   } = useCreateProject(form);
 
   useEffect(() => {
@@ -83,6 +86,11 @@ export default function ImportPage() {
     if (!canDeploy) return;
     createProject();
   };
+
+  useEffect(() => {
+    if (!createdProject?.deploymentId) return;
+    router.push(`/dashboard/deployments/${createdProject.deploymentId}`);
+  }, [createdProject?.deploymentId, router]);
 
   const detectedBuild = detectServiceData?.buildCommand;
 
