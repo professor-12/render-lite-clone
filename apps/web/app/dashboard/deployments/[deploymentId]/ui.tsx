@@ -2,7 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { fetchDeploymentLogs, useGetDeployment, type DeploymentLogRow } from '@/app/queries/deployments.query';
+import {
+  fetchDeploymentLogs,
+  useGetDeployment,
+  type DeploymentLogRow,
+} from '@/app/queries/deployments.query';
 
 function statusLabel(status: string) {
   if (status === 'build_uploaded') return 'Deployed';
@@ -13,11 +17,12 @@ function statusLabel(status: string) {
 }
 
 function statusTone(status: string) {
-  if (status === 'build_uploaded') return 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300';
+  if (status === 'build_uploaded')
+    return 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300';
   if (status === 'build_failed') return 'border-rose-400/25 bg-rose-400/10 text-rose-300';
   if (status === 'building') return 'border-blue-400/25 bg-blue-400/10 text-blue-300';
-  if (status === 'queued_build') return 'border-white/10 bg-white/5 text-[#a3a3a3]';
-  return 'border-white/10 bg-white/5 text-[#a3a3a3]';
+  if (status === 'queued_build') return 'border-border/60 bg-muted/40 text-muted-foreground';
+  return 'border-border/60 bg-muted/40 text-muted-foreground';
 }
 
 function LogLine({ row }: { row: DeploymentLogRow }) {
@@ -26,7 +31,7 @@ function LogLine({ row }: { row: DeploymentLogRow }) {
       <span className="w-16 shrink-0 font-mono text-[11px] text-[#525252]">
         {row.type.toUpperCase()}
       </span>
-      <pre className="min-w-0 flex-1 whitespace-pre-wrap wrap-break-word font-mono text-[12px] leading-5 text-[#d4d4d4]">
+      <pre className="min-w-0 flex-1 whitespace-pre-wrap wrap-break-word font-mono text-[12px] leading-5 text-foreground/90">
         {row.log}
       </pre>
     </div>
@@ -102,10 +107,13 @@ export function DeploymentLogsView({ deploymentId }: { deploymentId: string }) {
     <div className="mx-auto w-full max-w-5xl px-6 py-8">
       <div className="mb-5 flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <Link href="/dashboard/projects" className="text-[13px] text-[#888] hover:text-white">
+          <Link
+            href="/dashboard/projects"
+            className="text-[13px] text-muted-foreground transition-colors hover:text-foreground"
+          >
             ← Projects
           </Link>
-          <h1 className="mt-2 truncate text-[18px] font-semibold text-white">
+          <h1 className="mt-2 truncate text-[18px] font-semibold text-foreground">
             {deployment?.project?.name ?? 'Deploying…'}
           </h1>
           <p className="mt-1 text-[13px] text-[#737373]">Deployment: {deploymentId}</p>
@@ -120,9 +128,9 @@ export function DeploymentLogsView({ deploymentId }: { deploymentId: string }) {
         </span>
       </div>
 
-      <div className="rounded-lg border border-[#262626] bg-[#0a0a0a]">
-        <div className="flex items-center justify-between border-b border-white/8 px-4 py-3">
-          <div className="text-[13px] font-medium text-white">Build logs</div>
+      <div className="rounded-lg border border-border/60 bg-card">
+        <div className="flex items-center justify-between border-b border-border/60 px-4 py-3">
+          <div className="text-[13px] font-medium text-foreground">Build logs</div>
           <div className="text-[12px] text-[#737373]">
             {loadingLogs ? 'Connecting…' : canAutoPoll ? 'Live' : 'Complete'}
           </div>
@@ -134,15 +142,12 @@ export function DeploymentLogsView({ deploymentId }: { deploymentId: string }) {
           </div>
         )}
 
-        <div
-          ref={scrollerRef}
-          className="h-[60vh] overflow-auto px-4 py-3"
-        >
+        <div ref={scrollerRef} className="h-[60vh] overflow-auto bg-muted/20 px-4 py-3">
           {loadingLogs && rows.length === 0 ? (
             <div className="space-y-2">
-              <div className="h-3 w-2/3 animate-pulse rounded bg-white/6" />
-              <div className="h-3 w-1/2 animate-pulse rounded bg-white/6" />
-              <div className="h-3 w-4/5 animate-pulse rounded bg-white/6" />
+              <div className="h-3 w-2/3 animate-pulse rounded bg-muted" />
+              <div className="h-3 w-1/2 animate-pulse rounded bg-muted" />
+              <div className="h-3 w-4/5 animate-pulse rounded bg-muted" />
             </div>
           ) : rows.length === 0 ? (
             <div className="text-[12px] text-[#737373]">No logs yet.</div>
@@ -154,4 +159,3 @@ export function DeploymentLogsView({ deploymentId }: { deploymentId: string }) {
     </div>
   );
 }
-

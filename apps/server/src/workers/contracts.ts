@@ -21,14 +21,17 @@ export type RepoSyncRequestedJob = JobMetadata & {
   };
 };
 
+/**
+ * Minimal build payload: worker clones repo and runs commands.
+ * Keep it small so messages are cheap and workers can run statelessly.
+ */
 export type BuildRequestedJob = JobMetadata & {
-  projectId: string;
   deploymentId: string;
-  commitSha: string;
-  build: {
-    strategy: 'dockerfile' | 'autodetect';
-    dockerfilePath?: string;
-  };
+  githubUrl: string;
+  installCommand: string;
+  buildCommand: string;
+  /** Optional output directory to package + upload (e.g. dist, .next, build). */
+  outDir?: string;
 };
 
 export type DeployRequestedJob = JobMetadata & {

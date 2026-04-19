@@ -61,24 +61,24 @@ const SideBar = () => {
 
   return (
     <div
-      className="relative h-full shrink-0 border-r flex flex-col gap-4 p-3 border-white/10"
+      className="relative flex h-full shrink-0 flex-col gap-0.5 border-r border-border/60 p-3"
       style={{ width }}
     >
       {sideBarItems.map((item) => (
         <Link
           key={item.href}
           href={item.href}
-          className="flex items-center gap-2 px-2 rounded-md text-white/80 hover:text-white transition-colors min-w-0"
+          className="flex min-w-0 items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
         >
-          <item.icon className="text-md shrink-0" />
-          <span className="text-sm truncate">{item.label}</span>
+          <item.icon className="text-xl w-4 shrink-0" />
+          <span className="truncate">{item.label}</span>
         </Link>
       ))}
       <button
         type="button"
         aria-label="Resize sidebar"
         onPointerDown={onResizePointerDown}
-        className="absolute top-0 -right-1 w-3 h-full cursor-col-resize hover:bg-white/6 active:bg-white/10 border-0 p-0 bg-transparent touch-none"
+        className="absolute top-0 -right-1 h-full w-2 cursor-col-resize touch-none border-0 bg-transparent p-0 hover:bg-muted/40 active:bg-muted/60"
       />
     </div>
   );

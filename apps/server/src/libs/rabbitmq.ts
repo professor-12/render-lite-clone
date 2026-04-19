@@ -63,10 +63,7 @@ export class RabbitMQService {
     return this.connectingPromise;
   }
 
-  public async assertQueue(
-    queueName: string,
-    options: Options.AssertQueue = { durable: true },
-  ) {
+  public async assertQueue(queueName: string, options: Options.AssertQueue = { durable: true }) {
     const channel = await this.connect();
     return channel.assertQueue(queueName, options);
   }
@@ -79,8 +76,7 @@ export class RabbitMQService {
     const channel = await this.connect();
     await this.assertQueue(queueName);
 
-    const serializedPayload =
-      typeof payload === 'string' ? payload : JSON.stringify(payload);
+    const serializedPayload = typeof payload === 'string' ? payload : JSON.stringify(payload);
     const sent = channel.sendToQueue(queueName, Buffer.from(serializedPayload), options);
 
     if (!sent) {

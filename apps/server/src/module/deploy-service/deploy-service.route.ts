@@ -4,6 +4,30 @@ import { deployServiceController } from './deploy-service.module';
 
 const router: Router = Router();
 
+router.get(
+  '/',
+  authenticateJwtFromCookies('renderLite-access'),
+  deployServiceController.listProjects,
+);
+
+router.get(
+  '/:projectId',
+  authenticateJwtFromCookies('renderLite-access'),
+  deployServiceController.getProject,
+);
+
+router.get(
+  '/deployments/:deploymentId',
+  authenticateJwtFromCookies('renderLite-access'),
+  deployServiceController.getDeployment,
+);
+
+router.get(
+  '/deployments/:deploymentId/logs',
+  authenticateJwtFromCookies('renderLite-access'),
+  deployServiceController.getDeploymentLogs,
+);
+
 router.post(
   '/create',
   authenticateJwtFromCookies('renderLite-access'),

@@ -1,7 +1,7 @@
 function SkeletonBar({ className }: { className?: string }) {
   return (
     <div
-      className={`animate-pulse rounded-md bg-white/6 ${className ?? ''}`}
+      className={`animate-pulse rounded-md bg-muted ${className ?? ''}`}
       aria-hidden
     />
   );
@@ -9,7 +9,7 @@ function SkeletonBar({ className }: { className?: string }) {
 
 export function ProjectCardSkeleton() {
   return (
-    <article className="rounded-lg border border-[#262626] bg-[#0a0a0a] p-5">
+    <article className="rounded-lg border border-border/60 bg-card p-5">
       <div className="flex gap-4">
         <SkeletonBar className="size-11 shrink-0 rounded-md" />
         <div className="min-w-0 flex-1">

@@ -1,37 +1,41 @@
-import { Sora } from "next/font/google";
-import { ReactNode } from "react";
-import localFont from "next/font/local";
-import "./globals.css";
-import { QueryClient,QueryClientProvider, } from "@tanstack/react-query";
-import QueryProvider from "@/providers/QueryProvider";
-const sora = Sora({
-  subsets: ["latin"],
-  variable: "--font-sora",
-  display: "swap",
-  weight: ["300", "400", "500", "600", "700", "800"],
+import { Geist, Geist_Mono } from 'next/font/google';
+import { ReactNode } from 'react';
+import './globals.css';
+import QueryProvider from '@/providers/QueryProvider';
+import { ThemeProvider } from '@/components/theme-provider';
+
+const geistSans = Geist({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+});
+
+const geistMono = Geist_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  display: 'swap',
 });
 
 export const metadata = {
-  title: "Render Lite",
-  description: "Deploy anything, instantly.",
+  title: 'Render Lite',
+  description: 'Deploy anything, instantly.',
 };
-type Props={
-  children:ReactNode
-}
-const queryClient = new QueryClient()
+type Props = {
+  children: ReactNode;
+};
 
-export default function RootLayout({ children }:Props) {
-  
+export default function RootLayout({ children }: Props) {
   return (
-    <html lang="en" className={sora.variable}>
-      <body className={`${sora.className} antialiased`}>
-
-        <QueryProvider>
-                {children}
-        </QueryProvider>
-        
-        
-        </body>
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable}`}
+      suppressHydrationWarning
+    >
+      <body className="antialiased">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <QueryProvider>{children}</QueryProvider>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

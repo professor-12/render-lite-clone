@@ -1,5 +1,7 @@
 import type { ConsumeMessage } from 'amqplib';
 import { logger } from '../libs/logger';
+import { prisma } from '../libs/prisma';
+import { runBuildJobAndUpload } from '../libs/build/build-job';
 import { BaseWorker } from './base.worker';
 import { type BuildRequestedJob, RenderLiteQueue } from './contracts';
 
@@ -8,21 +10,71 @@ export class BuildWorker extends BaseWorker<BuildRequestedJob> {
   protected readonly workerName = 'BuildWorker';
 
   protected async process(payload: BuildRequestedJob, _rawMessage: ConsumeMessage): Promise<void> {
-    logger.info(
-      {
-        deploymentId: payload.deploymentId,
-        projectId: payload.projectId,
-        commitSha: payload.commitSha,
-        strategy: payload.build.strategy,
-        correlationId: payload.correlationId,
-      },
-      'Build job started',
-    );
+    const { deploymentId, correlationId } = payload;
 
-    // TODO: Implement Dockerfile detection, image build and artifact publishing.
-    logger.info(
-      { deploymentId: payload.deploymentId, correlationId: payload.correlationId },
-      'Build job finished',
-    );
+    logger.info({ deploymentId, correlationId }, 'Build job started');
+
+    const deployment = await prisma.deployment.findUnique({ where: { id: deploymentId } });
+    if (!deployment) {
+      logger.warn({ deploymentId, correlationId }, 'Build job skipped: deployment not found');
+      return;
+    }
+
+    const appendLog = async (type: 'stdout' | 'stderr', chunk: string) => {
+      const trimmed = chunk.toString();
+      if (!trimmed) return;
+      // Keep rows reasonably sized.
+      const parts =
+        trimmed.length > 4000 ? [trimmed.slice(0, 4000), trimmed.slice(4000)] : [trimmed];
+      for (const p of parts) {
+        const logs = await prisma.deploymentLog.create({
+          data: {
+            deploymentId,
+            type,
+            log: p,
+          },
+        });
+
+        logger.info({ logs }, 'Log created');
+      }
+    };
+
+    try {
+      await prisma.deployment.update({ where: { id: deploymentId }, data: { status: 'building' } });
+
+      const result = await runBuildJobAndUpload({
+        githubUrl: payload.githubUrl,
+        branch: deployment.branch,
+        installCommand: payload.installCommand,
+        buildCommand: payload.buildCommand,
+        outDir: payload.outDir,
+        onStdout: (c) => void appendLog('stdout', c),
+        onStderr: (c) => void appendLog('stderr', c),
+      });
+
+      await prisma.deployment.update({
+        where: { id: deploymentId },
+        data: {
+          status: 'build_uploaded',
+          image: result.artifactUrl,
+        },
+      });
+
+      logger.info(
+        { deploymentId, correlationId, artifactKind: result.artifactKind },
+        'Build job finished',
+      );
+    } catch (err) {
+      logger.error({ err, deploymentId, correlationId }, 'Build job failed');
+      await prisma.deployment.update({
+        where: { id: deploymentId },
+        data: { status: 'build_failed' },
+      });
+      await appendLog(
+        'stderr',
+        `\nBuild failed: ${err instanceof Error ? err.message : String(err)}\n`,
+      );
+      throw err;
+    }
   }
 }

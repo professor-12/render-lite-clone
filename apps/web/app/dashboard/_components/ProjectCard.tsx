@@ -11,15 +11,15 @@ function StackIcon({ stack }: { stack: ProjectStack }) {
   const common = 'size-9';
   switch (stack) {
     case 'next':
-      return <SiNextdotjs className={`${common} text-white`} aria-hidden />;
+      return <SiNextdotjs className={`${common} text-foreground`} aria-hidden />;
     case 'vue':
       return <SiVuedotjs className={`${common} text-[#42b883]`} aria-hidden />;
     case 'vercel':
-      return <SiVercel className={`${common} text-white`} aria-hidden />;
+      return <SiVercel className={`${common} text-foreground`} aria-hidden />;
     case 'node':
       return <SiNodedotjs className={`${common} text-[#3c873a]`} aria-hidden />;
     default:
-      return <SiVercel className={`${common} text-white`} aria-hidden />;
+      return <SiVercel className={`${common} text-foreground`} aria-hidden />;
   }
 }
 
@@ -89,10 +89,10 @@ export function ProjectCard({ project }: { project: ProjectListItem }) {
     project;
 
   return (
-    <article className="group relative rounded-lg border border-[#262626] bg-[#0a0a0a] p-5 transition-colors hover:border-[#333333]">
+    <article className="group relative rounded-lg border border-border/60 bg-card p-5 transition-colors hover:border-border">
       <div className="flex gap-4">
         <div className="flex shrink-0 items-start pt-0.5">
-          <div className="flex size-11 items-center justify-center rounded-md bg-black/40 ring-1 ring-white/6">
+          <div className="flex size-11 items-center justify-center rounded-md bg-muted/30 ring-1 ring-border/40">
             <StackIcon stack={stack} />
           </div>
         </div>
@@ -102,17 +102,17 @@ export function ProjectCard({ project }: { project: ProjectListItem }) {
             <div className="min-w-0 flex-1">
               <Link
                 href={`/dashboard/projects/${project.id}`}
-                className="block truncate font-semibold text-white transition-colors hover:text-white/90"
+                className="block truncate font-semibold text-foreground transition-colors hover:text-foreground/90"
               >
                 {name}
               </Link>
               <p className="mt-0.5 truncate text-[13px] text-[#737373]">{deploymentUrl}</p>
             </div>
             <div className="flex shrink-0 items-center gap-1">
-              <DeploymentStatus status={status} />
+              {/* <DeploymentStatus status={status} /> */}
               <button
                 type="button"
-                className="rounded p-1 text-[#737373] transition-colors hover:bg-white/6 hover:text-white"
+                className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
                 aria-label="Project actions"
               >
                 <RiMore2Fill className="size-5 rotate-90" />
@@ -120,8 +120,8 @@ export function ProjectCard({ project }: { project: ProjectListItem }) {
             </div>
           </div>
 
-          <div className="mt-3 inline-flex max-w-full items-center gap-1.5 rounded-md border border-white/8 bg-[#141414] px-2 py-1 text-[12px] text-[#a3a3a3]">
-            <SiGithub className="size-3.5 shrink-0 text-white/70" aria-hidden />
+          <div className="mt-3 inline-flex max-w-full items-center gap-1.5 rounded-md border border-border/60 bg-muted/20 px-2 py-1 text-[12px] text-muted-foreground">
+            <SiGithub className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
             <span className="truncate font-mono">{truncateRepo(repo)}</span>
           </div>
 
