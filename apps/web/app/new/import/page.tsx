@@ -29,6 +29,7 @@ export default function ImportPage() {
     buildCommand: 'npm run build',
     startCommand: 'npm start',
     useDockerCommands: false,
+    buildLanguage: 'javascript',
   });
 
   const { data: detectServiceData, isPending, isError } = useDetectService(form.gitUrl);
@@ -43,12 +44,14 @@ export default function ImportPage() {
   useEffect(() => {
     if (!detectServiceData?.buildCommand) return;
     const bc = detectServiceData.buildCommand;
+    const bl = detectServiceData.buildLanguage;
     setForm((prev) => ({
       ...prev,
       installCommand: bc.installCommand ?? '',
       buildCommand: bc.buildCommand ?? prev.buildCommand,
       startCommand: bc.startCommand ?? prev.startCommand,
       useDockerCommands: bc.runtime === 'docker',
+      buildLanguage: bl ?? (bc.runtime === 'docker' ? 'docker' : 'javascript'),
     }));
   }, [detectServiceData]);
 
@@ -64,11 +67,13 @@ export default function ImportPage() {
               installCommand: bc.installCommand ?? '',
               buildCommand: bc.buildCommand ?? '',
               startCommand: bc.startCommand ?? '',
+              buildLanguage: 'docker',
             }
           : {
               installCommand: 'npm install',
               buildCommand: 'npm run build',
               startCommand: 'npm start',
+              buildLanguage: detectServiceData.buildLanguage ?? 'javascript',
             }),
       }));
     },

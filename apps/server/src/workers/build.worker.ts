@@ -2,6 +2,7 @@ import type { ConsumeMessage } from 'amqplib';
 import { logger } from '../libs/logger';
 import { prisma } from '../libs/prisma';
 import { runBuildJobAndUpload } from '../libs/build/build-job';
+import { isBuildLanguage, type BuildLanguage } from '../libs/build/build-language';
 import { BaseWorker } from './base.worker';
 import { type BuildRequestedJob, RenderLiteQueue } from './contracts';
 
@@ -42,12 +43,20 @@ export class BuildWorker extends BaseWorker<BuildRequestedJob> {
     try {
       await prisma.deployment.update({ where: { id: deploymentId }, data: { status: 'building' } });
 
+      const buildLanguage: BuildLanguage = isBuildLanguage(payload.buildLanguage)
+        ? payload.buildLanguage
+        : isBuildLanguage(deployment.buildLanguage)
+          ? deployment.buildLanguage
+          : 'javascript';
+
       const result = await runBuildJobAndUpload({
         githubUrl: payload.githubUrl,
         branch: deployment.branch,
+        rootDir: payload.rootDir ?? deployment.rootDir,
         installCommand: payload.installCommand,
         buildCommand: payload.buildCommand,
         outDir: payload.outDir,
+        buildLanguage,
         onStdout: (c) => void appendLog('stdout', c),
         onStderr: (c) => void appendLog('stderr', c),
       });

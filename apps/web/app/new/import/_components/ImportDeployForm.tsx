@@ -5,6 +5,16 @@ import { GitUrlField } from './GitUrlField';
 import { OutDirField } from './OutDirField';
 import { ProjectNameField } from './ProjectNameField';
 
+export type BuildLanguage =
+  | 'javascript'
+  | 'php'
+  | 'python'
+  | 'go'
+  | 'rust'
+  | 'ruby'
+  | 'docker'
+  | 'generic';
+
 export type ImportFormState = {
   name: string;
   gitUrl: string;
@@ -15,6 +25,7 @@ export type ImportFormState = {
   buildCommand: string;
   startCommand: string;
   useDockerCommands: boolean;
+  buildLanguage: BuildLanguage;
 };
 
 type ImportDeployFormProps = {

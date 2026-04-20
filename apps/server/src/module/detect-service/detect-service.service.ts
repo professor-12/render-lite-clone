@@ -1,4 +1,5 @@
 import { AppError } from '../../errors/Apperror';
+import { mapGithubRuntimeToBuildLanguage } from '../../libs/build/build-language';
 import { logger } from '../../libs/logger';
 import { userAccountService } from '../../libs/user-account.service';
 import { GithubRepository } from '../../types/github.types';
@@ -29,7 +30,7 @@ class DetectServiceService {
 
     logger.debug({ repository }, 'Repository found');
     const { default_branch: branch, name: repo_name } = repository as GithubRepository;
-    const buildCommand = await githubClientService.getBuildCommand({
+    const detected = await githubClientService.getBuildCommand({
       installationId: githubInstallation.installationId,
       repoName: repo,
       branch: branch,
@@ -37,7 +38,8 @@ class DetectServiceService {
       owner: owner,
     });
     return {
-      buildCommand,
+      buildCommand: detected,
+      buildLanguage: mapGithubRuntimeToBuildLanguage(detected.runtime),
     };
   };
   private extractOwnerAndRepo(githubUrl: string) {

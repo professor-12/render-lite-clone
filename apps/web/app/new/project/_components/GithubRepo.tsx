@@ -15,7 +15,6 @@ type GitHubRepoApi = {
   html_url: string;
   default_branch: string;
   root_dir: string;
-
 };
 
 type BackendResponse = {
@@ -99,10 +98,10 @@ export default async function GithubRepo({
           </h2>
         </div>
         <div className="rounded-lg border border-red-500/20 bg-red-500/5 px-4 py-3 text-[13px] text-red-400">
-          <p className="font-medium">Could not load repositories</p>
-          <p className="mt-1 text-red-400/90 text-xs">
+          <p className="mt-1 text-red-400/90">
             {error instanceof Error ? error.message : 'An unexpected error occurred.'}
           </p>
+          <p className="font-medium text-xs">Could not load repositories</p>
         </div>
         <ConnectGitHubPopupButton className="mt-3 cursor-pointer w-full text-[13px] font-medium text-[#a0a0a0] hover:text-white py-2.5 border border-dashed border-white/20 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/30 transition-colors disabled:opacity-70">
           + Connect your GitHub account

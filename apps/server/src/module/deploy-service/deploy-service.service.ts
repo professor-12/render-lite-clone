@@ -3,6 +3,7 @@ import { prisma } from '../../libs/prisma';
 import type { CreateProjectBody } from '../../validators/deploy.validator';
 import { logger } from '../../libs/logger';
 import { mapProjectToListItem } from '../../utils/project-list.mapper';
+import type { BuildLanguage } from '../../libs/build/build-language';
 import { renderLiteJobsPublisher } from '../../workers/renderlite-jobs.publisher';
 
 export class DeployServiceService {
@@ -128,12 +129,17 @@ export class DeployServiceService {
   };
 
   public createProject = async (validatedData: CreateProjectBody, userId: string) => {
+    const buildLanguage: BuildLanguage = validatedData.useDockerCommands
+      ? 'docker'
+      : (validatedData.buildLanguage as BuildLanguage);
+
     const project = await prisma.project.create({
       data: {
         name: validatedData.name.trim(),
         repoUrl: validatedData.gitUrl.trim(),
         branch: validatedData.branch.trim(),
         rootDir: validatedData.rootDir.trim(),
+        buildLanguage,
         outDir: validatedData.outDir?.trim() || null,
         installCommand: validatedData.installCommand.trim(),
         buildCommand: validatedData.buildCommand.trim(),
@@ -152,6 +158,7 @@ export class DeployServiceService {
         repoUrl: project.repoUrl,
         branch: project.branch,
         rootDir: project.rootDir,
+        buildLanguage,
         outDir: project.outDir,
         installCommand: project.installCommand,
         buildCommand: project.buildCommand,
@@ -172,6 +179,7 @@ export class DeployServiceService {
       githubUrl: project.repoUrl,
       installCommand: project.installCommand,
       buildCommand: project.buildCommand,
+      buildLanguage,
       outDir: project.outDir ?? undefined,
       rootDir: project.rootDir ?? undefined,
     };

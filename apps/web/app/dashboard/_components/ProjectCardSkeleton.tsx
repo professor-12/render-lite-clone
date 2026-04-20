@@ -1,10 +1,5 @@
 function SkeletonBar({ className }: { className?: string }) {
-  return (
-    <div
-      className={`animate-pulse rounded-md bg-muted ${className ?? ''}`}
-      aria-hidden
-    />
-  );
+  return <div className={`animate-pulse rounded-md bg-muted ${className ?? ''}`} aria-hidden />;
 }
 
 export function ProjectCardSkeleton() {

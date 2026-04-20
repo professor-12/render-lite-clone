@@ -1,4 +1,5 @@
 import api from '@/app/client/client';
+import type { ImportFormState } from '@/app/new/import/_components/ImportDeployForm';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 export const useGetUserRepos = () => {
@@ -32,13 +33,3 @@ export const useCreateProject = (projectData: ImportFormState) => {
     },
   });
 };
-interface ImportFormState {
-  name: string;
-  gitUrl: string;
-  branch: string;
-  rootDir: string;
-  installCommand: string;
-  buildCommand: string;
-  startCommand: string;
-  useDockerCommands: boolean;
-}

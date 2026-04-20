@@ -79,6 +79,8 @@ model Project {
   repoUrl String
   branch String
   rootDir String
+  /** Language-level build environment (e.g. javascript, php). Drives preset Docker image. */
+  buildLanguage String @default("javascript")
   installCommand String @default("")
   outDir String?
   buildCommand String
@@ -103,6 +105,7 @@ model Deployment {
   repoUrl String
   branch String
   rootDir String
+  buildLanguage String @default("javascript")
   installCommand String @default("")
   outDir String?
   buildCommand String

@@ -30,8 +30,11 @@ export type BuildRequestedJob = JobMetadata & {
   githubUrl: string;
   installCommand: string;
   buildCommand: string;
+  /** Language-level environment: drives preset Docker image for isolated builds. */
+  buildLanguage: string;
   /** Optional output directory to package + upload (e.g. dist, .next, build). */
   outDir?: string;
+  rootDir?: string;
 };
 
 export type DeployRequestedJob = JobMetadata & {

@@ -41,9 +41,11 @@ function LogLine({ row }: { row: DeploymentLogRow }) {
 export function DeploymentLogsView({ deploymentId }: { deploymentId: string }) {
   const { data: deployment } = useGetDeployment(deploymentId);
   const [rows, setRows] = useState<DeploymentLogRow[]>([]);
-  const [cursor, setCursor] = useState<string | null>(null);
   const [loadingLogs, setLoadingLogs] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  /** Pagination cursor — kept in a ref so polling does not reset the interval on every batch. */
+  const logCursorRef = useRef<string | null>(null);
 
   const atBottomRef = useRef(true);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
@@ -68,23 +70,33 @@ export function DeploymentLogsView({ deploymentId }: { deploymentId: string }) {
 
   useEffect(() => {
     let cancelled = false;
+    logCursorRef.current = null;
+    setRows([]);
+    setLoadingLogs(true);
+    setError(null);
+
     const tick = async () => {
       try {
-        const data = await fetchDeploymentLogs(deploymentId, cursor);
+        const data = await fetchDeploymentLogs(deploymentId, logCursorRef.current);
         if (cancelled) return;
 
-        setRows((prev) => (data.logs.length ? [...prev, ...data.logs] : prev));
-        setCursor(data.nextCursor);
+        if (data.logs.length > 0) {
+          setRows((prev) => [...prev, ...data.logs]);
+          const lastId = data.logs[data.logs.length - 1]?.id;
+          if (lastId) logCursorRef.current = lastId;
+        }
         setError(null);
       } catch (e) {
         if (cancelled) return;
         setError(e instanceof Error ? e.message : 'Failed to load logs');
       } finally {
-        if (!cancelled) setLoadingLogs(false);
+        // Always clear "Connecting…" after a response — avoids getting stuck when Strict Mode
+        // aborts an in-flight request before `cancelled` is false again.
+        setLoadingLogs(false);
       }
     };
 
-    tick();
+    void tick();
     const id = window.setInterval(() => {
       if (!canAutoPoll) return;
       void tick();
@@ -94,7 +106,7 @@ export function DeploymentLogsView({ deploymentId }: { deploymentId: string }) {
       cancelled = true;
       window.clearInterval(id);
     };
-  }, [deploymentId, cursor, canAutoPoll]);
+  }, [deploymentId, canAutoPoll]);
 
   useEffect(() => {
     if (!atBottomRef.current) return;
@@ -130,9 +142,9 @@ export function DeploymentLogsView({ deploymentId }: { deploymentId: string }) {
 
       <div className="rounded-lg border border-border/60 bg-card">
         <div className="flex items-center justify-between border-b border-border/60 px-4 py-3">
-          <div className="text-[13px] font-medium text-foreground">Build logs</div>
-          <div className="text-[12px] text-[#737373]">
-            {loadingLogs ? 'Connecting…' : canAutoPoll ? 'Live' : 'Complete'}
+          <div className="text-[16px] font-medium text-foreground">Build logs</div>
+          <div className="text-[12px] text-muted-foreground">
+            {loadingLogs ? 'Loading…' : canAutoPoll ? '' : 'Complete'}
           </div>
         </div>
 
@@ -150,7 +162,11 @@ export function DeploymentLogsView({ deploymentId }: { deploymentId: string }) {
               <div className="h-3 w-4/5 animate-pulse rounded bg-muted" />
             </div>
           ) : rows.length === 0 ? (
-            <div className="text-[12px] text-[#737373]">No logs yet.</div>
+            <div className="text-[16px] text-muted-foreground">
+              {deployment?.status === 'queued_build'
+                ? 'No logs yet. The deployment is still queued'
+                : 'No logs yet.'}
+            </div>
           ) : (
             rows.map((r) => <LogLine key={r.id} row={r} />)
           )}
