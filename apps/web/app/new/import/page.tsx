@@ -2,7 +2,7 @@
 
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useCreateProject, useDetectService } from '@/app/queries/github.query';
 import { DeployProjectFooter } from './_components/DeployProjectFooter';
 import { ImportBuildMetadataSkeleton } from './_components/ImportBuildMetadataSkeleton';
@@ -13,6 +13,14 @@ import { ImportPageIntro } from './_components/ImportPageIntro';
 import { RepositorySummary } from './_components/RepositorySummary';
 
 export default function ImportPage() {
+  return (
+    <Suspense fallback={<ImportBuildMetadataSkeleton />}>
+      <ImportPageSuspense />
+    </Suspense>
+  );
+}
+
+export function ImportPageSuspense() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
