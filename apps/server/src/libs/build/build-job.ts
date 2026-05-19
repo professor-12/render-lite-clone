@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { uploadRawFileToCloudinary } from '../media/cloudinary-uploader';
+import { uploadFileToCloudflareR2, uploadRawFileToCloudinary } from '../media/cloudinary-uploader';
 import type { BuildLanguage } from './build-language';
 import { zipDirectory } from './archive';
 import { shallowCloneGithubRepo } from './clone-github';
@@ -80,9 +80,15 @@ export async function runBuildJobAndUpload({
       await runShellCommand({ command: saveCmd, cwd: repoDir, onStdout, onStderr });
 
       const publicId = `docker-image-${randomUUID()}`;
-      const uploaded = await uploadRawFileToCloudinary({ filePath: outFile, publicId });
+
+      onStdout?.(`Uploading ${outFile}...\n`);
+      const uploaded = await uploadFileToCloudflareR2({
+        filePath: outFile,
+        publicId,
+        onLog: onStdout,
+      });
       return {
-        artifactUrl: uploaded.url,
+        artifactUrl : uploaded.url,
         artifactPublicId: uploaded.publicId,
         artifactKind: 'docker-image-tar',
       };
@@ -117,11 +123,23 @@ export async function runBuildJobAndUpload({
     }
 
     const zipFile = path.join(artifactDir, 'build.zip');
-    onStdout?.(`\nPackaging ${path.relative(repoDir, directoryToZip) || '.'}...\n`);
-    await zipDirectory({ sourceDir: directoryToZip, outFile: zipFile });
+    const zippingWholeRepo = directoryToZip === repoDir;
+    onStdout?.(
+      `\nPackaging ${path.relative(repoDir, directoryToZip) || '.'}${zippingWholeRepo ? ' (excluding .git, node_modules, .pnpm)' : ''
+      }...\n`,
+    );
+    await zipDirectory({
+      sourceDir: directoryToZip,
+      outFile: zipFile,
+      excludeHeavyDirs: zippingWholeRepo,
+    });
 
     const publicId = `build-${randomUUID()}`;
-    const uploaded = await uploadRawFileToCloudinary({ filePath: zipFile, publicId });
+    const uploaded = await uploadFileToCloudflareR2({
+      filePath: zipFile,
+      publicId,
+      onLog: onStdout,
+    });
     return {
       artifactUrl: uploaded.url,
       artifactPublicId: uploaded.publicId,

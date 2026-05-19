@@ -35,8 +35,6 @@ export async function runInstallAndBuildInDocker(opts: {
     lines.push(`cd ${bashSingleQuote(safeRoot)}`);
   }
 
-  // `corepack enable` symlinks into /usr/local/bin and fails with EACCES when Docker runs as
-  // `--user` (non-root). Install CLIs under /tmp with `npm --prefix` instead (writable by any UID).
   if (buildLanguage === 'javascript') {
     lines.push(
       'export RENDERLITE_TOOL_ROOT="${RENDERLITE_TOOL_ROOT:-/tmp/renderlite-js-tools}"',

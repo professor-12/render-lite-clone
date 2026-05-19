@@ -260,11 +260,123 @@ type BuildResult = {
   installCommand: string;
   buildCommand: string;
   startCommand: string;
+  /** Optional build output directory to package (e.g. dist, build, .next). */
+  outDir?: string;
   runtime: string;
   framework?: string;
   reason: string[];
 };
 
+function inferOutDirFromNodeProject({
+  deps,
+  scripts,
+  framework,
+  reason,
+}: {
+  deps: Record<string, string> | undefined;
+  scripts: Record<string, string>;
+  framework: string | undefined;
+  reason: string[];
+}): string | undefined {
+  const has = (name: string) => Boolean(deps && Object.prototype.hasOwnProperty.call(deps, name));
+  const buildScript = (scripts.build ?? '').toLowerCase();
+
+  // Framework-specific / de-facto defaults
+  if (framework === 'nextjs') {
+    reason.push('outDir inferred: .next (Next.js)');
+    return '.next';
+  }
+
+  // Static build tools / common SPA setups
+  if (has('vite') || buildScript.includes('vite')) {
+    reason.push('outDir inferred: dist (Vite)');
+    return 'dist';
+  }
+  if (has('react-scripts') || buildScript.includes('react-scripts build')) {
+    reason.push('outDir inferred: build (Create React App)');
+    return 'build';
+  }
+  if (has('astro') || buildScript.includes('astro build')) {
+    reason.push('outDir inferred: dist (Astro)');
+    return 'dist';
+  }
+  if (has('nuxt') || buildScript.includes('nuxt build')) {
+    reason.push('outDir inferred: .output (Nuxt 3)');
+    return '.output';
+  }
+  if (has('@angular/cli') || buildScript.includes('ng build')) {
+    // Angular outputs to dist/<project-name> by default, but "dist" is still better than empty.
+    reason.push('outDir inferred: dist (Angular)');
+    return 'dist';
+  }
+
+  return undefined;
+}
+
+
+function inferOutDirFromFramework(framework: string): string | undefined {
+  if (framework === 'nextjs') return '.next';
+  if (framework === 'react') return 'build';
+  if (framework === 'vue') return 'dist';
+  if (framework === 'nestjs') return '.output';
+  if (framework === 'express') return 'dist';
+  if (framework === 'fastify') return 'dist';
+  if (framework === 'angular') return 'dist';
+  if (framework === 'svelte') return 'build';
+  if (framework === 'nuxt') return '.output';
+  if (framework === 'laravel') return 'public';
+  if (framework === 'symfony') return 'public';
+  if (framework === 'django') return 'static';
+  if (framework === 'flask') return 'static';
+  if (framework === 'ruby') return 'public';
+  if (framework === 'php') return 'public';
+  if (framework === 'rust') return 'target';
+  if (framework === 'elixir') return 'priv';
+  if (framework === 'kotlin') return 'build';
+  if (framework === 'swift') return 'build';
+  if (framework === 'dart') return 'build';
+  if (framework === 'scala') return 'target';
+  if (framework === 'haskell') return 'dist';
+  if (framework === 'erlang') return 'ebin';
+  if (framework === 'lua') return 'lua';
+  if (framework === 'perl') return 'blib';
+  if (framework === 'r') return 'src';
+  if (framework === 'julia') return 'deps';
+  if (framework === 'fortran') return 'build';
+  if (framework === 'zig') return 'zig-out';
+  if (framework === 'crystal') return 'build';
+  if (framework === 'nim') return 'build';
+  if (framework === 'solidity') return 'build';
+  if (framework === 'vlang') return 'build';
+  if (framework === 'fsharp') return 'build';
+  if (framework === 'ocaml') return 'build';
+  if (framework === 'reasonml') return 'build';
+  if (framework === 'webassembly') return 'build';
+  if (framework === 'html') return 'build';
+  if (framework === 'css') return 'build';
+  if (framework === 'sass') return 'build';
+  if (framework === 'less') return 'build';
+  if (framework === 'tailwind') return 'build';
+  if (framework === 'react') return 'build';
+  if (framework === 'nextjs') return 'build';
+  if (framework === 'nodejs') return 'build';
+  if (framework === 'express') return 'build';
+  if (framework === 'vue') return 'build';
+  if (framework === 'svelte') return 'build';
+  if (framework === 'angular') return 'build';
+  if (framework === 'flutter') return 'build';
+  if (framework === 'electron') return 'build';
+  if (framework === 'graphql') return 'build';
+  if (framework === 'firebase') return 'build';
+  if (framework === 'supabase') return 'build';
+  if (framework === 'mongodb') return 'build';
+  if (framework === 'postgres') return 'build';
+  if (framework === 'mysql') return 'build';
+  if (framework === 'redis') return 'build';
+  if (framework === 'docker') return 'build';
+  if (framework === 'kubernetes') return 'build';
+  return 'public';
+}
 export async function getBuildCommand(
   files: RepoFile[],
   fetchFileContent: (url: string) => Promise<any>,
@@ -377,10 +489,13 @@ export async function getBuildCommand(
       reason.push('Fallback start command');
     }
 
+    const outDir = inferOutDirFromFramework(framework ?? 'nodejs');
+
     return {
       installCommand: install,
       buildCommand: build,
       startCommand: start,
+      outDir,
       runtime: 'node',
       framework,
       reason,

@@ -116,7 +116,7 @@ export function DeploymentLogsView({ deploymentId }: { deploymentId: string }) {
   }, [rows.length]);
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-6 py-8">
+    <div className="mx-auto w-full px-6 py-8">
       <div className="mb-5 flex items-start justify-between gap-4">
         <div className="min-w-0">
           <Link

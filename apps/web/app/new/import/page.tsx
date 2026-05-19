@@ -58,6 +58,7 @@ export function ImportPageSuspense() {
       installCommand: bc.installCommand ?? '',
       buildCommand: bc.buildCommand ?? prev.buildCommand,
       startCommand: bc.startCommand ?? prev.startCommand,
+      outDir: (prev.outDir?.trim() ? prev.outDir : (bc.outDir ?? prev.outDir)),
       useDockerCommands: bc.runtime === 'docker',
       buildLanguage: bl ?? (bc.runtime === 'docker' ? 'docker' : 'javascript'),
     }));
@@ -102,6 +103,7 @@ export function ImportPageSuspense() {
 
   useEffect(() => {
     if (!createdProject?.deploymentId) return;
+    
     router.push(`/dashboard/deployments/${createdProject.deploymentId}`);
   }, [createdProject?.deploymentId, router]);
 
