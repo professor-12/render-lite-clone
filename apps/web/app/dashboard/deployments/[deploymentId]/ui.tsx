@@ -5,23 +5,34 @@ import Link from 'next/link';
 import {
   fetchDeploymentLogs,
   useGetDeployment,
+  useRedeploy,
   type DeploymentLogRow,
 } from '@/app/queries/deployments.query';
+import { TbReload } from "react-icons/tb";
+
+import { Button } from '@/components/ui/button';
 
 function statusLabel(status: string) {
-  if (status === 'build_uploaded') return 'Deployed';
-  if (status === 'build_failed') return 'Failed';
+  if (status === 'live') return 'Live';
+  if (status === 'build_uploaded') return 'Build uploaded';
+  if (status === 'queued_deploy') return 'Queued for deploy';
+  if (status === 'deploying') return 'Deploying';
+  if (status === 'deploy_failed') return 'Deploy failed';
+  if (status === 'build_failed') return 'Build failed';
   if (status === 'building') return 'Building';
   if (status === 'queued_build') return 'Queued';
   return status;
 }
 
 function statusTone(status: string) {
-  if (status === 'build_uploaded')
+  if (status === 'live' || status === 'build_uploaded')
     return 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300';
-  if (status === 'build_failed') return 'border-rose-400/25 bg-rose-400/10 text-rose-300';
-  if (status === 'building') return 'border-blue-400/25 bg-blue-400/10 text-blue-300';
-  if (status === 'queued_build') return 'border-border/60 bg-muted/40 text-muted-foreground';
+  if (status === 'build_failed' || status === 'deploy_failed')
+    return 'border-rose-400/25 bg-rose-400/10 text-rose-300';
+  if (status === 'building' || status === 'deploying')
+    return 'border-blue-400/25 bg-blue-400/10 text-blue-300';
+  if (status === 'queued_build' || status === 'queued_deploy')
+    return 'border-border/60 bg-muted/40 text-muted-foreground';
   return 'border-border/60 bg-muted/40 text-muted-foreground';
 }
 
@@ -52,7 +63,7 @@ export function DeploymentLogsView({ deploymentId }: { deploymentId: string }) {
 
   const canAutoPoll = useMemo(() => {
     const s = deployment?.status;
-    return s !== 'build_uploaded' && s !== 'build_failed';
+    return s !== 'live' && s !== 'build_failed' && s !== 'deploy_failed';
   }, [deployment?.status]);
 
   useEffect(() => {
@@ -115,6 +126,11 @@ export function DeploymentLogsView({ deploymentId }: { deploymentId: string }) {
     el.scrollTop = el.scrollHeight;
   }, [rows.length]);
 
+  const redeploy = useRedeploy(deploymentId);
+
+  const redeployErrorMessage =
+    redeploy.error instanceof Error ? redeploy.error.message : null;
+
   return (
     <div className="mx-auto w-full px-6 py-8">
       <div className="mb-5 flex items-start justify-between gap-4">
@@ -131,13 +147,27 @@ export function DeploymentLogsView({ deploymentId }: { deploymentId: string }) {
           <p className="mt-1 text-[13px] text-[#737373]">Deployment: {deploymentId}</p>
         </div>
 
-        <span
-          className={`inline-flex shrink-0 items-center rounded-full border px-2.5 py-1 text-[12px] ${statusTone(
-            deployment?.status ?? 'queued_build',
-          )}`}
-        >
-          {statusLabel(deployment?.status ?? 'queued_build')}
-        </span>
+        <div className="flex items-center gap-3">
+          <span
+            className={`inline-flex shrink-0 items-center rounded-full border px-2.5 py-1 text-[12px] ${statusTone(
+              deployment?.status ?? 'queued_build',
+            )}`}
+          >
+            {statusLabel(deployment?.status ?? 'queued_build')}
+          </span>
+          {deployment?.status === 'build_failed' && (
+            <Button
+              onClick={() => redeploy.mutate()}
+              disabled={redeploy.isPending}
+              className="ml-2 cursor-pointer gap-3 flex items-center"
+            >
+              <span className={redeploy.isPending ? 'animate-spin' : ''}>
+                <TbReload />
+              </span>
+              {redeploy.isPending ? 'Redeploying…' : 'Redeploy'}
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="rounded-lg border border-border/60 bg-card">
@@ -151,6 +181,12 @@ export function DeploymentLogsView({ deploymentId }: { deploymentId: string }) {
         {error && (
           <div className="border-b border-rose-500/20 bg-rose-500/10 px-4 py-2 text-[12px] text-rose-200">
             {error}
+          </div>
+        )}
+
+        {redeployErrorMessage && (
+          <div className="border-b border-rose-500/20 bg-rose-500/10 px-4 py-2 text-[12px] text-rose-200">
+            Redeploy failed: {redeployErrorMessage}
           </div>
         )}
 

@@ -16,8 +16,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 function statusLabel(status: string) {
-  if (status === 'build_uploaded') return 'Ready';
-  if (status === 'build_failed') return 'Error';
+  if (status === 'live') return 'Ready';
+  if (status === 'build_uploaded' || status === 'queued_deploy') return 'Deploying';
+  if (status === 'deploying') return 'Deploying';
+  if (status === 'build_failed' || status === 'deploy_failed') return 'Error';
   if (status === 'building') return 'Building';
   if (status === 'queued_build') return 'Queued';
   return status;
@@ -80,7 +82,7 @@ export function ProjectDeploymentView({ projectId }: { projectId: string }) {
             <div
               className={[
                 'rounded-md border p-4',
-                status === 'build_failed'
+                status === 'build_failed' || status === 'deploy_failed'
                   ? 'border-rose-500/30 bg-rose-500/5'
                   : 'border-border/60 bg-muted/20',
               ].join(' ')}
@@ -90,6 +92,11 @@ export function ProjectDeploymentView({ projectId }: { projectId: string }) {
                   <>
                     <RiErrorWarningLine className="size-4 text-rose-500" aria-hidden />
                     Build Failed
+                  </>
+                ) : status === 'deploy_failed' ? (
+                  <>
+                    <RiErrorWarningLine className="size-4 text-rose-500" aria-hidden />
+                    Deploy Failed
                   </>
                 ) : (
                   <>
@@ -101,9 +108,11 @@ export function ProjectDeploymentView({ projectId }: { projectId: string }) {
               <div className="mt-3 text-[12px] text-muted-foreground">
                 {status === 'build_failed'
                   ? `Command "${project?.buildCommand ?? 'build'}" exited with an error.`
-                  : status === 'build_uploaded'
-                    ? 'Deployment completed successfully.'
-                    : 'Deployment in progress.'}
+                  : status === 'deploy_failed'
+                    ? 'The container failed to start. Check deployment logs.'
+                    : status === 'live'
+                      ? 'Deployment completed successfully.'
+                      : 'Deployment in progress.'}
               </div>
             </div>
 

@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import type { ConsumeMessage } from 'amqplib';
 import { logger } from '../libs/logger';
 import { prisma } from '../libs/prisma';
@@ -5,6 +6,7 @@ import { runBuildJobAndUpload } from '../libs/build/build-job';
 import { isBuildLanguage, type BuildLanguage } from '../libs/build/build-language';
 import { BaseWorker } from './base.worker';
 import { type BuildRequestedJob, RenderLiteQueue } from './contracts';
+import { renderLiteJobsPublisher } from './renderlite-jobs.publisher';
 
 export class BuildWorker extends BaseWorker<BuildRequestedJob> {
   protected readonly queueName = RenderLiteQueue.BUILD_REQUESTED;
@@ -61,17 +63,38 @@ export class BuildWorker extends BaseWorker<BuildRequestedJob> {
         onStderr: (c) => void appendLog('stderr', c),
       });
 
-      await prisma.deployment.update({
+      const updatedDeployment = await prisma.deployment.update({
         where: { id: deploymentId },
         data: {
-          status: 'build_uploaded',
+          status: 'queued_deploy',
           image: result.artifactUrl,
+        },
+        select: { projectId: true, startCommand: true, rootDir: true, outDir: true, env: true, port: true },
+      });
+      appendLog("stdout", "Build successfully done 🥳🙌🏽")
+      appendLog("stdout", "Publishing your deployment... 🚀")
+
+      await renderLiteJobsPublisher.publishDeployRequested({
+        correlationId: correlationId ?? randomUUID(),
+        requestedAt: new Date().toISOString(),
+        projectId: updatedDeployment.projectId,
+        deploymentId,
+        artifactUrl: result.artifactUrl,
+        artifactKey: result.artifactKey,
+        artifactKind: result.artifactKind,
+        buildLanguage,
+        startCommand: updatedDeployment.startCommand,
+        rootDir: updatedDeployment.rootDir,
+        outDir: updatedDeployment.outDir,
+        runtime: {
+          containerPort: updatedDeployment.port,
+          env: updatedDeployment.env,
         },
       });
 
       logger.info(
         { deploymentId, correlationId, artifactKind: result.artifactKind },
-        'Build job finished',
+        'Build job finished, deploy enqueued',
       );
     } catch (err) {
       logger.error({ err, deploymentId, correlationId }, 'Build job failed');

@@ -51,8 +51,8 @@ function slugifyName(name: string): string {
 
 function deploymentStatusToUi(status: string | undefined): UiProjectStatus {
   if (!status) return 'building';
-  if (status === 'build_failed') return 'error';
-  if (status === 'build_uploaded') return 'ready';
+  if (status === 'build_failed' || status === 'deploy_failed') return 'error';
+  if (status === 'live') return 'ready';
   return 'building';
 }
 

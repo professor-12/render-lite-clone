@@ -37,13 +37,25 @@ export type BuildRequestedJob = JobMetadata & {
   rootDir?: string;
 };
 
+export type DeployArtifactKind = 'zip' | 'docker-image-tar';
+
 export type DeployRequestedJob = JobMetadata & {
   projectId: string;
   deploymentId: string;
-  imageTag: string;
+  /** Public URL or R2 URL where the artifact lives. */
+  artifactUrl: string;
+  /** Optional R2 object key, set by the build worker so the deploy worker doesn't have to parse the URL. */
+  artifactKey?: string;
+  artifactKind: DeployArtifactKind;
+  /** Drives runtime image choice for zip artifacts. */
+  buildLanguage: string;
+  startCommand: string;
+  rootDir?: string | null;
+  outDir?: string | null;
   runtime: {
     containerPort: number;
-    env: Record<string, string>;
+    /** Raw "KEY=VALUE" strings, as stored on the Deployment. */
+    env: string[];
   };
 };
 

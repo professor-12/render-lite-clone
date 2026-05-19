@@ -34,4 +34,9 @@ router.post(
   deployServiceController.createProject,
 );
 
+router.post("/deployments/:deploymentId/redeploy",
+  authenticateJwtFromCookies('renderLite-access'),
+  deployServiceController.redeploy,
+);
+
 export default router;

@@ -113,9 +113,9 @@ export class DeployServiceService {
       take: 250,
       ...(cursor
         ? {
-            cursor: { id: cursor },
-            skip: 1,
-          }
+          cursor: { id: cursor },
+          skip: 1,
+        }
         : {}),
       select: {
         id: true,
@@ -183,6 +183,7 @@ export class DeployServiceService {
       outDir: project.outDir ?? undefined,
       rootDir: project.rootDir ?? undefined,
     };
+    logger.info({ projectId: project.id, deploymentId: deployment.id, job }, 'Project created and build queued');
 
     await renderLiteJobsPublisher.publishBuildRequested(job);
     logger.info({ projectId: project.id, deploymentId: deployment.id }, 'Build queued');
@@ -192,4 +193,56 @@ export class DeployServiceService {
       status: deployment.status,
     };
   };
+  public async redeploy(deploymentId: string, userId: string) {
+    const deployment = await prisma.deployment.findFirst({
+      where: {
+        id: deploymentId,
+        project: { userId },
+      },
+      select: {
+        id: true,
+        projectId: true,
+        repoUrl: true,
+        branch: true,
+        rootDir: true,
+        buildLanguage: true,
+        outDir: true,
+        installCommand: true,
+        buildCommand: true,
+        startCommand: true,
+        project: { select: { id: true, name: true, } },
+        status: true,
+      },
+
+    });
+    if (!deployment) throw new Error('Deployment not found');
+
+    await prisma.deploymentLog.deleteMany({ where: { deploymentId } });
+    const updated = await prisma.deployment.update({
+      where: { id: deploymentId },
+      data: { status: 'queued_build' },
+      select: { status: true },
+    });
+
+    const job = {
+      correlationId: randomUUID(),
+      requestedByUserId: userId,
+      requestedAt: new Date().toISOString(),
+      deploymentId: deployment.id,
+      githubUrl: deployment.repoUrl,
+      installCommand: deployment.installCommand,
+      buildCommand: deployment.buildCommand,
+      buildLanguage: deployment.buildLanguage,
+      outDir: deployment.outDir ?? undefined,
+      rootDir: deployment.rootDir ?? undefined,
+    };
+
+    await renderLiteJobsPublisher.publishBuildRequested(job);
+    logger.info({ deploymentId: deployment.id, job }, 'Redeploy requested');
+    return {
+      projectId: deployment.project.id,
+      deploymentId: deployment.id,
+      status: updated.status,
+    };
+  }
 }

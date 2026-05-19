@@ -89,11 +89,12 @@ export function ProjectCard({ project }: { project: ProjectListItem }) {
     project;
 
   return (
-    <article className="group relative rounded-lg border border-border/60 bg-card p-5 transition-colors hover:border-border">
+    <Link href={`/dashboard/projects/${project.id}`} className="group hover:scale-[98%] block relative rounded-lg border border-border/60 bg-card p-5 transition-all hover:border-border">
       <div className="flex gap-4">
         <div className="flex shrink-0 items-start pt-0.5">
           <div className="flex size-11 items-center justify-center rounded-md bg-muted/30 ring-1 ring-border/40">
             <StackIcon stack={stack} />
+
           </div>
         </div>
 
@@ -120,10 +121,10 @@ export function ProjectCard({ project }: { project: ProjectListItem }) {
             </div>
           </div>
 
-          <div className="mt-3 inline-flex max-w-full items-center gap-1.5 rounded-md border border-border/60 bg-muted/20 px-2 py-1 text-[12px] text-muted-foreground">
+          <Link href={"https://github.com/"+repo} target="_blank" rel="noopener noreferrer" onClick={(e) => { e.stopPropagation() }} className="mt-3 inline-flex max-w-full items-center gap-1.5 block rounded-md border border-border/60 bg-muted/20 px-2 py-1 text-[12px] text-muted-foreground">
             <SiGithub className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
             <span className="truncate font-mono">{truncateRepo(repo)}</span>
-          </div>
+          </Link>
 
           <p className="mt-2 truncate text-[13px] text-[#737373]">{commitMessage}</p>
 
@@ -137,6 +138,6 @@ export function ProjectCard({ project }: { project: ProjectListItem }) {
           </p>
         </div>
       </div>
-    </article>
+    </Link>
   );
 }

@@ -118,6 +118,7 @@ model Deployment {
   updatedAt DateTime @updatedAt
   projectId String
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  live_url String
   deploymentLogs DeploymentLog[]
 }
 

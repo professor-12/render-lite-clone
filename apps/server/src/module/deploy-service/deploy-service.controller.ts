@@ -3,7 +3,7 @@ import { createProjectBodySchema } from '../../validators/deploy.validator';
 import { DeployServiceService } from './deploy-service.service';
 
 export class DeployServiceController {
-  constructor(private readonly deployServiceService: DeployServiceService) {}
+  constructor(private readonly deployServiceService: DeployServiceService) { }
 
   public listProjects = asyncHandler(async (req, res) => {
     const userId = req.userId;
@@ -28,7 +28,7 @@ export class DeployServiceController {
         message: 'Unauthorized',
       });
     }
-  
+
     const validatedData = createProjectBodySchema.parse(req.body);
 
     const project = await this.deployServiceService.createProject(validatedData, userId);
@@ -94,4 +94,20 @@ export class DeployServiceController {
       },
     });
   });
+  public redeploy = asyncHandler(async (req, res) => {
+    const userId = req.userId;
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const deploymentId = String(req.params.deploymentId ?? '');
+    const newDeployment = await this.deployServiceService.redeploy(deploymentId, userId);
+    if (!newDeployment) {
+      return res.status(404).json({ message: 'Deployment not found or cannot be redeployed' });
+    }
+    return res.status(200).json({
+      message: 'ok',
+      data: newDeployment,
+    });
+  })
 }

@@ -25,6 +25,7 @@ function inferDockerImageTag(buildCommand: string) {
 export type BuildJobResult = {
   artifactUrl: string;
   artifactPublicId: string;
+  artifactKey: string;
   artifactKind: 'zip' | 'docker-image-tar';
 };
 
@@ -88,8 +89,9 @@ export async function runBuildJobAndUpload({
         onLog: onStdout,
       });
       return {
-        artifactUrl : uploaded.url,
+        artifactUrl: uploaded.url,
         artifactPublicId: uploaded.publicId,
+        artifactKey: `renderlite/builds/${publicId}.tar`,
         artifactKind: 'docker-image-tar',
       };
     }
@@ -143,6 +145,7 @@ export async function runBuildJobAndUpload({
     return {
       artifactUrl: uploaded.url,
       artifactPublicId: uploaded.publicId,
+      artifactKey: `renderlite/builds/${publicId}.zip`,
       artifactKind: 'zip',
     };
   } finally {

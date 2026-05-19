@@ -1,5 +1,5 @@
 import api from '@/app/client/client';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export type DeploymentLogRow = {
   id: string;
@@ -46,3 +46,21 @@ export const fetchDeploymentLogs = async (deploymentId: string, cursor?: string 
   return data.data as DeploymentLogsResponse;
 };
 
+
+
+export const useRedeploy = (deploymentId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const { data } = await api.post(`/project/deployments/${deploymentId}/redeploy`);
+      return data.data as {
+        projectId: string;
+        deploymentId: string;
+        status: string;
+      };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['deployment', deploymentId] });
+    },
+  });
+};

@@ -20,6 +20,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/mime-types": "^3.0.1",
     "amqplib": "^0.10.9",
     "archiver": "^7.0.1",
     "cloudinary": "^2.9.0",

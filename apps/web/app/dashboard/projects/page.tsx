@@ -7,12 +7,12 @@ import { Input } from '@/components/ui/input';
 
 export default async function ProjectsPage() {
   const projects = await getProjects();
-
+  console.log({ projects })
   return (
     <div className="mx-auto w-full px-6 py-8">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <FiSearch className="text-md text-muted-foreground" />
+          {/* <FiSearch className="text-md text-muted-foreground" /> */}
           <Input type="text" placeholder="Search projects" className="h-9 w-[280px]" />
         </div>
         <Button>
