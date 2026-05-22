@@ -4,6 +4,7 @@ import type { DetectedBuildConfig } from './detected-build.types';
 import { GitUrlField } from './GitUrlField';
 import { OutDirField } from './OutDirField';
 import { ProjectNameField } from './ProjectNameField';
+import { ProjectTypeField } from './ProjectTypeField';
 
 export type BuildLanguage =
   | 'javascript'
@@ -14,6 +15,8 @@ export type BuildLanguage =
   | 'ruby'
   | 'docker'
   | 'generic';
+
+export type ProjectType = 'static' | 'dynamic';
 
 export type ImportFormState = {
   name: string;
@@ -26,6 +29,7 @@ export type ImportFormState = {
   startCommand: string;
   useDockerCommands: boolean;
   buildLanguage: BuildLanguage;
+  projectType: ProjectType;
 };
 
 type ImportDeployFormProps = {
@@ -41,8 +45,18 @@ export function ImportDeployForm({
   detectedBuild,
   onUseDockerCommandsChange,
 }: ImportDeployFormProps) {
-  const { name, gitUrl, branch, rootDir, outDir, installCommand, buildCommand, startCommand, useDockerCommands } =
-    state;
+  const {
+    name,
+    gitUrl,
+    branch,
+    rootDir,
+    outDir,
+    installCommand,
+    buildCommand,
+    startCommand,
+    useDockerCommands,
+    projectType,
+  } = state;
 
   const detection: DetectedBuildConfig = {
     ...detectedBuild,
@@ -53,6 +67,7 @@ export function ImportDeployForm({
     <div className="mt-8 space-y-6">
       <ProjectNameField value={name} onChange={(v) => onChange('name', v)} />
       <GitUrlField value={gitUrl} onChange={(v) => onChange('gitUrl', v)} />
+      <ProjectTypeField value={projectType} onChange={(v) => onChange('projectType', v)} />
       <BranchRootFields
         branch={branch}
         rootDir={rootDir}
@@ -70,6 +85,7 @@ export function ImportDeployForm({
         detectedBuild={detection}
         useDockerCommands={useDockerCommands}
         onUseDockerCommandsChange={onUseDockerCommandsChange}
+        projectType={projectType}
       />
     </div>
   );

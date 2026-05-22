@@ -140,6 +140,7 @@ export class DeployServiceService {
         branch: validatedData.branch.trim(),
         rootDir: validatedData.rootDir.trim(),
         buildLanguage,
+        projectType: validatedData.projectType,
         outDir: validatedData.outDir?.trim() || null,
         installCommand: validatedData.installCommand.trim(),
         buildCommand: validatedData.buildCommand.trim(),
@@ -159,6 +160,7 @@ export class DeployServiceService {
         branch: project.branch,
         rootDir: project.rootDir,
         buildLanguage,
+        projectType: project.projectType,
         outDir: project.outDir,
         installCommand: project.installCommand,
         buildCommand: project.buildCommand,
@@ -168,6 +170,7 @@ export class DeployServiceService {
         port: project.port,
         status: 'queued_build',
         projectId: project.id,
+        live_url: '',
       },
     });
 
@@ -180,6 +183,7 @@ export class DeployServiceService {
       installCommand: project.installCommand,
       buildCommand: project.buildCommand,
       buildLanguage,
+      projectType: project.projectType,
       outDir: project.outDir ?? undefined,
       rootDir: project.rootDir ?? undefined,
     };
@@ -205,6 +209,7 @@ export class DeployServiceService {
         branch: true,
         rootDir: true,
         buildLanguage: true,
+        projectType: true,
         outDir: true,
         installCommand: true,
         buildCommand: true,
@@ -232,6 +237,7 @@ export class DeployServiceService {
       installCommand: deployment.installCommand,
       buildCommand: deployment.buildCommand,
       buildLanguage: deployment.buildLanguage,
+      projectType: deployment.projectType,
       outDir: deployment.outDir ?? undefined,
       rootDir: deployment.rootDir ?? undefined,
     };

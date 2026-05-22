@@ -83,6 +83,7 @@ export class BuildWorker extends BaseWorker<BuildRequestedJob> {
         artifactKey: result.artifactKey,
         artifactKind: result.artifactKind,
         buildLanguage,
+        projectType: payload.projectType,
         startCommand: updatedDeployment.startCommand,
         rootDir: updatedDeployment.rootDir,
         outDir: updatedDeployment.outDir,

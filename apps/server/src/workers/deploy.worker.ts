@@ -61,6 +61,7 @@ export class DeployWorker extends BaseWorker<DeployRequestedJob> {
         artifactKey: payload.artifactKey,
         artifactKind: payload.artifactKind,
         buildLanguage,
+        projectType: payload.projectType ?? deployment.projectType,
         startCommand: payload.startCommand,
         rootDir: payload.rootDir ?? deployment.rootDir,
         outDir: payload.outDir ?? deployment.outDir,

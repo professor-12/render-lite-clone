@@ -38,7 +38,9 @@ export function ImportPageSuspense() {
     startCommand: 'npm start',
     useDockerCommands: false,
     buildLanguage: 'javascript',
+    projectType: 'dynamic',
   });
+  const [projectTypeTouched, setProjectTypeTouched] = useState(false);
 
   const { data: detectServiceData, isPending, isError } = useDetectService(form.gitUrl);
   const {
@@ -53,6 +55,7 @@ export function ImportPageSuspense() {
     if (!detectServiceData?.buildCommand) return;
     const bc = detectServiceData.buildCommand;
     const bl = detectServiceData.buildLanguage;
+    const suggestedType = detectServiceData.projectType ?? bc.projectType;
     setForm((prev) => ({
       ...prev,
       installCommand: bc.installCommand ?? '',
@@ -61,8 +64,9 @@ export function ImportPageSuspense() {
       outDir: (prev.outDir?.trim() ? prev.outDir : (bc.outDir ?? prev.outDir)),
       useDockerCommands: bc.runtime === 'docker',
       buildLanguage: bl ?? (bc.runtime === 'docker' ? 'docker' : 'javascript'),
+      projectType: projectTypeTouched ? prev.projectType : (suggestedType ?? prev.projectType),
     }));
-  }, [detectServiceData]);
+  }, [detectServiceData, projectTypeTouched]);
 
   const handleUseDockerCommandsChange = useCallback(
     (useDocker: boolean) => {
@@ -93,6 +97,7 @@ export function ImportPageSuspense() {
   const hasRepoUrl = form.gitUrl.trim().length > 0;
 
   const updateField = <K extends keyof ImportFormState>(field: K, value: ImportFormState[K]) => {
+    if (field === 'projectType') setProjectTypeTouched(true);
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 

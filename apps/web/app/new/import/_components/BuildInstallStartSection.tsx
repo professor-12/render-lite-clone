@@ -3,6 +3,7 @@ import { FiLayers, FiPackage, FiTerminal } from 'react-icons/fi';
 import { HintText } from './HintText';
 import { SectionLabel } from './SectionLabel';
 import type { DetectedBuildConfig } from './detected-build.types';
+import type { ProjectType } from './ImportDeployForm';
 
 type BuildInstallStartSectionProps = {
   installCommand: string;
@@ -14,6 +15,7 @@ type BuildInstallStartSectionProps = {
   detectedBuild: DetectedBuildConfig | null;
   useDockerCommands: boolean;
   onUseDockerCommandsChange: (useDocker: boolean) => void;
+  projectType: ProjectType;
 };
 
 function CommandTextarea({
@@ -63,8 +65,10 @@ export function BuildInstallStartSection({
   detectedBuild,
   useDockerCommands,
   onUseDockerCommandsChange,
+  projectType,
 }: BuildInstallStartSectionProps) {
   const isDockerRuntime = detectedBuild?.runtime === 'docker';
+  const isStatic = projectType === 'static';
 
   return (
     <div className="space-y-4">
@@ -146,19 +150,21 @@ export function BuildInstallStartSection({
           placeholder="npm run build"
           icon={FiTerminal}
         />
-        <CommandTextarea
-          id="import-start-command"
-          label="Start command"
-          hint={
-            isDockerRuntime && useDockerCommands
-              ? 'Typically docker run. Adjust ports, env, and image name to match your build command.'
-              : 'Command that runs your app in production.'
-          }
-          value={startCommand}
-          onChange={onStartCommandChange}
-          placeholder="npm start"
-          icon={FiTerminal}
-        />
+        {isStatic ? null : (
+          <CommandTextarea
+            id="import-start-command"
+            label="Start command"
+            hint={
+              isDockerRuntime && useDockerCommands
+                ? 'Typically docker run. Adjust ports, env, and image name to match your build command.'
+                : 'Command that runs your app in production.'
+            }
+            value={startCommand}
+            onChange={onStartCommandChange}
+            placeholder="npm start"
+            icon={FiTerminal}
+          />
+        )}
       </div>
     </div>
   );

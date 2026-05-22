@@ -16,6 +16,7 @@ export const createProjectBodySchema = z.object({
   startCommand: z.string(),
   useDockerCommands: z.boolean(),
   buildLanguage: buildLanguageEnum.default('javascript'),
+  projectType: z.enum(['static', 'dynamic']),
   env: z.array(z.string()).default([]),
   description: z.string().optional(),
 });

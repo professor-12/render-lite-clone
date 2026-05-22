@@ -256,6 +256,8 @@ type PackageJson = {
   devDependencies?: Record<string, string>;
 };
 
+export type ProjectType = 'static' | 'dynamic';
+
 type BuildResult = {
   installCommand: string;
   buildCommand: string;
@@ -264,8 +266,49 @@ type BuildResult = {
   outDir?: string;
   runtime: string;
   framework?: string;
+  projectType: ProjectType;
   reason: string[];
 };
+
+function inferProjectTypeFromNode({
+  deps,
+  framework,
+  scripts,
+}: {
+  deps: Record<string, string> | undefined;
+  framework: string | undefined;
+  scripts: Record<string, string>;
+}): ProjectType {
+  const has = (name: string) => Boolean(deps && Object.prototype.hasOwnProperty.call(deps, name));
+  const buildScript = (scripts.build ?? '').toLowerCase();
+
+  if (
+    framework === 'nextjs' ||
+    framework === 'nestjs' ||
+    framework === 'express' ||
+    framework === 'fastify' ||
+    has('nuxt') ||
+    buildScript.includes('nuxt')
+  ) {
+    return 'dynamic';
+  }
+
+  if (
+    has('vite') ||
+    buildScript.includes('vite') ||
+    has('react-scripts') ||
+    buildScript.includes('react-scripts') ||
+    has('astro') ||
+    has('@angular/cli') ||
+    buildScript.includes('ng build') ||
+    framework === 'react' ||
+    framework === 'vue'
+  ) {
+    return 'static';
+  }
+
+  return 'dynamic';
+}
 
 function inferOutDirFromNodeProject({
   deps,
@@ -395,6 +438,7 @@ export async function getBuildCommand(
       buildCommand: 'docker build -t app .',
       startCommand: 'docker run -p 3000:3000 app',
       runtime: 'docker',
+      projectType: 'dynamic',
       reason: ['Dockerfile detected'],
     };
   }
@@ -490,6 +534,8 @@ export async function getBuildCommand(
     }
 
     const outDir = inferOutDirFromFramework(framework ?? 'nodejs');
+    const projectType = inferProjectTypeFromNode({ deps, framework, scripts });
+    reason.push(`projectType inferred: ${projectType}`);
 
     return {
       installCommand: install,
@@ -498,6 +544,7 @@ export async function getBuildCommand(
       outDir,
       runtime: 'node',
       framework,
+      projectType,
       reason,
     };
   }
@@ -513,6 +560,7 @@ export async function getBuildCommand(
       buildCommand: '',
       startCommand: 'python app.py',
       runtime: 'python',
+      projectType: 'dynamic',
       reason,
     };
   }
@@ -528,6 +576,7 @@ export async function getBuildCommand(
       buildCommand: 'go build -o app',
       startCommand: './app',
       runtime: 'go',
+      projectType: 'dynamic',
       reason,
     };
   }
@@ -542,6 +591,7 @@ export async function getBuildCommand(
       buildCommand: '',
       startCommand: 'bundle exec ruby app.rb',
       runtime: 'ruby',
+      projectType: 'dynamic',
       reason,
     };
   }
@@ -556,6 +606,7 @@ export async function getBuildCommand(
       buildCommand: '',
       startCommand: 'php -S 0.0.0.0:8000 public/index.php',
       runtime: 'php',
+      projectType: 'dynamic',
       reason,
     };
   }
@@ -570,6 +621,7 @@ export async function getBuildCommand(
       buildCommand: 'cargo build',
       startCommand: './target/debug/app',
       runtime: 'rust',
+      projectType: 'dynamic',
       reason,
     };
   }
@@ -584,6 +636,7 @@ export async function getBuildCommand(
       buildCommand: 'mix compile',
       startCommand: 'mix run --no-halt',
       runtime: 'elixir',
+      projectType: 'dynamic',
       reason,
     };
   }
@@ -598,6 +651,7 @@ export async function getBuildCommand(
       buildCommand: 'gradle build',
       startCommand: 'gradle run',
       runtime: 'kotlin',
+      projectType: 'dynamic',
       reason,
     };
   }
@@ -612,6 +666,7 @@ export async function getBuildCommand(
       buildCommand: 'swift build',
       startCommand: 'swift run',
       runtime: 'swift',
+      projectType: 'dynamic',
       reason,
     };
   }
@@ -626,6 +681,7 @@ export async function getBuildCommand(
       buildCommand: 'flutter build',
       startCommand: 'flutter run',
       runtime: 'dart',
+      projectType: 'dynamic',
       reason,
     };
   }
@@ -640,6 +696,7 @@ export async function getBuildCommand(
       buildCommand: 'sbt build',
       startCommand: 'sbt run',
       runtime: 'scala',
+      projectType: 'dynamic',
       reason,
     };
   }
@@ -654,6 +711,7 @@ export async function getBuildCommand(
       buildCommand: 'stack build',
       startCommand: 'stack run',
       runtime: 'haskell',
+      projectType: 'dynamic',
       reason,
     };
   }
@@ -663,6 +721,7 @@ export async function getBuildCommand(
     buildCommand: '',
     startCommand: '',
     runtime: 'unknown',
+    projectType: 'dynamic',
     reason: ['Could not detect project type'],
   };
 }

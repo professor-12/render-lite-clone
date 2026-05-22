@@ -4,6 +4,7 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { resolveBuildImageForLanguage, type BuildLanguage } from '../build/build-language';
 import { sanitizeRelativeDir } from '../build/sanitize-relative-dir';
+import type { ProjectType } from '../../workers/contracts';
 import { downloadArtifact } from './download-artifact';
 import {
   captureContainerLogs,
@@ -13,6 +14,9 @@ import {
   stopAndRemoveContainer,
 } from './docker-runtime';
 
+const STATIC_NGINX_IMAGE = 'nginx:alpine';
+const STATIC_NGINX_CONTAINER_PORT = 80;
+
 export type DeployJobInput = {
   /** Stable identifier used as the container name (one running container per project). */
   projectId: string;
@@ -21,6 +25,7 @@ export type DeployJobInput = {
   artifactKey?: string;
   artifactKind: 'zip' | 'docker-image-tar';
   buildLanguage: BuildLanguage;
+  projectType: ProjectType;
   startCommand: string;
   rootDir?: string | null;
   outDir?: string | null;
@@ -86,6 +91,7 @@ export async function deployArtifact(input: DeployJobInput): Promise<DeployJobRe
     artifactKey,
     artifactKind,
     buildLanguage,
+    projectType,
     startCommand,
     rootDir,
     outDir,
@@ -113,8 +119,27 @@ export async function deployArtifact(input: DeployJobInput): Promise<DeployJobRe
     let workdir: string | undefined;
     let binds: Array<{ host: string; container: string; readOnly?: boolean }> | undefined;
     let commandOverride: string | undefined;
+    let effectiveContainerPort = containerPort;
 
-    if (artifactKind === 'docker-image-tar') {
+    if (projectType === 'static') {
+      if (artifactKind !== 'zip') {
+        throw new Error(`Static deploys require a zip artifact, got: ${artifactKind}`);
+      }
+      const extractDir = path.join(workRoot, 'extracted');
+      onStdout?.(`Extracting static site artifact...\n`);
+      await extractZip({ zipPath: artifactPath, destDir: extractDir, onStdout, onStderr });
+
+      imageRef = STATIC_NGINX_IMAGE;
+      effectiveContainerPort = STATIC_NGINX_CONTAINER_PORT;
+      binds = [
+        {
+          host: path.resolve(extractDir),
+          container: '/usr/share/nginx/html',
+          readOnly: true,
+        },
+      ];
+      onStdout?.(`Serving static assets via ${STATIC_NGINX_IMAGE} on container port ${STATIC_NGINX_CONTAINER_PORT}.\n`);
+    } else if (artifactKind === 'docker-image-tar') {
       onStdout?.(`Loading docker image from tar...\n`);
       imageRef = await loadDockerImageFromTar({ tarPath: artifactPath, onStdout, onStderr });
       onStdout?.(`Loaded image: ${imageRef}\n`);
@@ -140,11 +165,11 @@ export async function deployArtifact(input: DeployJobInput): Promise<DeployJobRe
       commandOverride = startCommand.trim() || 'tail -f /dev/null';
     }
 
-    onStdout?.(`Starting container ${containerName} (image=${imageRef}, port=${containerPort})...\n`);
+    onStdout?.(`Starting container ${containerName} (image=${imageRef}, port=${effectiveContainerPort})...\n`);
     const { containerId, hostPort } = await runDetachedContainer({
       name: containerName,
       image: imageRef,
-      containerPort,
+      containerPort: effectiveContainerPort,
       env,
       workdir,
       binds,

@@ -73,6 +73,11 @@ model GithubInstallation {
 
 
 
+enum ProjectType {
+  static
+  dynamic
+}
+
 model Project {
   id String @id @default(cuid())
   name String
@@ -81,6 +86,7 @@ model Project {
   rootDir String
   /** Language-level build environment (e.g. javascript, php). Drives preset Docker image. */
   buildLanguage String @default("javascript")
+  projectType ProjectType
   installCommand String @default("")
   outDir String?
   buildCommand String
@@ -91,9 +97,9 @@ model Project {
   port Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  userId String 
+  userId String
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   deployments Deployment[]
 }
    
@@ -106,6 +112,7 @@ model Deployment {
   branch String
   rootDir String
   buildLanguage String @default("javascript")
+  projectType ProjectType
   installCommand String @default("")
   outDir String?
   buildCommand String

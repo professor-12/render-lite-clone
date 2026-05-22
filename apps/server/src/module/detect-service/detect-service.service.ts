@@ -40,6 +40,7 @@ class DetectServiceService {
     return {
       buildCommand: detected,
       buildLanguage: mapGithubRuntimeToBuildLanguage(detected.runtime),
+      projectType: detected.projectType,
     };
   };
   private extractOwnerAndRepo(githubUrl: string) {

@@ -25,6 +25,8 @@ export type RepoSyncRequestedJob = JobMetadata & {
  * Minimal build payload: worker clones repo and runs commands.
  * Keep it small so messages are cheap and workers can run statelessly.
  */
+export type ProjectType = 'static' | 'dynamic';
+
 export type BuildRequestedJob = JobMetadata & {
   deploymentId: string;
   githubUrl: string;
@@ -32,6 +34,8 @@ export type BuildRequestedJob = JobMetadata & {
   buildCommand: string;
   /** Language-level environment: drives preset Docker image for isolated builds. */
   buildLanguage: string;
+  /** Static site vs dynamic/persistent server. Drives downstream deploy strategy. */
+  projectType: ProjectType;
   /** Optional output directory to package + upload (e.g. dist, .next, build). */
   outDir?: string;
   rootDir?: string;
@@ -49,6 +53,8 @@ export type DeployRequestedJob = JobMetadata & {
   artifactKind: DeployArtifactKind;
   /** Drives runtime image choice for zip artifacts. */
   buildLanguage: string;
+  /** Static site vs dynamic/persistent server. Drives deploy strategy. */
+  projectType: ProjectType;
   startCommand: string;
   rootDir?: string | null;
   outDir?: string | null;
