@@ -15,7 +15,6 @@ export const createProjectBodySchema = z.object({
   buildCommand: z.string(),
   startCommand: z.string(),
   useDockerCommands: z.boolean(),
-  /** Preset Docker image group: javascript (Node/Next/Vue/…), php, python, … */
   buildLanguage: buildLanguageEnum.default('javascript'),
   env: z.array(z.string()).default([]),
   description: z.string().optional(),

@@ -47,7 +47,7 @@ export function ImportPageSuspense() {
     isSuccess: isProjectCreated,
     error: createProjectError,
     data: createdProject,
-  } = useCreateProject(form);
+  } = useCreateProject();
 
   useEffect(() => {
     if (!detectServiceData?.buildCommand) return;
@@ -98,7 +98,7 @@ export function ImportPageSuspense() {
 
   const handleDeploy = () => {
     if (!canDeploy) return;
-    createProject();
+    createProject(form);
   };
 
   useEffect(() => {

@@ -64,6 +64,7 @@ export async function runBuildJobAndUpload({
     const isDockerfileBuild =
       buildLanguage === 'docker' || /^\s*docker\s+build\b/i.test(buildCommand);
 
+    // This is if the user is using a Dockerfile and wants us to build the image for them. We run the install and build commands on the host since it's expected that the user is using a Dockerfile and has docker installed locally. In this case, we also support pushing the built image to a registry as part of the build command, and then we save the built image to a tarball and upload it to R2 for the deploy step to consume. This is because Docker images can be large and may exceed Cloudinary's limits.
     if (isDockerfileBuild) {
       if (installCommand.trim()) {
         onStdout?.(`\n$ ${installCommand}\n`);

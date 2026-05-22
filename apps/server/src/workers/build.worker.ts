@@ -74,7 +74,7 @@ export class BuildWorker extends BaseWorker<BuildRequestedJob> {
       appendLog("stdout", "Build successfully done 🥳🙌🏽")
       appendLog("stdout", "Publishing your deployment... 🚀")
 
-      await renderLiteJobsPublisher.publishDeployRequested({
+      const deployJob = {
         correlationId: correlationId ?? randomUUID(),
         requestedAt: new Date().toISOString(),
         projectId: updatedDeployment.projectId,
@@ -90,8 +90,8 @@ export class BuildWorker extends BaseWorker<BuildRequestedJob> {
           containerPort: updatedDeployment.port,
           env: updatedDeployment.env,
         },
-      });
-
+      }
+      await renderLiteJobsPublisher.publishDeployRequested(deployJob);
       logger.info(
         { deploymentId, correlationId, artifactKind: result.artifactKind },
         'Build job finished, deploy enqueued',

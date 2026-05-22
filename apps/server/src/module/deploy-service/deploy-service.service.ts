@@ -184,7 +184,6 @@ export class DeployServiceService {
       rootDir: project.rootDir ?? undefined,
     };
     logger.info({ projectId: project.id, deploymentId: deployment.id, job }, 'Project created and build queued');
-
     await renderLiteJobsPublisher.publishBuildRequested(job);
     logger.info({ projectId: project.id, deploymentId: deployment.id }, 'Build queued');
     return {

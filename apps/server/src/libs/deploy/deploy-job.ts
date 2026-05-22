@@ -106,7 +106,6 @@ export async function deployArtifact(input: DeployJobInput): Promise<DeployJobRe
     onStdout?.(`Downloading artifact for deployment...\n`);
     await downloadArtifact({ url: artifactUrl, explicitKey: artifactKey, destPath: artifactPath, onLog: onStdout });
     onStdout?.(`Artifact downloaded.\n`);
-
     onStdout?.(`Stopping previous container ${containerName} (if any)...\n`);
     await stopAndRemoveContainer(containerName);
 
@@ -130,7 +129,7 @@ export async function deployArtifact(input: DeployJobInput): Promise<DeployJobRe
       }
       imageRef = runtimeImage;
 
-      
+
       const safeRoot = sanitizeRelativeDir(rootDir);
       const safeOut = sanitizeRelativeDir(outDir);
       // If outDir was provided, the zip is *already* that directory's contents.

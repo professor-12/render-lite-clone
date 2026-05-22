@@ -25,9 +25,9 @@ export const useDetectService = (githubUrl: string) => {
   });
 };
 
-export const useCreateProject = (projectData: ImportFormState) => {
+export const useCreateProject = () => {
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async (projectData: ImportFormState) => {
       const { data } = await api.post('/project/create', projectData);
       return data.data;
     },
