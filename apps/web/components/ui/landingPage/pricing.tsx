@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { Check, Minus, ArrowUpRight } from 'lucide-react';
 
 const PLANS = [
   {
@@ -16,7 +17,7 @@ const PLANS = [
       { text: 'Custom domains', included: false },
       { text: 'Team members', included: false },
     ],
-    cta: 'Get started free',
+    cta: 'Get started',
     href: '/auth/login',
     featured: false,
   },
@@ -54,14 +55,9 @@ const PLANS = [
     featured: false,
   },
 ];
-type Feature = {
-  text: string;
-  included: boolean;
-};
-type PriceObject = {
-  monthly: number;
-  annual: number;
-};
+
+type Feature = { text: string; included: boolean };
+type PriceObject = { monthly: number; annual: number };
 type PlanProps = {
   name: string;
   price: PriceObject;
@@ -72,65 +68,72 @@ type PlanProps = {
   featured: boolean;
   badge?: string;
 };
-type PlanCardProps = {
-  plan: PlanProps;
-  annual: boolean;
-};
+type PlanCardProps = { plan: PlanProps; annual: boolean };
 
 function PlanCard({ plan, annual }: PlanCardProps) {
   const price = annual ? plan.price.annual : plan.price.monthly;
 
   return (
     <div
-      className={`relative rounded-xl p-8 border transition-all duration-300 hover:-translate-y-1
+      className={`relative flex flex-col rounded-2xl p-8 transition-all duration-300
         ${
           plan.featured
-            ? 'border-[rgba(232,255,87,0.4)] bg-linear-b from-[rgba(232,255,87,0.05)] to-[#111111] hover:border-[#e8ff57]'
-            : 'border-white/8 bg-[#111111] hover:border-white/[0.14]'
+            ? 'border border-brand-orange/30 bg-gradient-to-b from-brand-orange/[0.06] to-transparent shadow-[0_30px_60px_-30px_rgba(251,92,28,0.3)]'
+            : 'border border-white/[0.08] bg-white/[0.02] hover:border-white/[0.14]'
         }`}
     >
       {plan.badge && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#e8ff57] text-black font-mono text-[10px] font-semibold tracking-[0.08em] uppercase px-3.5 py-1 rounded-full whitespace-nowrap">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-brand-orange px-3.5 py-1 font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-white">
           {plan.badge}
         </div>
       )}
 
-      <p className="font-mono text-[11px] uppercase tracking-widest text-[#888] mb-3">
+      <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.14em] text-brand-muted-soft">
         {plan.name}
       </p>
 
       <div className="mb-1">
-        <span className="text-[38px] font-bold text-white tracking-[-0.04em]">
+        <span className="text-[40px] font-medium tracking-[-0.04em] text-brand-cream">
           {price === 0 ? (
             'Free'
           ) : (
             <>
-              <sup className="text-[20px] font-normal align-super">$</sup>
+              <sup className="align-super text-[18px] font-normal text-brand-muted-soft">
+                $
+              </sup>
               {price}
-              <sub className="text-[14px] text-[#888] font-normal">/mo</sub>
+              <sub className="text-[14px] font-normal text-brand-muted-soft">/mo</sub>
             </>
           )}
         </span>
       </div>
       {annual && price > 0 && (
-        <p className="font-mono text-[11px] text-[#e8ff57] mb-2">
+        <p className="mb-2 font-mono text-[11px] text-brand-orange">
           Save ${(plan.price.monthly - price) * 12}/yr
         </p>
       )}
 
-      <p className="text-[13px] text-[#888] mb-7">{plan.desc}</p>
+      <p className="mb-7 text-[13.5px] leading-relaxed text-brand-muted-soft">
+        {plan.desc}
+      </p>
 
-      <ul className="space-y-0 mb-8">
+      <ul className="mb-8 flex-1 space-y-3">
         {plan.features.map((f) => (
           <li
             key={f.text}
-            className={`flex items-start gap-2.5 py-2 border-b border-white/6 text-[13.5px] last:border-b-0
-              ${f.included ? 'text-[#888]' : 'text-[#555]'}`}
+            className={`flex items-start gap-2.5 text-[13.5px]
+              ${f.included ? 'text-brand-cream/85' : 'text-brand-muted/70 line-through decoration-white/10'}`}
           >
             <span
-              className={`mt-0.5 text-[12px] shrink-0 ${f.included ? 'text-[#e8ff57]' : 'text-white/20'}`}
+              className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${
+                f.included ? 'bg-brand-orange/15 text-brand-orange' : 'bg-white/[0.05] text-brand-muted'
+              }`}
             >
-              {f.included ? '✓' : '—'}
+              {f.included ? (
+                <Check className="h-3 w-3" />
+              ) : (
+                <Minus className="h-3 w-3" />
+              )}
             </span>
             {f.text}
           </li>
@@ -139,14 +142,15 @@ function PlanCard({ plan, annual }: PlanCardProps) {
 
       <Link
         href={plan.href}
-        className={`block w-full text-center py-2.5 rounded-lg text-[13.5px] font-semibold border transition-all
+        className={`group inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-[13.5px] font-medium transition-all
           ${
             plan.featured
-              ? 'bg-[#e8ff57] text-black border-[#e8ff57] hover:bg-[#d4eb4f]'
-              : 'bg-transparent text-[#f0f0f0] border-white/[0.14] hover:border-white/30 hover:bg-white/5'
+              ? 'bg-brand-orange text-white hover:bg-brand-orange/90'
+              : 'border border-white/[0.14] bg-white/[0.02] text-brand-cream hover:border-white/30 hover:bg-white/[0.06]'
           }`}
       >
         {plan.cta}
+        <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-px group-hover:translate-x-px" />
       </Link>
     </div>
   );
@@ -156,39 +160,45 @@ export default function Pricing() {
   const [annual, setAnnual] = useState(false);
 
   return (
-    <section id="pricing" className="py-24 px-6">
-      <div className="max-w-290 mx-auto">
+    <section id="pricing" className="bg-black px-6 py-28">
+      <div className="mx-auto max-w-6xl">
         {/* Header */}
-        <div className="text-center mb-14">
-          <span className="inline-flex items-center gap-1.5 font-mono text-[11px] tracking-[0.08em] uppercase text-[#e8ff57] bg-[rgba(232,255,87,0.08)] border border-[rgba(232,255,87,0.2)] px-3 py-1 rounded-full mb-5">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#e8ff57] animate-pulse" />
+        <div className="mb-14 text-center">
+          <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 font-mono text-[11px] uppercase tracking-[0.12em] text-brand-cream/80">
+            <span className="h-1.5 w-1.5 rounded-full bg-brand-orange" />
             Pricing
           </span>
-          <h2 className="text-[clamp(28px,4vw,44px)] font-bold tracking-[-0.03em] text-white mb-3.5">
-            Simple, honest pricing.
+          <h2 className="mb-4 text-[clamp(32px,4.5vw,52px)] font-medium leading-[1.05] tracking-[-0.035em] text-brand-cream">
+            Simple,{' '}
+            <span className="font-serif-display italic">honest</span> pricing
+            <span className="text-brand-orange">.</span>
           </h2>
-          <p className="text-[#888] text-base max-w-105 mx-auto mb-8">
+          <p className="mx-auto mb-8 max-w-md text-[15px] leading-relaxed text-brand-muted-soft">
             No hidden fees. Scale as you grow — start free, pay only for what you use.
           </p>
 
           {/* Toggle */}
-          <div className="inline-flex items-center gap-3 bg-[#111111] border border-white/8 rounded-full p-1">
+          <div className="inline-flex items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.02] p-1">
             <button
               onClick={() => setAnnual(false)}
-              className={`px-4 py-1.5 rounded-full text-[13px] font-medium transition-all ${
-                !annual ? 'bg-white text-black' : 'text-[#888] hover:text-white'
+              className={`rounded-full px-4 py-1.5 text-[13px] font-medium transition-all ${
+                !annual
+                  ? 'bg-brand-cream text-black'
+                  : 'text-brand-muted-soft hover:text-brand-cream'
               }`}
             >
               Monthly
             </button>
             <button
               onClick={() => setAnnual(true)}
-              className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-[13px] font-medium transition-all ${
-                annual ? 'bg-white text-black' : 'text-[#888] hover:text-white'
+              className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-[13px] font-medium transition-all ${
+                annual
+                  ? 'bg-brand-cream text-black'
+                  : 'text-brand-muted-soft hover:text-brand-cream'
               }`}
             >
               Annual
-              <span className="text-[10px] font-mono text-[#e8ff57] bg-[rgba(232,255,87,0.12)] px-1.5 py-0.5 rounded-full">
+              <span className="rounded-full bg-brand-orange/15 px-1.5 py-0.5 font-mono text-[10px] text-brand-orange">
                 −20%
               </span>
             </button>
@@ -196,14 +206,14 @@ export default function Pricing() {
         </div>
 
         {/* Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-225 mx-auto">
+        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-5 md:grid-cols-3">
           {PLANS.map((plan) => (
             <PlanCard key={plan.name} plan={plan} annual={annual} />
           ))}
         </div>
 
-        <p className="text-center font-mono text-[12px] text-[#555] mt-8">
-          All plans include SSL, CDN, and 99.9% uptime SLA · No credit card required to start
+        <p className="mt-10 text-center font-mono text-[12px] text-brand-muted">
+          All plans include SSL, CDN, and 99.9% uptime SLA · No credit card required
         </p>
       </div>
     </section>

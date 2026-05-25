@@ -10,14 +10,14 @@ import CTA from '@/components/ui/landingPage/cta';
 import Footer from '@/components/ui/landingPage/footer';
 
 export const metadata = {
-  title: 'Render Lite — Deploy Anything, Instantly',
+  title: 'Render Lite — Deploy anything, instantly',
   description:
-    'Instant cloud deployments for modern teams. From git push to live URL in seconds. No DevOps needed.',
+    'The minimalist cloud platform for shipping software at the speed of thought. From git push to live URL — no DevOps required.',
 };
 
 export default function LandingPage() {
   return (
-    <main className="min-h-screen bg-[#0a0a0a]">
+    <main className="min-h-screen bg-black text-brand-cream selection:bg-brand-orange selection:text-white">
       <Navbar />
       <Hero />
       <SocialProof />

@@ -2,75 +2,24 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { ArrowUpRight, X, Menu } from 'lucide-react';
 
 const NAV_LINKS = [
-  { label: 'Features', href: '#features' },
+  { label: 'Platform', href: '#features' },
   { label: 'How it works', href: '#how-it-works' },
   { label: 'Pricing', href: '#pricing' },
   { label: 'About', href: '#about' },
   { label: 'Docs', href: '#' },
 ];
 
-function StarburstLogo() {
+function RenderLiteMark() {
+  // ElevenLabs-style circular dot mark with a refined ring
   return (
-    <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
-      <line x1="14" y1="1" x2="14" y2="8" stroke="white" strokeWidth="1.6" strokeLinecap="round" />
-      <line
-        x1="14"
-        y1="20"
-        x2="14"
-        y2="27"
-        stroke="white"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-      <line x1="1" y1="14" x2="8" y2="14" stroke="white" strokeWidth="1.6" strokeLinecap="round" />
-      <line
-        x1="20"
-        y1="14"
-        x2="27"
-        y2="14"
-        stroke="white"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-      <line
-        x1="4.22"
-        y1="4.22"
-        x2="9.17"
-        y2="9.17"
-        stroke="white"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-      <line
-        x1="18.83"
-        y1="18.83"
-        x2="23.78"
-        y2="23.78"
-        stroke="white"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-      <line
-        x1="23.78"
-        y1="4.22"
-        x2="18.83"
-        y2="9.17"
-        stroke="white"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-      <line
-        x1="9.17"
-        y1="18.83"
-        x2="4.22"
-        y2="23.78"
-        stroke="white"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-    </svg>
+    <span className="relative inline-flex h-7 w-7 items-center justify-center">
+      <span className="absolute inset-0 rounded-full bg-brand-cream" />
+      <span className="absolute inset-[3px] rounded-full bg-black" />
+      <span className="relative h-2 w-2 rounded-full bg-brand-cream" />
+    </span>
   );
 }
 
@@ -88,26 +37,33 @@ export default function Navbar() {
     <>
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled ? 'bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-white/8' : 'bg-transparent'
+          scrolled
+            ? 'bg-black/70 backdrop-blur-xl border-b border-white/[0.06]'
+            : 'bg-transparent'
         }`}
       >
-        <div className="max-w-290 mx-auto px-6 flex items-center justify-between h-15">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2.5 font-bold text-[15px] tracking-tight text-white"
+            className="flex items-center gap-2.5 text-[15px] font-medium tracking-tight text-brand-cream"
           >
-            <StarburstLogo />
-            renderlite
+            <RenderLiteMark />
+            <span className="flex items-baseline gap-1">
+              renderlite
+              <span className="font-serif-display text-brand-orange text-[15px] leading-none">
+                .
+              </span>
+            </span>
           </Link>
 
           {/* Desktop links */}
-          <ul className="hidden md:flex items-center gap-1 list-none">
+          <ul className="hidden items-center gap-0.5 md:flex">
             {NAV_LINKS.map((l) => (
               <li key={l.label}>
                 <Link
                   href={l.href}
-                  className="text-[#888] hover:text-white text-[13.5px] font-normal px-3.5 py-1.5 rounded-lg transition-colors hover:bg-white/6"
+                  className="rounded-full px-3.5 py-1.5 text-[13.5px] font-normal text-brand-muted-soft transition-colors hover:bg-white/[0.05] hover:text-brand-cream"
                 >
                   {l.label}
                 </Link>
@@ -116,49 +72,40 @@ export default function Navbar() {
           </ul>
 
           {/* Desktop actions */}
-          <div className="hidden md:flex items-center gap-2.5">
+          <div className="hidden items-center gap-2 md:flex">
             <Link
               href="/auth/login"
-              className="text-[#f0f0f0] text-[13px] font-medium px-4 py-1.75 rounded-lg border border-white/[0.14] hover:border-white/30 hover:bg-white/5 transition-all"
+              className="rounded-full px-4 py-2 text-[13px] font-medium text-brand-cream transition-colors hover:bg-white/[0.06]"
             >
               Log in
             </Link>
             <Link
               href="/auth/login"
-              className="bg-white text-black text-[13px] font-semibold px-5 py-2 rounded-lg hover:bg-[#e8e8e8] hover:-translate-y-px transition-all"
+              className="group inline-flex items-center gap-1.5 rounded-full bg-brand-cream px-4 py-2 text-[13px] font-medium text-black transition-all hover:bg-white"
             >
-              Get Started
+              Get started
+              <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-px group-hover:translate-x-px" />
             </Link>
           </div>
 
           {/* Hamburger */}
           <button
-            className="md:hidden flex flex-col gap-1.25 p-1.5 cursor-pointer"
+            className="flex items-center justify-center rounded-full p-1.5 text-brand-cream md:hidden"
             onClick={() => setMobileOpen((o) => !o)}
             aria-label="Toggle menu"
           >
-            <span
-              className={`block w-5.5 h-[1.5px] bg-[#f0f0f0] rounded transition-transform duration-300 ${
-                mobileOpen ? 'translate-y-[6.5px] rotate-45' : ''
-              }`}
-            />
-            <span
-              className={`block w-5.5 h-[1.5px] bg-[#f0f0f0] rounded transition-opacity duration-300 ${
-                mobileOpen ? 'opacity-0' : ''
-              }`}
-            />
-            <span
-              className={`block w-5.5 h-[1.5px] bg-[#f0f0f0] rounded transition-transform duration-300 ${
-                mobileOpen ? '-translate-y-[6.5px] -rotate-45' : ''
-              }`}
-            />
+            {mobileOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
           </button>
         </div>
       </nav>
 
       {/* Mobile menu */}
       <div
-        className={`fixed inset-x-0 top-25 z-40 bg-[#0a0a0a] border-b border-white/8 transition-all duration-300 overflow-hidden md:hidden ${
+        className={`fixed inset-x-0 top-16 z-40 overflow-hidden border-b border-white/[0.06] bg-black/95 backdrop-blur-xl transition-all duration-300 md:hidden ${
           mobileOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
@@ -168,23 +115,23 @@ export default function Navbar() {
               key={l.label}
               href={l.href}
               onClick={() => setMobileOpen(false)}
-              className="text-[#f0f0f0] text-[17px] font-medium py-4 border-b border-white/8"
+              className="border-b border-white/[0.06] py-4 text-[16px] font-medium text-brand-cream"
             >
               {l.label}
             </Link>
           ))}
-          <div className="flex flex-col gap-2.5 mt-6 mb-2">
+          <div className="mt-6 mb-2 flex flex-col gap-2.5">
             <Link
               href="/auth/login"
-              className="text-center text-[#f0f0f0] text-[13px] font-medium px-4 py-3 rounded-lg border border-white/[0.14]"
+              className="rounded-full border border-white/[0.14] px-4 py-3 text-center text-[13px] font-medium text-brand-cream"
             >
               Log in
             </Link>
             <Link
               href="/auth/login"
-              className="text-center bg-white text-black text-[13px] font-semibold px-4 py-3 rounded-lg"
+              className="rounded-full bg-brand-cream px-4 py-3 text-center text-[13px] font-semibold text-black"
             >
-              Get Started Free
+              Get started
             </Link>
           </div>
         </div>

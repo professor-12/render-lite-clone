@@ -3,81 +3,98 @@
 @import 'shadcn/tailwind.css';
 @custom-variant dark (&:is(.dark *));
 
-body {
-  font-family: var(--font-sans);
-}
+/* ----------------------------------------------------------
+   ElevenLabs-inspired design tokens
+   – warm cream + pure black palette
+   – subtle warm accent (signature orange)
+   – serif display + grotesque sans + mono mix
+   ---------------------------------------------------------- */
 
 :root {
-  --background: #FAFAFA;
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.5 0.134 242.749);
-  --primary-foreground: oklch(0.977 0.013 236.62);
-  --secondary: oklch(0.967 0.001 286.375);
-  --secondary-foreground: oklch(0.21 0.006 285.885);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.5 0.134 242.749);
-  --accent-foreground: oklch(0.977 0.013 236.62);
-  --destructive: oklch(0.58 0.22 27);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.828 0.111 230.318);
-  --chart-2: oklch(0.685 0.169 237.323);
-  --chart-3: oklch(0.588 0.158 241.966);
-  --chart-4: oklch(0.5 0.134 242.749);
-  --chart-5: oklch(0.443 0.11 240.79);
-  --radius: 0.875rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.588 0.158 241.966);
-  --sidebar-primary-foreground: oklch(0.977 0.013 236.62);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Light surface — warm cream */
+  --background: #f5f4ee;
+  --foreground: #0a0a0a;
+  --card: #ffffff;
+  --card-foreground: #0a0a0a;
+  --popover: #ffffff;
+  --popover-foreground: #0a0a0a;
+  --primary: #0a0a0a;
+  --primary-foreground: #f5f4ee;
+  --secondary: #ebe9df;
+  --secondary-foreground: #0a0a0a;
+  --muted: #ebe9df;
+  --muted-foreground: #666666;
+  --accent: #fb5c1c;
+  --accent-foreground: #ffffff;
+  --destructive: #d63838;
+  --border: rgba(10, 10, 10, 0.08);
+  --input: rgba(10, 10, 10, 0.10);
+  --ring: rgba(10, 10, 10, 0.20);
+  --chart-1: #fb5c1c;
+  --chart-2: #0a0a0a;
+  --chart-3: #a3a3a3;
+  --chart-4: #ebe9df;
+  --chart-5: #666666;
+  --radius: 0.625rem;
+  --sidebar: #f5f4ee;
+  --sidebar-foreground: #0a0a0a;
+  --sidebar-primary: #0a0a0a;
+  --sidebar-primary-foreground: #f5f4ee;
+  --sidebar-accent: #ebe9df;
+  --sidebar-accent-foreground: #0a0a0a;
+  --sidebar-border: rgba(10, 10, 10, 0.06);
+  --sidebar-ring: rgba(10, 10, 10, 0.20);
+
+  /* Brand tokens (used directly across landing/dashboard) */
+  --brand-cream: #f5f4ee;
+  --brand-beige: #ebe9df;
+  --brand-ink: #0a0a0a;
+  --brand-ink-soft: #1a1a1a;
+  --brand-orange: #fb5c1c;
+  --brand-orange-soft: rgba(251, 92, 28, 0.10);
+  --brand-muted: #666666;
+  --brand-muted-soft: #a3a3a3;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.443 0.11 240.79);
-  --primary-foreground: oklch(0.977 0.013 236.62);
-  --secondary: oklch(0.274 0.006 286.033);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.443 0.11 240.79);
-  --accent-foreground: oklch(0.977 0.013 236.62);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.828 0.111 230.318);
-  --chart-2: oklch(0.685 0.169 237.323);
-  --chart-3: oklch(0.588 0.158 241.966);
-  --chart-4: oklch(0.5 0.134 242.749);
-  --chart-5: oklch(0.443 0.11 240.79);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.685 0.169 237.323);
-  --sidebar-primary-foreground: oklch(0.293 0.066 243.157);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: #000000;
+  --foreground: #f5f4ee;
+  --card: #0a0a0a;
+  --card-foreground: #f5f4ee;
+  --popover: #0a0a0a;
+  --popover-foreground: #f5f4ee;
+  --primary: #f5f4ee;
+  --primary-foreground: #0a0a0a;
+  --secondary: #1a1a1a;
+  --secondary-foreground: #f5f4ee;
+  --muted: #141414;
+  --muted-foreground: #a3a3a3;
+  --accent: #fb5c1c;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.10);
+  --ring: rgba(255, 255, 255, 0.20);
+  --chart-1: #fb5c1c;
+  --chart-2: #f5f4ee;
+  --chart-3: #a3a3a3;
+  --chart-4: #1a1a1a;
+  --chart-5: #666666;
+  --sidebar: #000000;
+  --sidebar-foreground: #f5f4ee;
+  --sidebar-primary: #f5f4ee;
+  --sidebar-primary-foreground: #0a0a0a;
+  --sidebar-accent: #0f0f0f;
+  --sidebar-accent-foreground: #f5f4ee;
+  --sidebar-border: rgba(255, 255, 255, 0.06);
+  --sidebar-ring: rgba(255, 255, 255, 0.20);
 }
 
 @theme inline {
   --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-serif: var(--font-serif);
+
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -109,6 +126,15 @@ body {
   --color-card: var(--card);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
+
+  --color-brand-cream: var(--brand-cream);
+  --color-brand-beige: var(--brand-beige);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-ink-soft: var(--brand-ink-soft);
+  --color-brand-orange: var(--brand-orange);
+  --color-brand-muted: var(--brand-muted);
+  --color-brand-muted-soft: var(--brand-muted-soft);
+
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -124,9 +150,15 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    font-feature-settings: 'ss01', 'cv11';
+    letter-spacing: -0.01em;
   }
   html {
     @apply font-sans;
+  }
+  h1, h2, h3, h4, h5 {
+    letter-spacing: -0.025em;
   }
 }
 
@@ -144,8 +176,75 @@ body {
   overflow-x: hidden;
 }
 
+/* ----------------------------------------------------------
+   Typography utilities — ElevenLabs uses a serif italic accent
+   for "magic moments" in their hero & section headings
+   ---------------------------------------------------------- */
 .font-mono {
   font-family: var(--font-mono);
+}
+
+/* ----------------------------------------------------------
+   Lucide icons — hairline stroke for the ElevenLabs / Linear
+   premium feel. Lucide injects class="lucide lucide-{name}".
+   ---------------------------------------------------------- */
+.lucide {
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ----------------------------------------------------------
+   Dashboard typography — premium ElevenLabs-style typeface
+   (Inter Tight body + JetBrains Mono for code/numeric)
+   Scoped to .dashboard-shell so the marketing site is unchanged.
+   ---------------------------------------------------------- */
+.dashboard-shell {
+  font-family: var(--font-dashboard-sans), 'Inter Tight', 'Söhne', 'Inter', system-ui, sans-serif;
+  font-feature-settings: 'ss01', 'ss03', 'cv11', 'cv02';
+  font-optical-sizing: auto;
+  letter-spacing: -0.011em;
+}
+
+.dashboard-shell h1,
+.dashboard-shell h2,
+.dashboard-shell h3,
+.dashboard-shell h4,
+.dashboard-shell h5 {
+  letter-spacing: -0.028em;
+  font-feature-settings: 'ss01', 'ss03';
+}
+
+.dashboard-shell .font-mono,
+.dashboard-shell code,
+.dashboard-shell kbd,
+.dashboard-shell pre,
+.dashboard-shell samp {
+  font-family: var(--font-dashboard-mono), 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  font-feature-settings: 'ss02', 'ss03', 'cv06';
+}
+
+.font-serif-display {
+  font-family: 'Instrument Serif', 'Cormorant Garamond', 'Times New Roman', Georgia, serif;
+  font-style: italic;
+  letter-spacing: -0.02em;
+  font-weight: 400;
+}
+
+/* Subtle film grain overlay used on dark heroes */
+.grain-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.6'/></svg>");
+}
+
+/* Soft warm radial glow */
+.warm-glow {
+  background: radial-gradient(circle at center, rgba(251, 92, 28, 0.18) 0%, transparent 60%);
 }
 
 @layer utilities {
@@ -160,20 +259,31 @@ body {
     }
   }
   @keyframes blink {
-    0%,
-    100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0;
-    }
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  @keyframes pulseRing {
+    0% { transform: scale(0.85); opacity: 0.8; }
+    100% { transform: scale(1.6); opacity: 0; }
+  }
+  @keyframes waveform {
+    0%, 100% { transform: scaleY(0.4); }
+    50% { transform: scaleY(1); }
   }
 
-  .animate-fadeUp {
-    animation: fadeUp 0.6s ease forwards;
+  .animate-fadeUp { animation: fadeUp 0.6s ease forwards; }
+  .animate-blink { animation: blink 1s step-end infinite; }
+  .animate-shimmer {
+    background-size: 200% 100%;
+    animation: shimmer 2.4s linear infinite;
   }
+  .animate-pulse-ring { animation: pulseRing 2s ease-out infinite; }
 
-  .animate-blink {
-    animation: blink 1s step-end infinite;
-  }
+  /* hide scrollbar but keep functionality */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { scrollbar-width: none; }
 }

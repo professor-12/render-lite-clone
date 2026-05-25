@@ -1,3 +1,5 @@
+import { ArrowUpRight, Loader2 } from 'lucide-react';
+
 type DeployProjectFooterProps = {
   canDeploy: boolean;
   deploying: boolean;
@@ -11,18 +13,28 @@ export function DeployProjectFooter({ canDeploy, deploying, onDeploy }: DeployPr
         type="button"
         onClick={onDeploy}
         disabled={!canDeploy || deploying}
-        className={`mt-10 w-full py-3 rounded-lg text-[14px] font-semibold transition-all
-              ${
-                canDeploy && !deploying
-                  ? 'bg-white text-black hover:bg-[#e8e8e8]'
-                  : 'bg-white/[0.06] text-[#555] cursor-not-allowed'
-              }`}
+        className={`group mt-10 inline-flex w-full items-center justify-center gap-2 rounded-full py-3.5 text-[14.5px] font-medium transition-all
+          ${
+            canDeploy && !deploying
+              ? 'bg-brand-orange text-white shadow-[0_10px_40px_-10px_rgba(251,92,28,0.5)] hover:opacity-95'
+              : 'cursor-not-allowed bg-white/[0.06] text-brand-muted'
+          }`}
       >
-        {deploying ? 'Deploying…' : 'Deploy Project'}
+        {deploying ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Deploying…
+          </>
+        ) : (
+          <>
+            Deploy project
+            <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-px group-hover:translate-x-px" />
+          </>
+        )}
       </button>
 
-      <p className="mt-5 text-center text-[12px] text-[#444] font-mono">
-        SSL and CDN included automatically on every deploy.
+      <p className="mt-6 text-center font-mono text-[11.5px] uppercase tracking-[0.14em] text-brand-muted">
+        SSL &amp; CDN included automatically on every deploy.
       </p>
     </>
   );

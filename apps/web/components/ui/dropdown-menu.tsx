@@ -2,7 +2,7 @@
  
  import * as React from 'react';
  import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
- import { RiCheckLine, RiArrowRightSLine } from '@remixicon/react';
+ import { Check, ChevronRight } from 'lucide-react';
  
  import { cn } from '@/lib/utils';
  
@@ -34,7 +34,7 @@
      {...props}
    >
      {children}
-     <RiArrowRightSLine className="ml-auto size-4" />
+     <ChevronRight className="ml-auto size-4" />
    </DropdownMenuPrimitive.SubTrigger>
  ));
  DropdownMenuSubTrigger.displayName = DropdownMenuPrimitive.SubTrigger.displayName;
@@ -111,7 +111,7 @@
    >
      <span className="absolute left-2 flex size-3.5 items-center justify-center">
        <DropdownMenuPrimitive.ItemIndicator>
-         <RiCheckLine className="size-4" />
+         <Check className="size-4" />
        </DropdownMenuPrimitive.ItemIndicator>
      </span>
      {children}
@@ -133,7 +133,7 @@
    >
      <span className="absolute left-2 flex size-3.5 items-center justify-center">
        <DropdownMenuPrimitive.ItemIndicator>
-         <RiCheckLine className="size-4" />
+         <Check className="size-4" />
        </DropdownMenuPrimitive.ItemIndicator>
      </span>
      {children}

@@ -115,11 +115,12 @@ export function ImportPageSuspense() {
   const detectedBuild = detectServiceData?.buildCommand;
 
   return (
-    <div className="min-h-screen pt-12 bg-[#0a0a0a]">
+    <div className="min-h-screen bg-black pt-12 text-brand-cream">
       <ImportHeader />
 
-      <main className="bg-[#0a0a0a] min-h-screen py-12 pt-20">
-        <div className="max-w-2xl w-full mx-auto px-6">
+      <main className="relative min-h-screen overflow-hidden bg-black py-12 pt-20">
+        <div className="pointer-events-none absolute left-1/2 top-0 h-[400px] w-[700px] -translate-x-1/2 rounded-full warm-glow opacity-40" />
+        <div className="relative z-10 mx-auto w-full max-w-2xl px-6">
           <ImportPageIntro />
 
           <RepositorySummary gitUrl={form.gitUrl} branch={form.branch} />

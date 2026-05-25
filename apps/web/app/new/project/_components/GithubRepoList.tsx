@@ -3,7 +3,7 @@
 import { useDebounce } from '@/hooks/useDebounce';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { FiLock, FiSearch } from 'react-icons/fi';
+import { Lock, Search, Check, Plus } from 'lucide-react';
 
 const LANG_COLORS: Record<string, string> = {
   TypeScript: '#3178c6',
@@ -120,51 +120,47 @@ export default function GithubRepoList({ repos }: GithubRepoListProps) {
   return (
     <>
       {/* Search */}
-      <div className="flex items-center gap-2 border border-white/8 bg-[#0a0a0a] rounded-lg px-3 py-2 mb-3 focus-within:ring-2 focus-within:ring-white/10 focus-within:border-white/20 transition-all">
-        <FiSearch className="text-[#555] text-[15px] shrink-0" />
+      <div className="mb-3 flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.02] px-4 py-2 transition-all focus-within:border-brand-orange/40 focus-within:ring-4 focus-within:ring-brand-orange/10">
+        <Search className="h-4 w-4 shrink-0 text-brand-muted" />
         <input
           type="text"
           placeholder="Search repositories…"
           value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-          }}
-          className="flex-1 text-[13px] bg-transparent focus:outline-none placeholder:text-[#444] text-[#f0f0f0]"
+          onChange={(e) => setSearch(e.target.value)}
+          className="flex-1 bg-transparent text-[13px] text-brand-cream placeholder:text-brand-muted focus:outline-none"
           aria-label="Search repositories"
         />
       </div>
 
       {/* Repo list */}
-      <ul className="divide-y divide-white/5">
+      <ul className="divide-y divide-white/[0.05]">
         {filtered.length === 0 && (
-          <li className="py-8 text-center text-[13px] text-[#555]">
+          <li className="py-8 text-center text-[12.5px] leading-relaxed text-brand-muted">
             {repos.length === 0
-              ? 'No repositories found. Connect a GitHub account to import or Install the RenderLite GitHub app to import your repositories.'
-              : 'No repositories match your search. Connect a GitHub account to import or Install the RenderLite GitHub app to import your repositories.'}
+              ? 'No repositories found. Connect a GitHub account to import.'
+              : 'No repositories match your search.'}
           </li>
         )}
         {filtered.map((repo) => (
-          <li key={repo.name} className="flex items-center justify-between py-3 group">
-            <div className="flex items-center gap-2.5 min-w-0">
+          <li key={repo.name} className="group flex items-center justify-between py-3">
+            <div className="flex min-w-0 items-center gap-2.5">
               <span
-                className="w-2.5 h-2.5 rounded-full shrink-0"
-                style={{
-                  background: LANG_COLORS[repo.language ?? ''] ?? '#555',
-                }}
+                className="h-2.5 w-2.5 shrink-0 rounded-full"
+                style={{ background: LANG_COLORS[repo.language ?? ''] ?? '#555' }}
               />
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[13px] font-medium text-[#f0f0f0] truncate">
+                  <span className="truncate text-[13px] font-medium text-brand-cream">
                     {repo.name}
                   </span>
-                  {repo.private && <FiLock className="text-[11px] text-[#555] shrink-0" />}
+                  {repo.private && (
+                    <Lock className="h-3 w-3 shrink-0 text-brand-muted" />
+                  )}
                 </div>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="text-[11px] text-[#555]">{repo.language ?? '—'}</span>
-                  <span className="text-[#444] text-[10px]">·</span>
-                  <span className="text-[11px] text-[#555]">
-                    {formatRelativeTime(repo.updatedAt)}
-                  </span>
+                <div className="mt-0.5 flex items-center gap-1.5 font-mono text-[10.5px] text-brand-muted">
+                  <span>{repo.language ?? '—'}</span>
+                  <span className="opacity-50">·</span>
+                  <span>{formatRelativeTime(repo.updatedAt)}</span>
                 </div>
               </div>
             </div>
@@ -173,13 +169,21 @@ export default function GithubRepoList({ repos }: GithubRepoListProps) {
               type="button"
               onClick={() => handleImport(repo)}
               disabled={importing === repo.name}
-              className={`ml-3 shrink-0 text-[12px] font-medium px-3.5 py-1.5 rounded-md border transition-all
-                ${importing === repo.name
-                  ? 'bg-[rgba(74,222,128,0.08)] border-[rgba(74,222,128,0.2)] text-[#4ade80] cursor-default'
-                  : 'bg-transparent border-white/10 text-[#888] hover:bg-white hover:text-black hover:border-white'
+              className={`ml-3 inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12px] font-medium transition-all
+                ${
+                  importing === repo.name
+                    ? 'cursor-default bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/25'
+                    : 'border border-white/[0.1] bg-transparent text-brand-muted-soft hover:border-brand-cream hover:bg-brand-cream hover:text-black'
                 }`}
             >
-              {importing === repo.name ? '✓ Importing…' : 'Import'}
+              {importing === repo.name ? (
+                <>
+                  <Check className="h-3 w-3" />
+                  Importing…
+                </>
+              ) : (
+                'Import'
+              )}
             </button>
           </li>
         ))}
@@ -189,10 +193,20 @@ export default function GithubRepoList({ repos }: GithubRepoListProps) {
       <button
         type="button"
         disabled={isInstallingApp}
-        className="mt-3 w-full text-[13px] font-medium text-[#a0a0a0] hover:text-white py-2.5 border border-dashed border-white/20 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/30 transition-colors"
+        className="mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-white/[0.14] bg-white/[0.02] py-2.5 text-[12.5px] font-medium text-brand-muted-soft transition-colors hover:border-white/30 hover:bg-white/[0.05] hover:text-brand-cream"
         onClick={handleInstallApp}
       >
-        {isInstallingApp ? '✓ Installing…' : '+ Connect your GitHub account'}
+        {isInstallingApp ? (
+          <>
+            <Check className="h-3.5 w-3.5" />
+            Installing…
+          </>
+        ) : (
+          <>
+            <Plus className="h-3.5 w-3.5" />
+            Connect your GitHub account
+          </>
+        )}
       </button>
     </>
   );

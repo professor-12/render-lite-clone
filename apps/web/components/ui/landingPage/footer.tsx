@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { Github, Twitter } from 'lucide-react';
+import { SiDiscord } from 'react-icons/si';
 
 const FOOTER_COLS = [
   {
@@ -15,101 +17,76 @@ const FOOTER_COLS = [
   },
 ];
 
-function StarburstLogo() {
+function RenderLiteMark() {
   return (
-    <svg width="22" height="22" viewBox="0 0 28 28" fill="none">
-      <line x1="14" y1="1" x2="14" y2="8" stroke="white" strokeWidth="1.6" strokeLinecap="round" />
-      <line
-        x1="14"
-        y1="20"
-        x2="14"
-        y2="27"
-        stroke="white"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-      <line x1="1" y1="14" x2="8" y2="14" stroke="white" strokeWidth="1.6" strokeLinecap="round" />
-      <line
-        x1="20"
-        y1="14"
-        x2="27"
-        y2="14"
-        stroke="white"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-      <line
-        x1="4.22"
-        y1="4.22"
-        x2="9.17"
-        y2="9.17"
-        stroke="white"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-      <line
-        x1="18.83"
-        y1="18.83"
-        x2="23.78"
-        y2="23.78"
-        stroke="white"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-      <line
-        x1="23.78"
-        y1="4.22"
-        x2="18.83"
-        y2="9.17"
-        stroke="white"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-      <line
-        x1="9.17"
-        y1="18.83"
-        x2="4.22"
-        y2="23.78"
-        stroke="white"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-    </svg>
+    <span className="relative inline-flex h-6 w-6 items-center justify-center">
+      <span className="absolute inset-0 rounded-full bg-brand-cream" />
+      <span className="absolute inset-[3px] rounded-full bg-black" />
+      <span className="relative h-1.5 w-1.5 rounded-full bg-brand-cream" />
+    </span>
   );
 }
 
 export default function Footer() {
   return (
-    <footer className="border-t border-white/8 pt-14 pb-8 px-6">
-      <div className="max-w-290 mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+    <footer className="border-t border-white/[0.06] bg-black px-6 pt-16 pb-8">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-14 grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div>
             <Link
               href="/"
-              className="flex items-center gap-2 font-bold text-[15px] tracking-tight text-white mb-3.5"
+              className="mb-4 flex items-center gap-2.5 text-[15px] font-medium tracking-tight text-brand-cream"
             >
-              <StarburstLogo />
-              renderlite
+              <RenderLiteMark />
+              <span className="flex items-baseline gap-1">
+                renderlite
+                <span className="font-serif-display text-brand-orange text-[15px] leading-none">
+                  .
+                </span>
+              </span>
             </Link>
-            <p className="text-[13px] text-[#888] leading-[1.7] max-w-55">
+            <p className="mb-6 max-w-[240px] text-[13.5px] leading-[1.7] text-brand-muted-soft">
               Deploy anything, instantly. The cloud platform built for the speed of modern
               development.
             </p>
+            <div className="flex items-center gap-2">
+              <Link
+                href="#"
+                aria-label="GitHub"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.08] text-brand-muted-soft transition-colors hover:border-white/20 hover:text-brand-cream"
+              >
+                <Github className="h-4 w-4" />
+              </Link>
+              <Link
+                href="#"
+                aria-label="X / Twitter"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.08] text-brand-muted-soft transition-colors hover:border-white/20 hover:text-brand-cream"
+              >
+                <Twitter className="h-4 w-4" />
+              </Link>
+              <Link
+                href="#"
+                aria-label="Discord"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.08] text-brand-muted-soft transition-colors hover:border-white/20 hover:text-brand-cream"
+              >
+                <SiDiscord className="h-4 w-4" />
+              </Link>
+            </div>
           </div>
 
-          {/* Cols */}
+          {/* Columns */}
           {FOOTER_COLS.map((col) => (
             <div key={col.heading}>
-              <h4 className="font-mono text-[11px] uppercase tracking-widesttext-[#888] mb-4">
+              <h4 className="mb-5 font-mono text-[11px] uppercase tracking-[0.14em] text-brand-muted">
                 {col.heading}
               </h4>
-              <ul className="space-y-2.5">
+              <ul className="space-y-3">
                 {col.links.map((link) => (
                   <li key={link}>
                     <Link
                       href="#"
-                      className="text-[13.5px] text-[#888] hover:text-white transition-colors"
+                      className="text-[13.5px] text-brand-muted-soft transition-colors hover:text-brand-cream"
                     >
                       {link}
                     </Link>
@@ -121,9 +98,9 @@ export default function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-6 border-t border-white/8 font-mono text-[12px] text-[#555]">
+        <div className="flex flex-col items-center justify-between gap-3 border-t border-white/[0.06] pt-6 font-mono text-[12px] text-brand-muted sm:flex-row">
           <span>© {new Date().getFullYear()} Render Lite, Inc. All rights reserved.</span>
-          <span>Made with obsession for developer experience.</span>
+          <span>Crafted with obsession for developer experience.</span>
         </div>
       </div>
     </footer>

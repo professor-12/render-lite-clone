@@ -4,24 +4,21 @@ function SkeletonBar({ className }: { className?: string }) {
 
 export function ProjectCardSkeleton() {
   return (
-    <article className="rounded-lg border border-border/60 bg-card p-5">
-      <div className="flex gap-4">
-        <SkeletonBar className="size-11 shrink-0 rounded-md" />
+    <article className="rounded-2xl border border-border bg-card p-5">
+      <div className="flex gap-3.5">
+        <SkeletonBar className="size-10 shrink-0 rounded-xl" />
         <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1 space-y-2">
               <SkeletonBar className="h-4 w-[min(100%,14rem)]" />
               <SkeletonBar className="h-3 w-[min(100%,11rem)]" />
             </div>
-            <div className="flex shrink-0 items-center gap-1">
-              <SkeletonBar className="size-9 rounded-full" />
-              <SkeletonBar className="size-7 rounded-md" />
-            </div>
+            <SkeletonBar className="size-6 rounded-full" />
           </div>
           <div className="mt-3">
-            <SkeletonBar className="h-7 w-[min(100%,220px)] rounded-md" />
+            <SkeletonBar className="h-6 w-[min(100%,220px)] rounded-full" />
           </div>
-          <SkeletonBar className="mt-2 h-3 w-[min(100%,10rem)]" />
+          <SkeletonBar className="mt-3 h-3 w-[min(100%,10rem)]" />
           <div className="mt-3 flex gap-2">
             <SkeletonBar className="h-3 w-14" />
             <SkeletonBar className="h-3 w-20" />
@@ -34,13 +31,14 @@ export function ProjectCardSkeleton() {
 
 export function ProjectsPageSkeleton() {
   return (
-    <div className="mx-auto w-full px-6 py-8">
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <SkeletonBar className="size-4 rounded-sm" />
-          <SkeletonBar className="h-10 w-[min(100%,240px)] rounded-md" />
-        </div>
-        <SkeletonBar className="h-9 w-30 rounded-md" />
+    <div className="mx-auto w-full max-w-6xl px-6 py-8">
+      <div className="mb-8 flex flex-col gap-2">
+        <SkeletonBar className="h-8 w-48" />
+        <SkeletonBar className="h-3 w-64" />
+      </div>
+      <div className="mb-6 flex items-center gap-2.5">
+        <SkeletonBar className="h-9 w-[min(100%,360px)] rounded-full" />
+        <SkeletonBar className="h-9 w-24 rounded-full" />
       </div>
       <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (

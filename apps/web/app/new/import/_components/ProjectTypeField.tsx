@@ -1,6 +1,7 @@
-import { FiBox, FiGlobe } from 'react-icons/fi';
+import { Globe, Server, Check } from 'lucide-react';
 import { SectionLabel } from './SectionLabel';
 import type { ProjectType } from './ImportDeployForm';
+import type { ComponentType } from 'react';
 
 type ProjectTypeFieldProps = {
   value: ProjectType;
@@ -11,19 +12,19 @@ const OPTIONS: Array<{
   type: ProjectType;
   title: string;
   description: string;
-  Icon: typeof FiGlobe;
+  Icon: ComponentType<{ className?: string }>;
 }> = [
   {
     type: 'static',
     title: 'Static site',
-    description: 'HTML/CSS/JS bundle served by nginx. No runtime server.',
-    Icon: FiGlobe,
+    description: 'HTML/CSS/JS bundle served by CDN. No runtime server.',
+    Icon: Globe,
   },
   {
     type: 'dynamic',
     title: 'Web service',
-    description: 'Persistent server (Node, Python, Docker, etc.) with a start command.',
-    Icon: FiBox,
+    description: 'Persistent server (Node, Python, Docker) with a start command.',
+    Icon: Server,
   },
 ];
 
@@ -40,17 +41,24 @@ export function ProjectTypeField({ value, onChange }: ProjectTypeFieldProps) {
               type="button"
               onClick={() => onChange(type)}
               className={[
-                'text-left rounded-lg border px-3.5 py-3 transition-all',
+                'group relative overflow-hidden rounded-2xl border px-4 py-4 text-left transition-all',
                 selected
-                  ? 'border-white/30 bg-[#161616] ring-2 ring-white/10'
-                  : 'border-white/8 bg-[#111111] hover:border-white/15',
+                  ? 'border-brand-orange/40 bg-brand-orange/[0.06] ring-2 ring-brand-orange/15'
+                  : 'border-white/[0.08] bg-white/[0.02] hover:border-white/[0.18] hover:bg-white/[0.04]',
               ].join(' ')}
             >
-              <div className="flex items-center gap-2 mb-1">
-                <Icon className="text-[14px] text-[#888]" aria-hidden />
-                <span className="text-[13px] text-[#f0f0f0] font-medium">{title}</span>
+              {selected && (
+                <span className="absolute right-3 top-3 inline-flex h-5 w-5 items-center justify-center rounded-full bg-brand-orange text-white">
+                  <Check className="h-3 w-3" />
+                </span>
+              )}
+              <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.03] text-brand-orange">
+                <Icon className="h-4 w-4" />
               </div>
-              <p className="text-[12px] text-[#777] leading-snug">{description}</p>
+              <p className="text-[13.5px] font-medium text-brand-cream">{title}</p>
+              <p className="mt-1 text-[12px] leading-snug text-brand-muted-soft">
+                {description}
+              </p>
             </button>
           );
         })}

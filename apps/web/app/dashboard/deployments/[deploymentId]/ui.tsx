@@ -132,19 +132,23 @@ export function DeploymentLogsView({ deploymentId }: { deploymentId: string }) {
     redeploy.error instanceof Error ? redeploy.error.message : null;
 
   return (
-    <div className="mx-auto w-full px-6 py-8">
-      <div className="mb-5 flex items-start justify-between gap-4">
+    <div className="mx-auto w-full max-w-6xl px-6 py-8">
+      <div className="mb-6 flex items-start justify-between gap-4">
         <div className="min-w-0">
           <Link
             href="/dashboard/projects"
-            className="text-[13px] text-muted-foreground transition-colors hover:text-foreground"
+            className="text-[12.5px] text-muted-foreground transition-colors hover:text-foreground"
           >
             ← Projects
           </Link>
-          <h1 className="mt-2 truncate text-[18px] font-semibold text-foreground">
-            {deployment?.project?.name ?? 'Deploying…'}
+          <h1 className="mt-3 truncate text-[26px] font-medium tracking-[-0.025em] text-foreground">
+            {deployment?.project?.name ?? (
+              <span className="font-serif-display italic">Deploying…</span>
+            )}
           </h1>
-          <p className="mt-1 text-[13px] text-[#737373]">Deployment: {deploymentId}</p>
+          <p className="mt-1 font-mono text-[12px] text-muted-foreground">
+            id · {deploymentId}
+          </p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -170,11 +174,14 @@ export function DeploymentLogsView({ deploymentId }: { deploymentId: string }) {
         </div>
       </div>
 
-      <div className="rounded-lg border border-border/60 bg-card">
-        <div className="flex items-center justify-between border-b border-border/60 px-4 py-3">
-          <div className="text-[16px] font-medium text-foreground">Build logs</div>
-          <div className="text-[12px] text-muted-foreground">
-            {loadingLogs ? 'Loading…' : canAutoPoll ? '' : 'Complete'}
+      <div className="overflow-hidden rounded-2xl border border-border bg-card">
+        <div className="flex items-center justify-between border-b border-border bg-muted/30 px-5 py-3">
+          <div className="flex items-center gap-2 text-[14px] font-medium text-foreground">
+            <span className="h-2 w-2 rounded-full bg-[var(--brand-orange)]" />
+            Build logs
+          </div>
+          <div className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+            {loadingLogs ? 'streaming…' : canAutoPoll ? '' : 'complete'}
           </div>
         </div>
 
@@ -190,7 +197,7 @@ export function DeploymentLogsView({ deploymentId }: { deploymentId: string }) {
           </div>
         )}
 
-        <div ref={scrollerRef} className="h-[60vh] overflow-auto bg-muted/20 px-4 py-3">
+        <div ref={scrollerRef} className="h-[60vh] overflow-auto bg-[#0a0a0a] px-5 py-4 text-brand-cream">
           {loadingLogs && rows.length === 0 ? (
             <div className="space-y-2">
               <div className="h-3 w-2/3 animate-pulse rounded bg-muted" />

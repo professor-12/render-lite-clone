@@ -1,14 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { RiGitBranchLine, RiMore2Fill } from '@remixicon/react';
+import { GitBranch, MoreVertical, Check, Loader2 } from 'lucide-react';
 import type { ProjectListItem, ProjectStack, ProjectStatus } from '@/lib/projects/types';
 import { SiGithub, SiNextdotjs, SiNodedotjs, SiVercel, SiVuedotjs } from 'react-icons/si';
 
 export type { ProjectListItem, ProjectStack, ProjectStatus } from '@/lib/projects/types';
 
 function StackIcon({ stack }: { stack: ProjectStack }) {
-  const common = 'size-9';
+  const common = 'h-5 w-5';
   switch (stack) {
     case 'next':
       return <SiNextdotjs className={`${common} text-foreground`} aria-hidden />;
@@ -23,64 +23,32 @@ function StackIcon({ stack }: { stack: ProjectStack }) {
   }
 }
 
-function truncateRepo(path: string, max = 28) {
+function truncateRepo(path: string, max = 32) {
   if (path.length <= max) return path;
   return `${path.slice(0, max - 1)}…`;
 }
 
-function DeploymentStatus({ status }: { status: ProjectStatus }) {
+function StatusBadge({ status }: { status: ProjectStatus }) {
   if (status === 'ready') {
     return (
-      <div
-        className="relative flex size-9 shrink-0 items-center justify-center"
-        title="Deployment ready"
-      >
-        <svg className="absolute size-9 -rotate-90 text-blue-500/45" viewBox="0 0 36 36" aria-hidden>
-          <circle
-            cx="18"
-            cy="18"
-            r="15.5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeDasharray="38 60"
-          />
-        </svg>
-        <span className="relative flex size-7 items-center justify-center rounded-full bg-[#0f0f0f] ring-1 ring-white/10">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
-            <path
-              d="M20 6L9 17l-5-5"
-              stroke="#a3a3a3"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </span>
-      </div>
+      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/[0.12] px-2 py-0.5 text-[10.5px] font-medium text-emerald-500 ring-1 ring-emerald-500/20">
+        <Check className="h-3 w-3" />
+        Ready
+      </span>
     );
   }
-
   if (status === 'building') {
     return (
-      <div
-        className="relative flex size-9 shrink-0 items-center justify-center"
-        title="Building"
-      >
-        <span className="absolute size-9 animate-spin rounded-full border-2 border-transparent border-t-blue-500/80 border-l-blue-500/40" />
-        <span className="relative size-2 rounded-full bg-blue-400" />
-      </div>
+      <span className="inline-flex items-center gap-1 rounded-full bg-[var(--brand-orange)]/[0.12] px-2 py-0.5 text-[10.5px] font-medium text-[var(--brand-orange)] ring-1 ring-[var(--brand-orange)]/20">
+        <Loader2 className="h-3 w-3 animate-spin" />
+        Building
+      </span>
     );
   }
-
   return (
-    <div
-      className="flex size-9 shrink-0 items-center justify-center rounded-full bg-red-500/10 ring-1 ring-red-500/25"
-      title="Failed"
-    >
-      <span className="text-[13px] font-semibold text-red-400">!</span>
-    </div>
+    <span className="inline-flex items-center gap-1 rounded-full bg-red-500/[0.12] px-2 py-0.5 text-[10.5px] font-medium text-red-400 ring-1 ring-red-500/20">
+      Failed
+    </span>
   );
 }
 
@@ -89,50 +57,62 @@ export function ProjectCard({ project }: { project: ProjectListItem }) {
     project;
 
   return (
-    <Link href={`/dashboard/projects/${project.id}`} className="group hover:scale-[98%] block relative rounded-lg border border-border/60 bg-card p-5 transition-all hover:border-border">
-      <div className="flex gap-4">
-        <div className="flex shrink-0 items-start pt-0.5">
-          <div className="flex size-11 items-center justify-center rounded-md bg-muted/30 ring-1 ring-border/40">
-            <StackIcon stack={stack} />
+    <Link
+      href={`/dashboard/projects/${project.id}`}
+      className="group relative block rounded-2xl border border-border bg-card p-5 transition-all hover:border-foreground/15 hover:shadow-[0_10px_30px_-15px_rgba(0,0,0,0.2)]"
+    >
+      {/* Hover accent line */}
+      <div className="pointer-events-none absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-[var(--brand-orange)]/50 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
 
-          </div>
+      <div className="flex items-start gap-3.5">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-muted/40">
+          <StackIcon stack={stack} />
         </div>
 
         <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
-              <Link
-                href={`/dashboard/projects/${project.id}`}
-                className="block truncate font-semibold text-foreground transition-colors hover:text-foreground/90"
-              >
-                {name}
-              </Link>
-              <p className="mt-0.5 truncate text-[13px] text-[#737373]">{deploymentUrl}</p>
+              <div className="flex items-center gap-2">
+                <h3 className="truncate text-[14.5px] font-medium tracking-tight text-foreground">
+                  {name}
+                </h3>
+                <StatusBadge status={status} />
+              </div>
+              <p className="mt-0.5 truncate text-[12.5px] text-muted-foreground">
+                {deploymentUrl}
+              </p>
             </div>
-            <div className="flex shrink-0 items-center gap-1">
-              {/* <DeploymentStatus status={status} /> */}
-              <button
-                type="button"
-                className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
-                aria-label="Project actions"
-              >
-                <RiMore2Fill className="size-5 rotate-90" />
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              className="-mr-1 -mt-1 rounded-full p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              aria-label="Project actions"
+            >
+              <MoreVertical className="h-4 w-4 rotate-90" />
+            </button>
           </div>
 
-          <Link href={"https://github.com/"+repo} target="_blank" rel="noopener noreferrer" onClick={(e) => { e.stopPropagation() }} className="mt-3 inline-flex max-w-full items-center gap-1.5 block rounded-md border border-border/60 bg-muted/20 px-2 py-1 text-[12px] text-muted-foreground">
-            <SiGithub className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
-            <span className="truncate font-mono">{truncateRepo(repo)}</span>
+          <Link
+            href={'https://github.com/' + repo}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="mt-3 inline-flex max-w-full items-center gap-1.5 rounded-full border border-border bg-muted/40 px-2.5 py-1 font-mono text-[11.5px] text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground"
+          >
+            <SiGithub className="h-3 w-3 shrink-0" aria-hidden />
+            <span className="truncate">{truncateRepo(repo)}</span>
           </Link>
 
-          <p className="mt-2 truncate text-[13px] text-[#737373]">{commitMessage}</p>
+          <p className="mt-3 truncate text-[12.5px] text-foreground/80">{commitMessage}</p>
 
-          <p className="mt-3 flex flex-wrap items-center gap-1.5 text-[12px] text-[#525252]">
+          <p className="mt-3 flex flex-wrap items-center gap-1.5 text-[11.5px] text-muted-foreground">
             <span>{relativeTime}</span>
-            <span className="text-[#404040]">on</span>
-            <span className="inline-flex items-center gap-1 text-[#737373]">
-              <RiGitBranchLine className="size-3.5" aria-hidden />
+            <span className="text-muted-foreground/50">·</span>
+            <span className="inline-flex items-center gap-1">
+              <GitBranch className="h-3 w-3" aria-hidden />
               {branch}
             </span>
           </p>

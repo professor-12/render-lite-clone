@@ -3,14 +3,14 @@
 import Link from 'next/link';
 import { useMemo } from 'react';
 import {
-  RiEarthLine,
-  RiErrorWarningLine,
-  RiGitBranchLine,
-  RiGitCommitLine,
-  RiMore2Fill,
-  RiTimeLine,
-  RiUser3Line,
-} from '@remixicon/react';
+  Globe,
+  AlertTriangle,
+  GitBranch,
+  GitCommitHorizontal,
+  MoreVertical,
+  Clock,
+  User,
+} from 'lucide-react';
 import { useGetProject } from '@/app/queries/projects.query';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -63,17 +63,20 @@ export function ProjectDeploymentView({ projectId }: { projectId: string }) {
   return (
     <div>
       <div className="space-y-3">
-        <section className="overflow-hidden rounded-lg border border-border/60 bg-card shadow-sm">
-          <div className="flex items-center justify-between border-b border-border/60 px-4 py-3">
-            <div className="text-[14px] font-medium text-foreground">Deployment Details</div>
+        <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+          <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
+            <div className="flex items-center gap-2 text-[14px] font-medium text-foreground">
+              <span className="h-2 w-2 rounded-full bg-[var(--brand-orange)]" />
+              Latest deployment
+            </div>
 
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" disabled className="gap-2">
-                <RiTimeLine className="size-4" aria-hidden />
+                <Clock className="size-4" aria-hidden />
                 Redeploy
               </Button>
               <Button variant="outline" size="icon" aria-label="Deployment actions" disabled>
-                <RiMore2Fill className="size-4" aria-hidden />
+                <MoreVertical className="size-4" aria-hidden />
               </Button>
             </div>
           </div>
@@ -81,26 +84,26 @@ export function ProjectDeploymentView({ projectId }: { projectId: string }) {
           <div className="grid gap-4 p-4 lg:grid-cols-[360px_1fr]">
             <div
               className={[
-                'rounded-md border p-4',
+                'rounded-xl border p-4',
                 status === 'build_failed' || status === 'deploy_failed'
                   ? 'border-rose-500/30 bg-rose-500/5'
-                  : 'border-border/60 bg-muted/20',
+                  : 'border-border bg-muted/30',
               ].join(' ')}
             >
               <div className="flex items-center gap-2 text-[13px] font-medium text-foreground">
                 {status === 'build_failed' ? (
                   <>
-                    <RiErrorWarningLine className="size-4 text-rose-500" aria-hidden />
+                    <AlertTriangle className="size-4 text-rose-500" aria-hidden />
                     Build Failed
                   </>
                 ) : status === 'deploy_failed' ? (
                   <>
-                    <RiErrorWarningLine className="size-4 text-rose-500" aria-hidden />
+                    <AlertTriangle className="size-4 text-rose-500" aria-hidden />
                     Deploy Failed
                   </>
                 ) : (
                   <>
-                    <RiTimeLine className="size-4 text-muted-foreground" aria-hidden />
+                    <Clock className="size-4 text-muted-foreground" aria-hidden />
                     {isLoading ? 'Checking build…' : 'Build'}
                   </>
                 )}
@@ -122,7 +125,7 @@ export function ProjectDeploymentView({ projectId }: { projectId: string }) {
                   <div className="text-[12px] text-muted-foreground">Created</div>
                   <div className="mt-1 flex items-center gap-2 text-[13px] text-foreground">
                     <span className="inline-flex size-5 items-center justify-center rounded-full bg-muted/40">
-                      <RiUser3Line className="size-3.5 text-muted-foreground" aria-hidden />
+                      <User className="size-3.5 text-muted-foreground" aria-hidden />
                     </span>
                     <span className="truncate">{fmtDate(latest?.createdAt)}</span>
                   </div>
@@ -145,7 +148,7 @@ export function ProjectDeploymentView({ projectId }: { projectId: string }) {
                 <div className="min-w-0">
                   <div className="text-[12px] text-muted-foreground">Duration</div>
                   <div className="mt-1 flex items-center gap-2 text-[13px] text-foreground">
-                    <RiTimeLine className="size-4 text-muted-foreground" aria-hidden />
+                    <Clock className="size-4 text-muted-foreground" aria-hidden />
                     {fmtDurationMs(
                       latest?.createdAt && latest?.updatedAt
                         ? new Date(latest.updatedAt).getTime() - new Date(latest.createdAt).getTime()
@@ -156,7 +159,7 @@ export function ProjectDeploymentView({ projectId }: { projectId: string }) {
                 <div className="min-w-0">
                   <div className="text-[12px] text-muted-foreground">Environment</div>
                   <div className="mt-1 flex items-center gap-2 text-[13px] text-foreground">
-                    <RiEarthLine className="size-4 text-muted-foreground" aria-hidden />
+                    <Globe className="size-4 text-muted-foreground" aria-hidden />
                     Preview
                   </div>
                 </div>
@@ -172,7 +175,7 @@ export function ProjectDeploymentView({ projectId }: { projectId: string }) {
                         target="_blank"
                         className="flex min-w-0 items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
                       >
-                        <RiEarthLine className="size-4 shrink-0" aria-hidden />
+                        <Globe className="size-4 shrink-0" aria-hidden />
                         <span className="truncate">{project.domain}</span>
                       </Link>
                     ) : (
@@ -183,7 +186,7 @@ export function ProjectDeploymentView({ projectId }: { projectId: string }) {
                         href={`/dashboard/deployments/${deploymentId}`}
                         className="flex min-w-0 items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
                       >
-                        <RiTimeLine className="size-4 shrink-0" aria-hidden />
+                        <Clock className="size-4 shrink-0" aria-hidden />
                         <span className="truncate">View build logs</span>
                       </Link>
                     ) : null}
@@ -194,11 +197,11 @@ export function ProjectDeploymentView({ projectId }: { projectId: string }) {
                   <div className="text-[12px] text-muted-foreground">Source</div>
                   <div className="mt-2 space-y-2 text-[13px]">
                     <div className="flex items-center gap-2 text-muted-foreground">
-                      <RiGitBranchLine className="size-4 shrink-0" aria-hidden />
+                      <GitBranch className="size-4 shrink-0" aria-hidden />
                       <span className="truncate">{project?.branch ?? '—'}</span>
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground">
-                      <RiGitCommitLine className="size-4 shrink-0" aria-hidden />
+                      <GitCommitHorizontal className="size-4 shrink-0" aria-hidden />
                       <span className="truncate font-mono">{deploymentId ? deploymentId.slice(0, 7) : '—'}</span>
                     </div>
                   </div>
@@ -211,8 +214,8 @@ export function ProjectDeploymentView({ projectId }: { projectId: string }) {
           </div>
         </section>
 
-        <aside className="rounded-lg border border-border/60 bg-card">
-          <div className="border-b border-border/60 px-4 py-3 text-[16px] font-medium text-foreground">
+        <aside className="rounded-2xl border border-border bg-card">
+          <div className="border-b border-border px-5 py-3.5 text-[14px] font-medium text-foreground">
             Summary
           </div>
           <dl className="space-y-3 px-4 py-4 text-[14px]">

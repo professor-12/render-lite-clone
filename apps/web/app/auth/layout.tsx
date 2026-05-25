@@ -1,17 +1,51 @@
-import Image from 'next/image';
+import Link from 'next/link';
 import React from 'react';
-import svgLogo from '@/public/logo.svg';
+
+function RenderLiteMark() {
+  return (
+    <span className="relative inline-flex h-6 w-6 items-center justify-center">
+      <span className="absolute inset-0 rounded-full bg-brand-cream" />
+      <span className="absolute inset-[3px] rounded-full bg-black" />
+      <span className="relative h-1.5 w-1.5 rounded-full bg-brand-cream" />
+    </span>
+  );
+}
+
 const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="flex flex-col items-center text-white bg-[#060B10] w-full min-h-screen">
-      <div className="w-[90%] mx-auto py-6 flex items-center shrink-0">
-        <Image className="w-28" src={svgLogo} alt="Render Lite Logo" width={1200} height={1200} />
-      </div>
-      <main className="flex-1 flex w-full items-center justify-center">
+    <div className="relative flex min-h-screen w-full flex-col items-center overflow-hidden bg-black text-brand-cream grain-overlay">
+      {/* Soft glow */}
+      <div className="pointer-events-none absolute left-1/2 top-1/3 h-[640px] w-[640px] -translate-x-1/2 -translate-y-1/2 rounded-full warm-glow opacity-60" />
+
+      <header className="relative z-10 mx-auto flex w-[90%] shrink-0 items-center justify-between py-6">
+        <Link
+          href="/"
+          className="flex items-center gap-2.5 text-[15px] font-medium tracking-tight text-brand-cream"
+        >
+          <RenderLiteMark />
+          <span className="flex items-baseline gap-1">
+            renderlite
+            <span className="font-serif-display text-brand-orange text-[15px] leading-none">
+              .
+            </span>
+          </span>
+        </Link>
+        <Link
+          href="/"
+          className="text-[13px] text-brand-muted-soft transition-colors hover:text-brand-cream"
+        >
+          ← Back to home
+        </Link>
+      </header>
+
+      <main className="relative z-10 flex w-full flex-1 items-center justify-center">
         {children}
       </main>
-      <footer className="w-[90%] mx-auto py-6 flex items-center justify-center shrink-0">
-        <h1 className="font-bold text-xl text-white/90">Render Lite</h1>
+
+      <footer className="relative z-10 mx-auto flex w-[90%] shrink-0 items-center justify-center py-6">
+        <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-brand-muted">
+          © {new Date().getFullYear()} Render Lite
+        </p>
       </footer>
     </div>
   );

@@ -1,5 +1,11 @@
-import type { IconType } from 'react-icons';
-import { FiLayers, FiPackage, FiTerminal } from 'react-icons/fi';
+import type { ComponentType } from 'react';
+import { Layers, Package, Terminal } from 'lucide-react';
+
+const FiLayers = Layers;
+const FiPackage = Package;
+const FiTerminal = Terminal;
+
+type IconType = ComponentType<{ className?: string }>;
 import { HintText } from './HintText';
 import { SectionLabel } from './SectionLabel';
 import type { DetectedBuildConfig } from './detected-build.types';
@@ -36,10 +42,10 @@ function CommandTextarea({
   icon: IconType;
 }) {
   return (
-    <div className="px-4 py-4">
+    <div className="px-5 py-5">
       <SectionLabel htmlFor={id}>{label}</SectionLabel>
-      <div className="flex items-start gap-2 rounded-lg border border-white/8 bg-[#0a0a0a] px-3.5 py-2.5 focus-within:ring-2 focus-within:ring-white/10 focus-within:border-white/20 transition-all">
-        <Icon className="mt-2 text-[15px] text-[#555] shrink-0" aria-hidden />
+      <div className="flex items-start gap-2.5 rounded-xl border border-white/[0.08] bg-black/40 px-4 py-3 transition-all focus-within:border-brand-orange/40 focus-within:ring-4 focus-within:ring-brand-orange/10">
+        <Icon className="mt-1.5 h-4 w-4 shrink-0 text-brand-muted" aria-hidden />
         <textarea
           id={id}
           value={value}
@@ -47,7 +53,7 @@ function CommandTextarea({
           placeholder={placeholder}
           spellCheck={false}
           rows={4}
-          className="min-h-21 w-full resize-y bg-transparent text-[13px] font-mono leading-relaxed text-[#f0f0f0] placeholder:text-[#444] focus:outline-none"
+          className="min-h-21 w-full resize-y bg-transparent font-mono text-[13px] leading-relaxed text-brand-cream placeholder:text-brand-muted focus:outline-none"
         />
       </div>
       <HintText>{hint}</HintText>
@@ -73,37 +79,39 @@ export function BuildInstallStartSection({
   return (
     <div className="space-y-4">
       {isDockerRuntime ? (
-        <div className="rounded-xl border border-cyan-500/25 bg-linear-to-b from-cyan-950/35 via-[#0a1412] to-[#0a0a0a] px-4 py-4">
+        <div className="rounded-2xl border border-brand-orange/25 bg-gradient-to-b from-brand-orange/[0.08] to-transparent px-5 py-5">
           <div className="flex items-start gap-3">
             <div
-              className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-cyan-500/30 bg-cyan-500/10"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brand-orange/30 bg-brand-orange/10"
               aria-hidden
             >
-              <FiLayers className="text-[18px] text-cyan-300/90" />
+              <FiLayers className="h-4 w-4 text-brand-orange" />
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="text-[14px] font-medium tracking-tight text-cyan-100/95">Dockerfile detected</h3>
-              <p className="mt-1 text-[12px] leading-relaxed text-cyan-200/55">
-                We suggested Docker build and run commands. You can edit them below, or switch to custom install / build /
-                start commands if you deploy without Docker on this platform.
+              <h3 className="text-[14px] font-medium tracking-tight text-brand-cream">
+                Dockerfile detected
+              </h3>
+              <p className="mt-1 text-[12.5px] leading-relaxed text-brand-muted-soft">
+                We suggested Docker build &amp; run commands. Edit them below, or switch to custom
+                install / build / start commands if you deploy without Docker.
               </p>
               {detectedBuild.reason.length > 0 ? (
-                <ul className="mt-2.5 list-disc space-y-0.5 pl-4 text-[11px] text-cyan-200/45">
+                <ul className="mt-2.5 list-disc space-y-0.5 pl-4 text-[11.5px] text-brand-muted">
                   {detectedBuild.reason.map((r) => (
                     <li key={r}>{r}</li>
                   ))}
                 </ul>
               ) : null}
-              <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-lg border border-white/6 bg-black/20 px-3 py-3 transition-colors hover:bg-black/30">
+              <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-xl border border-white/[0.06] bg-black/30 px-3.5 py-3 transition-colors hover:bg-black/50">
                 <input
                   type="checkbox"
                   checked={useDockerCommands}
                   onChange={(e) => onUseDockerCommandsChange(e.target.checked)}
-                  className="mt-0.5 size-4 shrink-0 rounded border-white/25 bg-[#111] text-cyan-500 focus:ring-2 focus:ring-cyan-500/40 focus:ring-offset-0 focus:ring-offset-transparent"
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-white/25 bg-black accent-brand-orange focus:ring-2 focus:ring-brand-orange/40"
                 />
-                <span className="text-[13px] leading-snug text-[#d4e8e4]">
-                  <span className="font-medium text-cyan-50/95">Use Docker build &amp; run</span>
-                  <span className="mt-0.5 block text-[12px] font-normal text-cyan-200/45">
+                <span className="text-[13px] leading-snug text-brand-cream/90">
+                  <span className="font-medium">Use Docker build &amp; run</span>
+                  <span className="mt-0.5 block text-[12px] font-normal text-brand-muted-soft">
                     Uncheck to use your own install, build, and start commands (e.g. Node, Python).
                   </span>
                 </span>
@@ -115,15 +123,16 @@ export function BuildInstallStartSection({
 
       {isDockerRuntime && !useDockerCommands ? (
         <div
-          className="rounded-lg border border-amber-500/20 bg-amber-950/25 px-4 py-3 text-[12px] leading-relaxed text-amber-100/85"
+          className="rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-4 py-3 text-[12.5px] leading-relaxed text-amber-200/90"
           role="status"
         >
-          Custom commands are active. Turn <strong className="font-medium">Use Docker build &amp; run</strong> back on to
-          restore the detected Docker commands.
+          Custom commands are active. Turn{' '}
+          <strong className="font-medium text-amber-100">Use Docker build &amp; run</strong> back on
+          to restore the detected Docker commands.
         </div>
       ) : null}
 
-      <div className="rounded-xl border border-white/8 bg-[#111111] divide-y divide-white/6 overflow-hidden">
+      <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.02] divide-y divide-white/[0.06]">
         <CommandTextarea
           id="import-install-command"
           label="Install command"

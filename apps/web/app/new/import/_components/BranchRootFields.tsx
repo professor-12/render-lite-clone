@@ -1,4 +1,4 @@
-import { FiFolder, FiGitBranch } from 'react-icons/fi';
+import { Folder, GitBranch } from 'lucide-react';
 import { SectionLabel } from './SectionLabel';
 
 type BranchRootFieldsProps = {
@@ -18,27 +18,27 @@ export function BranchRootFields({
     <div className="grid grid-cols-2 gap-4">
       <div>
         <SectionLabel>Branch</SectionLabel>
-        <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-lg border border-white/8 bg-[#111111] focus-within:ring-2 focus-within:ring-white/10 focus-within:border-white/20 transition-all">
-          <FiGitBranch className="text-[15px] text-[#555] shrink-0" />
+        <div className="flex items-center gap-2.5 rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3 transition-all focus-within:border-brand-orange/40 focus-within:ring-4 focus-within:ring-brand-orange/10">
+          <GitBranch className="h-4 w-4 shrink-0 text-brand-muted" />
           <input
             type="text"
             value={branch}
             onChange={(e) => onBranchChange(e.target.value)}
             placeholder="main"
-            className="flex-1 text-[13px] bg-transparent text-[#f0f0f0] placeholder:text-[#444] focus:outline-none"
+            className="flex-1 bg-transparent text-[14px] text-brand-cream placeholder:text-brand-muted focus:outline-none"
           />
         </div>
       </div>
       <div>
-        <SectionLabel>Root Directory</SectionLabel>
-        <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-lg border border-white/8 bg-[#111111] focus-within:ring-2 focus-within:ring-white/10 focus-within:border-white/20 transition-all">
-          <FiFolder className="text-[15px] text-[#555] shrink-0" />
+        <SectionLabel>Root directory</SectionLabel>
+        <div className="flex items-center gap-2.5 rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3 transition-all focus-within:border-brand-orange/40 focus-within:ring-4 focus-within:ring-brand-orange/10">
+          <Folder className="h-4 w-4 shrink-0 text-brand-muted" />
           <input
             type="text"
             value={rootDir}
             onChange={(e) => onRootDirChange(e.target.value)}
             placeholder="./"
-            className="flex-1 text-[13px] bg-transparent text-[#f0f0f0] placeholder:text-[#444] focus:outline-none"
+            className="flex-1 bg-transparent text-[14px] text-brand-cream placeholder:text-brand-muted focus:outline-none"
           />
         </div>
       </div>

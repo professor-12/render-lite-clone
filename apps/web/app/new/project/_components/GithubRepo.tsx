@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { FiGithub } from 'react-icons/fi';
+import { Github } from 'lucide-react';
 import GithubRepoList from './GithubRepoList';
 import ConnectGitHubPopupButton from './ConnectGitHubPopupButton';
 import type { RepoItem } from './GithubRepoList';
@@ -91,19 +91,19 @@ export default async function GithubRepo({
   } catch (error) {
     return (
       <div className="p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <FiGithub className="text-[17px] text-[#888]" />
-          <h2 className="text-[13px] font-semibold text-[#f0f0f0] tracking-tight">
-            Import Git Repository
+        <div className="mb-5 flex items-center gap-2">
+          <Github className="h-4 w-4 text-brand-cream" />
+          <h2 className="text-[13px] font-medium tracking-tight text-brand-cream">
+            Import Git repository
           </h2>
         </div>
-        <div className="rounded-lg border border-red-500/20 bg-red-500/5 px-4 py-3 text-[13px] text-red-400">
-          <p className="mt-1 text-red-400/90">
+        <div className="rounded-xl border border-red-500/20 bg-red-500/[0.06] px-4 py-3 text-[13px]">
+          <p className="font-medium text-red-300">Could not load repositories</p>
+          <p className="mt-1 text-[12.5px] text-red-400/90">
             {error instanceof Error ? error.message : 'An unexpected error occurred.'}
           </p>
-          <p className="font-medium text-xs">Could not load repositories</p>
         </div>
-        <ConnectGitHubPopupButton className="mt-3 cursor-pointer w-full text-[13px] font-medium text-[#a0a0a0] hover:text-white py-2.5 border border-dashed border-white/20 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/30 transition-colors disabled:opacity-70">
+        <ConnectGitHubPopupButton className="mt-4 inline-flex w-full cursor-pointer items-center justify-center rounded-xl border border-dashed border-white/[0.14] bg-white/[0.02] py-2.5 text-[12.5px] font-medium text-brand-muted-soft transition-colors hover:border-white/30 hover:bg-white/[0.05] hover:text-brand-cream disabled:opacity-70">
           + Connect your GitHub account
         </ConnectGitHubPopupButton>
       </div>
@@ -112,11 +112,16 @@ export default async function GithubRepo({
 
   return (
     <div className="p-6">
-      <div className="flex items-center gap-2 mb-4">
-        <FiGithub className="text-[17px] text-[#888]" />
-        <h2 className="text-[13px] font-semibold text-[#f0f0f0] tracking-tight">
-          Import Git Repository
-        </h2>
+      <div className="mb-5 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Github className="h-4 w-4 text-brand-cream" />
+          <h2 className="text-[13px] font-medium tracking-tight text-brand-cream">
+            Import Git repository
+          </h2>
+        </div>
+        <span className="font-mono text-[10px] uppercase tracking-wider text-brand-muted">
+          {repos.length} repos
+        </span>
       </div>
       <GithubRepoList repos={repos} />
     </div>

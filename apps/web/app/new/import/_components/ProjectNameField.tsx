@@ -9,15 +9,20 @@ type ProjectNameFieldProps = {
 export function ProjectNameField({ value, onChange }: ProjectNameFieldProps) {
   return (
     <div>
-      <SectionLabel>Project Name</SectionLabel>
+      <SectionLabel>Project name</SectionLabel>
       <input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="my-awesome-app"
-        className="w-full px-3.5 py-2.5 rounded-lg border border-white/8 bg-[#111111] text-[13px] text-[#f0f0f0] placeholder:text-[#444] focus:outline-none focus:ring-2 focus:ring-white/10 focus:border-white/20 transition-all"
+        className="w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3 text-[14px] text-brand-cream placeholder:text-brand-muted transition-all focus:border-brand-orange/40 focus:outline-none focus:ring-4 focus:ring-brand-orange/10"
       />
-      <HintText>Used as the subdomain: {value || 'your-project'}.bigdev.uk</HintText>
+      <HintText>
+        Used as the subdomain:{' '}
+        <code className="font-mono text-brand-cream/70">
+          {value || 'your-project'}.bigdev.uk
+        </code>
+      </HintText>
     </div>
   );
 }

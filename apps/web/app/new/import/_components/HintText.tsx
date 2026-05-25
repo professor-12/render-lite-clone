@@ -3,5 +3,5 @@ type HintTextProps = {
 };
 
 export function HintText({ children }: HintTextProps) {
-  return <p className="mt-1.5 text-[11px] text-[#555]">{children}</p>;
+  return <p className="mt-2 text-[11.5px] leading-relaxed text-brand-muted">{children}</p>;
 }
