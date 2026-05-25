@@ -8,6 +8,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { rabbitMQService } from './libs/rabbitmq';
 import { renderLiteWorkerRegistry } from './workers/workers.module';
+import { socketService } from './module/socket';
 import path from 'path';
 dotEnv.config();
 const PORT = process.env.PORT || 8080;
@@ -43,10 +44,15 @@ const server = app.listen(PORT, () => {
     .catch((error) => {
       logger.warn({ err: error }, 'RabbitMQ unavailable at startup. Workers will remain paused.');
     });
+
+  socketService.init(server).catch((err) => {
+    logger.error({ err }, 'Failed to initialize Socket.IO');
+  });
 });
 
 async function shutdown(signal: string) {
   logger.info({ signal }, 'Shutting down server');
+  await socketService.close();
   await rabbitMQService.close();
   server.close(() => {
     logger.info('HTTP server closed');
