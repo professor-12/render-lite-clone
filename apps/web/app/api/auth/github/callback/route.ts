@@ -46,13 +46,13 @@ export async function GET(request: NextRequest) {
       `
       <script>
         window.opener.postMessage(
-          { type: "oauth_error", error: "${error || 'server_misconfiguration'}" },
+          { type: "oauth_error", error: "${error || 'Something went wrong. Please try again later.'}" },
           window.location.origin
         );
         window.close();
       </script>
       `,
-      { headers: { 'Content-Type': 'text/html' } },
+    { headers: { 'Content-Type': 'text/html' } },
     );
   }
 
@@ -65,12 +65,12 @@ export async function GET(request: NextRequest) {
     });
   } catch (err) {
     console.error('[GithubCallback] Failed to reach auth backend:', err);
-    loginUrl.searchParams.set('error', 'server_unreachable');
+    loginUrl.searchParams.set('error', 'Something went wrong. Please try again later.');
     return new NextResponse(
       `
       <script>
         window.opener.postMessage(
-          { type: "oauth_error", error: "${error || 'server_unreachable'}" },
+          { type: "oauth_error", error: "${error || 'Something went wrong. Please try again later.'}" },
           window.location.origin
         );
         window.close();

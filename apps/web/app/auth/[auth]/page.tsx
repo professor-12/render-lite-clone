@@ -21,6 +21,7 @@ export default function AuthPage({ params }: { params: Promise<{ auth: string }>
     redirect('/auth/login');
   }
 
+  
   const isLogin = auth === 'login';
 
   useEffect(() => {
@@ -61,8 +62,8 @@ export default function AuthPage({ params }: { params: Promise<{ auth: string }>
       popupCheckRef.current = setInterval(() => {
         if (popup.closed) {
           if (popupCheckRef.current) clearInterval(popupCheckRef.current);
-          popupCheckRef.current = null;
-          setIsAuthenticating(false);
+         popupCheckRef.current = null;
+         setIsAuthenticating(false)  
         }
       }, 200);
     } else {
@@ -82,7 +83,7 @@ export default function AuthPage({ params }: { params: Promise<{ auth: string }>
             <h1 className="text-[28px] font-medium leading-tight tracking-[-0.025em] text-brand-cream">
               {isLogin ? (
                 <>
-                  Welcome <span className="font-serif-display italic">back</span>
+                  Welcome <span className="">back</span>
                 </>
               ) : (
                 <>
@@ -147,7 +148,7 @@ export default function AuthPage({ params }: { params: Promise<{ auth: string }>
           </div>
 
           {/* Footer note */}
-          <p className="mt-7 text-center font-mono text-[10.5px] uppercase tracking-wider text-brand-muted">
+          <p className="mt-7 text-center text-[10.5px] tracking-wider text-brand-muted">
             By continuing, you agree to our terms & privacy policy.
           </p>
         </div>

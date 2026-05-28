@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo } from 'react';
 import {
   Globe,
   AlertTriangle,
@@ -14,6 +13,8 @@ import {
 import { useGetProject } from '@/app/queries/projects.query';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useProjectStream } from '@/hooks/useProjectStream';
+import { useDeploymentStream } from '@/hooks/useDeploymentStream';
 
 function statusLabel(status: string) {
   if (status === 'live') return 'Ready';
@@ -47,10 +48,10 @@ export function ProjectDeploymentView({ projectId }: { projectId: string }) {
   const deploymentId = latest?.id ?? null;
   const status = latest?.status ?? 'queued_build';
 
-  const domain = useMemo(() => {
-    if (!project) return null;
-    return project.domain ?? null;
-  }, [project]);
+  // Realtime: project updates refresh the project query, and listening on the
+  // latest deployment ensures the surface refreshes the moment its status flips.
+  useProjectStream(projectId);
+  useDeploymentStream(deploymentId);
 
   if (isError) {
     return (

@@ -1,5 +1,7 @@
 import { AppError } from '../../errors/Apperror';
-import { logger } from '../../libs/logger';
+import { createLogger } from '../../libs/logger';
+
+const logger = createLogger({ module: 'github-app' });
 import { asyncHandler } from '../../middlewares/asyncHandler';
 import GithubAppService from './github_app.service';
 
@@ -39,7 +41,7 @@ export class GithuAppController {
     const { 'renderLite-access': jwt_token } = req.cookies;
 
     const { q: repo_name_query } = req.query;
-    console.log({ repo_name_query });
+    logger.debug({ repo_name_query }, 'Listing installation repos');
 
     if (!jwt_token) {
       res.status(401).json({

@@ -12,7 +12,7 @@ export default function NewProjectContent({
   return (
     <main className="relative min-h-screen overflow-hidden bg-black py-16 pt-24">
       {/* Warm glow */}
-      <div className="pointer-events-none absolute left-1/2 top-0 h-[500px] w-[800px] -translate-x-1/2 rounded-full warm-glow opacity-50" />
+      {/* <div className="pointer-events-none absolute left-1/2 top-0 h-[500px] w-[800px] -translate-x-1/2 rounded-full warm-glow opacity-50" /> */}
 
       <div className="relative z-10 mx-auto w-full max-w-5xl px-6">
         <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 font-mono text-[11px] uppercase tracking-[0.12em] text-brand-cream/80">

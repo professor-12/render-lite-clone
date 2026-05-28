@@ -1,7 +1,11 @@
+import { randomUUID } from 'node:crypto';
 import amqp, { type Channel, type ChannelModel, type ConsumeMessage, type Options } from 'amqplib';
-import { logger } from './logger';
+import { getLogContext, logger, runWithLogContext } from './logger';
 
 type ConsumerHandler<T> = (payload: T, rawMessage: ConsumeMessage) => Promise<void> | void;
+
+const REQ_HEADER = 'x-request-id';
+const JOB_HEADER = 'x-job-id';
 
 export class RabbitMQService {
   private connection: ChannelModel | null = null;
@@ -76,11 +80,25 @@ export class RabbitMQService {
     const channel = await this.connect();
     await this.assertQueue(queueName);
 
+    const ctx = getLogContext();
+    const jobId = randomUUID();
+    const headers = {
+      ...(options.headers ?? {}),
+      [REQ_HEADER]: ctx.requestId ?? options.headers?.[REQ_HEADER] ?? jobId,
+      [JOB_HEADER]: jobId,
+    };
+
     const serializedPayload = typeof payload === 'string' ? payload : JSON.stringify(payload);
-    const sent = channel.sendToQueue(queueName, Buffer.from(serializedPayload), options);
+    const sent = channel.sendToQueue(queueName, Buffer.from(serializedPayload), {
+      ...options,
+      headers,
+      messageId: jobId,
+    });
 
     if (!sent) {
-      logger.warn({ queueName }, 'RabbitMQ internal write buffer is full');
+      logger.warn({ queueName, jobId }, 'RabbitMQ internal write buffer is full');
+    } else {
+      logger.debug({ queueName, jobId, requestId: headers[REQ_HEADER] }, 'Job published');
     }
   }
 
@@ -97,15 +115,21 @@ export class RabbitMQService {
       async (message: ConsumeMessage | null) => {
         if (!message) return;
 
-        try {
-          const content = message.content.toString();
-          const parsed = this.tryParseJson<T>(content);
-          await handler(parsed, message);
-          channel.ack(message);
-        } catch (error) {
-          logger.error({ err: error, queueName }, 'RabbitMQ consumer handler failed');
-          channel.nack(message, false, false);
-        }
+        const headers = message.properties.headers ?? {};
+        const requestId = String(headers[REQ_HEADER] ?? '') || undefined;
+        const jobId = String(headers[JOB_HEADER] ?? message.properties.messageId ?? '') || undefined;
+
+        await runWithLogContext({ requestId, jobId }, async () => {
+          try {
+            const content = message.content.toString();
+            const parsed = this.tryParseJson<T>(content);
+            await handler(parsed, message);
+            channel.ack(message);
+          } catch (error) {
+            logger.error({ err: error, queueName, jobId }, 'RabbitMQ consumer handler failed');
+            channel.nack(message, false, false);
+          }
+        });
       },
       options,
     );

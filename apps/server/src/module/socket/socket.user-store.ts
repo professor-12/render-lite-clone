@@ -7,7 +7,7 @@ const ONLINE_USERS_KEY = 'socket:online:users';
 const TTL_SECONDS = 60 * 60 * 24;
 
 export class SocketUserStore {
-  constructor(private readonly redis: Redis) {}
+  constructor(private readonly redis: Redis) { }
 
   async addSocket(userId: string, socketId: string): Promise<number> {
     const pipeline = this.redis.multi();

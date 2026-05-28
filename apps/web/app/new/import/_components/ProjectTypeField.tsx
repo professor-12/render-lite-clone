@@ -14,19 +14,19 @@ const OPTIONS: Array<{
   description: string;
   Icon: ComponentType<{ className?: string }>;
 }> = [
-  {
-    type: 'static',
-    title: 'Static site',
-    description: 'HTML/CSS/JS bundle served by CDN. No runtime server.',
-    Icon: Globe,
-  },
-  {
-    type: 'dynamic',
-    title: 'Web service',
-    description: 'Persistent server (Node, Python, Docker) with a start command.',
-    Icon: Server,
-  },
-];
+    {
+      type: 'static',
+      title: 'Static site',
+      description: '',
+      Icon: Globe,
+    },
+    {
+      type: 'dynamic',
+      title: 'Web service',
+      description: '',
+      Icon: Server,
+    },
+  ];
 
 export function ProjectTypeField({ value, onChange }: ProjectTypeFieldProps) {
   return (
@@ -47,15 +47,11 @@ export function ProjectTypeField({ value, onChange }: ProjectTypeFieldProps) {
                   : 'border-white/[0.08] bg-white/[0.02] hover:border-white/[0.18] hover:bg-white/[0.04]',
               ].join(' ')}
             >
-              {selected && (
-                <span className="absolute right-3 top-3 inline-flex h-5 w-5 items-center justify-center rounded-full bg-brand-orange text-white">
-                  <Check className="h-3 w-3" />
-                </span>
-              )}
+
               <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.03] text-brand-orange">
                 <Icon className="h-4 w-4" />
               </div>
-              <p className="text-[13.5px] font-medium text-brand-cream">{title}</p>
+              <p className="text-[13.5px] font-medium text-brand-cream mt-6">{title}</p>
               <p className="mt-1 text-[12px] leading-snug text-brand-muted-soft">
                 {description}
               </p>

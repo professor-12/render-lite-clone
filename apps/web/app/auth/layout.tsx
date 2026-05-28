@@ -25,16 +25,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <RenderLiteMark />
           <span className="flex items-baseline gap-1">
             renderlite
-            <span className="font-serif-display text-brand-orange text-[15px] leading-none">
-              .
-            </span>
           </span>
-        </Link>
-        <Link
-          href="/"
-          className="text-[13px] text-brand-muted-soft transition-colors hover:text-brand-cream"
-        >
-          ← Back to home
         </Link>
       </header>
 

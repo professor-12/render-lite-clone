@@ -1,7 +1,9 @@
 import { prisma } from '../../libs/prisma';
 import { AuthService } from '../auth/auth.service';
 import { AppError } from '../../errors/Apperror';
-import { logger } from '../../libs/logger';
+import { createLogger } from '../../libs/logger';
+
+const logger = createLogger({ module: 'github-app' });
 import type { GithubInstallationAccount } from '../../types/github.types';
 import { githubClientService } from '../github_client/github_client.module';
 
@@ -30,13 +32,12 @@ export default class GithubAppService {
   ) {}
 
   async createInstallation(installationId: number, userId: string, _code: string) {
-    console.log({ installationId });
-    logger.debug({ installationId }, 'Creating GitHub installation');
+    logger.debug({ installationId, userId }, 'Creating GitHub installation');
     const data = await githubClientService.getAppInstallation(installationId);
-    logger.debug({ data }, 'GitHub installation data');
+    logger.debug({ installationId }, 'GitHub installation data fetched');
 
     if (!data.account) {
-      console.log('Installation has no linked account');
+      logger.warn({ installationId }, 'Installation has no linked account');
       throw new AppError('Installation has no linked account', 400);
     }
     const {

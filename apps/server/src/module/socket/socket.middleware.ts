@@ -5,32 +5,42 @@ import { verifyJwt } from '../../utlis';
 import { logger } from '../../libs/logger';
 import type { AppSocket } from './socket.types';
 
-const COOKIE_NAME = process.env.AUTH_COOKIE_NAME ?? 'access_token';
+const COOKIE_NAME = process.env.AUTH_COOKIE_NAME ?? 'renderLite-access';
 
 export const authenticateSocket = (
   socket: AppSocket,
   next: (err?: ExtendedError) => void,
 ) => {
   try {
-    const rawCookie = socket.handshake.headers.cookie;
-    const handshakeAuth = socket.handshake.auth as { token?: string } | undefined;
 
-    let token: string | undefined;
+    const cookies = socket.request.headers.cookie;
+    logger.debug({
+      socketId: socket.id,
+      cookies
+    }, 'Authenticating socket connection');
 
-    if (rawCookie) {
-      const parsed = cookie.parse(rawCookie);
-      token = parsed[COOKIE_NAME];
-    }
-    if (!token && handshakeAuth?.token) {
-      token = handshakeAuth.token;
+    let token: string | undefined
+
+    if (cookies) {
+      const parsedCookies = cookies.split(';').find((c) => c.trim().startsWith(`${COOKIE_NAME}=`));
+      token = parsedCookies ? parsedCookies.split('=')[1] : undefined;
     }
 
     if (!token) {
+      logger.error({
+        "message": "Unauthorized: missing token",
+        "socketId": socket.id,
+      })
       return next(new Error('Unauthorized: missing token'));
     }
 
+
     const { userId } = verifyJwt(token);
     if (!userId) {
+      logger.error({
+        "message": "Invalid token payload",
+        "socketId": socket.id,
+      })
       return next(new Error('Unauthorized: invalid token payload'));
     }
 

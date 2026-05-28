@@ -1,13 +1,14 @@
-import { logger } from '../../libs/logger';
+import { createLogger } from '../../libs/logger';
 import { asyncHandler } from '../../middlewares/asyncHandler';
 import DetectServiceService from './detect-service.service';
+
+const log = createLogger({ module: 'detect-service' });
 
 class DetectServiceController {
   constructor(private readonly detectServiceService: DetectServiceService) {}
 
   public detectService = asyncHandler(async (req, res) => {
-    console.log(req);
-    logger.debug({ body: req.body }, 'Detect service request');
+    log.debug({ body: req.body }, 'Detect service request');
     const githubUrl = req.body?.githubUrl ?? '';
 
     if (!githubUrl) {

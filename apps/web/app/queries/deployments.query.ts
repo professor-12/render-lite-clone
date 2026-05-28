@@ -35,13 +35,17 @@ export const useGetDeployment = (deploymentId: string) => {
       };
     },
     enabled: !!deploymentId,
-    refetchInterval: 1500,
   });
 };
 
-export const fetchDeploymentLogs = async (deploymentId: string, cursor?: string | null) => {
+export const fetchDeploymentLogs = async (
+  deploymentId: string,
+  cursor?: string | null,
+  signal?: AbortSignal,
+) => {
   const { data } = await api.get(`/project/deployments/${deploymentId}/logs`, {
     params: cursor ? { cursor } : undefined,
+    signal,
   });
   return data.data as DeploymentLogsResponse;
 };

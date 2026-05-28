@@ -1,1 +1,2 @@
+#!/usr/bin/env bash
 echo "Please wait.." && pnpm lint && echo "Building codebase" && pnpm build

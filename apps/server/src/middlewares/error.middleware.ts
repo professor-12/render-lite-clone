@@ -2,6 +2,7 @@ import { type NextFunction, type Request, type Response } from 'express';
 import { logger } from './httplogger.middleware';
 import { AppError } from '../errors/Apperror';
 import { ZodError } from 'zod';
+import { captureException } from '../libs/sentry';
 
 export const errorHandler = async (
   error: unknown,
@@ -36,7 +37,11 @@ export const errorHandler = async (
     });
   }
 
-  logger.error({ err: error }, 'Unhandled error');
+  logger.error(
+    { err: error, method: req.method, url: req.originalUrl, requestId: req.id },
+    'Unhandled error',
+  );
+  captureException(error, { method: req.method, url: req.originalUrl });
   return res.status(500).json({
     message: 'Something went wrong!!!',
     data: null,

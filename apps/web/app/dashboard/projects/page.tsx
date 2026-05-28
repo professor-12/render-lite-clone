@@ -7,12 +7,12 @@ export default async function ProjectsPage() {
   const projects = await getProjects();
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-6 py-8">
+    <div className="mx-auto w-full px-6 py-8">
       {/* Page header */}
       <div className="mb-8 flex flex-col gap-2">
         <div className="flex items-center justify-between gap-4">
           <h1 className="text-[28px] font-medium tracking-[-0.025em] text-foreground">
-            Your <span className="font-serif-display italic">projects</span>
+            Your <span className="">projects</span>
           </h1>
           <Link
             href="/new/project"
@@ -30,7 +30,7 @@ export default async function ProjectsPage() {
 
       {/* Toolbar */}
       <div className="mb-6 flex flex-wrap items-center gap-2.5">
-        <div className="relative flex-1 min-w-[240px] max-w-md">
+        <div className="relative flex-1 min-w-[240px] max-w-xl">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"

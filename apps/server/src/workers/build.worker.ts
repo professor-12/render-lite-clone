@@ -7,6 +7,7 @@ import { isBuildLanguage, type BuildLanguage } from '../libs/build/build-languag
 import { BaseWorker } from './base.worker';
 import { type BuildRequestedJob, RenderLiteQueue } from './contracts';
 import { renderLiteJobsPublisher } from './renderlite-jobs.publisher';
+import { socketService } from '../module/socket';
 
 export class BuildWorker extends BaseWorker<BuildRequestedJob> {
   protected readonly queueName = RenderLiteQueue.BUILD_REQUESTED;
@@ -30,20 +31,38 @@ export class BuildWorker extends BaseWorker<BuildRequestedJob> {
       const parts =
         trimmed.length > 4000 ? [trimmed.slice(0, 4000), trimmed.slice(4000)] : [trimmed];
       for (const p of parts) {
-        const logs = await prisma.deploymentLog.create({
-          data: {
+        await prisma.deploymentLog.create({
+          data: { deploymentId, type, log: p },
+        });
+        try {
+          socketService.emitToDeployment(deploymentId, 'deployment:log', {
             deploymentId,
             type,
-            log: p,
-          },
-        });
+            chunk: p,
+          });
+        } catch {
+          // Socket layer may not be ready yet; logs are still persisted.
+        }
+      }
+    };
 
-        logger.info({ logs }, 'Log created');
+    const setStatus = async (status: string) => {
+      await prisma.deployment.update({ where: { id: deploymentId }, data: { status } });
+      try {
+        socketService.emitToDeployment(deploymentId, 'deployment:status', {
+          deploymentId,
+          status,
+        });
+        socketService.emitToProject(deployment.projectId, 'project:updated', {
+          projectId: deployment.projectId,
+        });
+      } catch {
+        // No-op when socket layer is not initialized.
       }
     };
 
     try {
-      await prisma.deployment.update({ where: { id: deploymentId }, data: { status: 'building' } });
+      await setStatus('building');
 
       const buildLanguage: BuildLanguage = isBuildLanguage(payload.buildLanguage)
         ? payload.buildLanguage
@@ -71,8 +90,17 @@ export class BuildWorker extends BaseWorker<BuildRequestedJob> {
         },
         select: { projectId: true, startCommand: true, rootDir: true, outDir: true, env: true, port: true },
       });
-      appendLog("stdout", "Build successfully done 🥳🙌🏽")
-      appendLog("stdout", "Publishing your deployment... 🚀")
+      try {
+        socketService.emitToDeployment(deploymentId, 'deployment:status', {
+          deploymentId,
+          status: 'queued_deploy',
+        });
+        socketService.emitToProject(updatedDeployment.projectId, 'project:updated', {
+          projectId: updatedDeployment.projectId,
+        });
+      } catch {}
+      await appendLog('stdout', 'Build successfully done 🥳🙌🏽');
+      await appendLog('stdout', 'Publishing your deployment... 🚀');
 
       const deployJob = {
         correlationId: correlationId ?? randomUUID(),
@@ -99,10 +127,7 @@ export class BuildWorker extends BaseWorker<BuildRequestedJob> {
       );
     } catch (err) {
       logger.error({ err, deploymentId, correlationId }, 'Build job failed');
-      await prisma.deployment.update({
-        where: { id: deploymentId },
-        data: { status: 'build_failed' },
-      });
+      await setStatus('build_failed');
       await appendLog(
         'stderr',
         `\nBuild failed: ${err instanceof Error ? err.message : String(err)}\n`,

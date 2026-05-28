@@ -64,14 +64,14 @@ export class AuthController {
         httpOnly: true,
         secure: getEnv('NODE_ENV') === 'production',
         sameSite: 'lax',
-        maxAge: 1000 * 60 * 30, // 24 hours
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
       });
 
       res.cookie('renderLite-refresh', refresh_token, {
         httpOnly: true,
         secure: getEnv('NODE_ENV') === 'production',
         sameSite: 'lax',
-        maxAge: 1000 * 60 * 60 * 24 * 30,
+        maxAge: 24 * 60 * 60 * 1000 * 30,
         path: '/refresh',
       });
       return res.json({

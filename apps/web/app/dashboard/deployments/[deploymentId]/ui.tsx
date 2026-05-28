@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
   fetchDeploymentLogs,
@@ -11,6 +11,9 @@ import {
 import { TbReload } from "react-icons/tb";
 
 import { Button } from '@/components/ui/button';
+import { useDeploymentStream } from '@/hooks/useDeploymentStream';
+import { useSocket } from '@/providers/SocketProvider';
+import type { DeploymentLogPayload } from '@/lib/socket/types';
 
 function statusLabel(status: string) {
   if (status === 'live') return 'Live';
@@ -36,6 +39,9 @@ function statusTone(status: string) {
   return 'border-border/60 bg-muted/40 text-muted-foreground';
 }
 
+let liveRowCounter = 0;
+const nextLiveRowId = (deploymentId: string) => `live:${deploymentId}:${++liveRowCounter}`;
+
 function LogLine({ row }: { row: DeploymentLogRow }) {
   return (
     <div className="flex gap-3 py-1">
@@ -51,20 +57,21 @@ function LogLine({ row }: { row: DeploymentLogRow }) {
 
 export function DeploymentLogsView({ deploymentId }: { deploymentId: string }) {
   const { data: deployment } = useGetDeployment(deploymentId);
+  const { isConnected } = useSocket();
   const [rows, setRows] = useState<DeploymentLogRow[]>([]);
   const [loadingLogs, setLoadingLogs] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  /** Pagination cursor — kept in a ref so polling does not reset the interval on every batch. */
-  const logCursorRef = useRef<string | null>(null);
+  /** Tracks log ids seen so socket events don't duplicate rows from the initial fetch. */
+  const seenIdsRef = useRef<Set<string>>(new Set());
 
   const atBottomRef = useRef(true);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
 
-  const canAutoPoll = useMemo(() => {
-    const s = deployment?.status;
-    return s !== 'live' && s !== 'build_failed' && s !== 'deploy_failed';
-  }, [deployment?.status]);
+  const isTerminal =
+    deployment?.status === 'live' ||
+    deployment?.status === 'build_failed' ||
+    deployment?.status === 'deploy_failed';
 
   useEffect(() => {
     const el = scrollerRef.current;
@@ -80,44 +87,64 @@ export function DeploymentLogsView({ deploymentId }: { deploymentId: string }) {
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-    logCursorRef.current = null;
+    const controller = new AbortController();
+    seenIdsRef.current = new Set();
     setRows([]);
     setLoadingLogs(true);
     setError(null);
 
-    const tick = async () => {
+    (async () => {
+      const MAX_PAGES = 100;
       try {
-        const data = await fetchDeploymentLogs(deploymentId, logCursorRef.current);
-        if (cancelled) return;
+        let cursor: string | null = null;
+        for (let page = 0; page < MAX_PAGES; page++) {
+          const data = await fetchDeploymentLogs(deploymentId, cursor, controller.signal);
+          if (controller.signal.aborted) return;
 
-        if (data.logs.length > 0) {
-          setRows((prev) => [...prev, ...data.logs]);
-          const lastId = data.logs[data.logs.length - 1]?.id;
-          if (lastId) logCursorRef.current = lastId;
+          if (data.logs.length > 0) {
+            setRows((prev) => {
+              const next = [...prev];
+              for (const row of data.logs) {
+                if (!seenIdsRef.current.has(row.id)) {
+                  seenIdsRef.current.add(row.id);
+                  next.push(row);
+                }
+              }
+              return next;
+            });
+          }
+          if (!data.nextCursor) break;
+          cursor = data.nextCursor;
         }
-        setError(null);
+        if (!controller.signal.aborted) setError(null);
       } catch (e) {
-        if (cancelled) return;
+        if (controller.signal.aborted) return;
         setError(e instanceof Error ? e.message : 'Failed to load logs');
       } finally {
-        // Always clear "Connecting…" after a response — avoids getting stuck when Strict Mode
-        // aborts an in-flight request before `cancelled` is false again.
-        setLoadingLogs(false);
+        if (!controller.signal.aborted) setLoadingLogs(false);
       }
-    };
-
-    void tick();
-    const id = window.setInterval(() => {
-      if (!canAutoPoll) return;
-      void tick();
-    }, 1200);
+    })();
 
     return () => {
-      cancelled = true;
-      window.clearInterval(id);
+      controller.abort();
     };
-  }, [deploymentId, canAutoPoll]);
+  }, [deploymentId]);
+
+  const onLog = useCallback(
+    (payload: DeploymentLogPayload) => {
+      const row: DeploymentLogRow = {
+        id: nextLiveRowId(payload.deploymentId),
+        type: payload.type,
+        log: payload.chunk,
+        createdAt: new Date().toISOString(),
+      };
+      seenIdsRef.current.add(row.id);
+      setRows((prev) => [...prev, row]);
+    },
+    [],
+  );
+
+  useDeploymentStream(deploymentId, { onLog });
 
   useEffect(() => {
     if (!atBottomRef.current) return;
@@ -143,7 +170,7 @@ export function DeploymentLogsView({ deploymentId }: { deploymentId: string }) {
           </Link>
           <h1 className="mt-3 truncate text-[26px] font-medium tracking-[-0.025em] text-foreground">
             {deployment?.project?.name ?? (
-              <span className="font-serif-display italic">Deploying…</span>
+              <span className="">Deploying…</span>
             )}
           </h1>
           <p className="mt-1 font-mono text-[12px] text-muted-foreground">
@@ -181,7 +208,13 @@ export function DeploymentLogsView({ deploymentId }: { deploymentId: string }) {
             Build logs
           </div>
           <div className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-            {loadingLogs ? 'streaming…' : canAutoPoll ? '' : 'complete'}
+            {loadingLogs
+              ? 'loading…'
+              : isTerminal
+                ? 'complete'
+                : isConnected
+                  ? 'live'
+                  : 'reconnecting…'}
           </div>
         </div>
 

@@ -33,7 +33,6 @@ export const useGetProject = (projectId: string) => {
       const { data } = await api.get(`/project/${projectId}`);
       return data.data as ProjectDetail;
     },
-    refetchInterval: 3000,
   });
 };
 

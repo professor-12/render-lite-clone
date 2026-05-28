@@ -82,18 +82,9 @@ const SideBar = () => {
       className="relative flex h-full shrink-0 flex-col border-r border-border bg-sidebar p-3"
       style={{ width }}
     >
-      <Link
-        href="/new/project"
-        className="group mb-3 inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-4 py-2 text-[13px] font-medium text-background transition-all hover:opacity-90"
-      >
-        <Plus className="h-4 w-4" />
-        New project
-      </Link>
-
       <p className="px-3 pt-2 pb-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
         Workspace
       </p>
-
       <nav className="flex flex-col gap-0.5">
         {SIDEBAR_ITEMS.map((item) => {
           const active = pathname?.startsWith(item.href);
@@ -118,18 +109,6 @@ const SideBar = () => {
         })}
       </nav>
 
-      <div className="mt-auto rounded-xl border border-border bg-muted/40 p-4">
-        <p className="mb-1 text-[12.5px] font-medium text-foreground">Free plan</p>
-        <p className="mb-3 text-[11.5px] leading-relaxed text-muted-foreground">
-          You&apos;re on the Hobby tier. Upgrade for unlimited projects.
-        </p>
-        <Link
-          href="/#pricing"
-          className="inline-flex items-center gap-1 rounded-full bg-[var(--brand-orange)] px-3 py-1 text-[11.5px] font-medium text-white transition-all hover:opacity-90"
-        >
-          Upgrade
-        </Link>
-      </div>
 
       <button
         type="button"

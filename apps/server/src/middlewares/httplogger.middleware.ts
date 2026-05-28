@@ -1,11 +1,13 @@
 import pinoHttp from 'pino-http';
 import { logger } from '../libs/logger';
+import { recordHttpRequest } from '../libs/metrics';
 
 export { logger };
 
 export const httpLogger = pinoHttp({
   logger,
   autoLogging: true,
+  genReqId: (req) => (req as { id?: string }).id ?? '',
 
   customSuccessMessage(req, res) {
     return `${req.method} ${req.url} ${res.statusCode}`;
@@ -29,6 +31,7 @@ export const httpLogger = pinoHttp({
   serializers: {
     req(req) {
       return {
+        id: req.id,
         method: req.method,
         url: req.url,
         query: req.query,
@@ -47,5 +50,10 @@ export const httpLogger = pinoHttp({
     if (err || res.statusCode >= 500) return 'error';
     if (res.statusCode >= 400) return 'warn';
     return 'info';
+  },
+
+  customProps(req, res) {
+    recordHttpRequest(req.method ?? 'UNKNOWN', res.statusCode);
+    return {};
   },
 });

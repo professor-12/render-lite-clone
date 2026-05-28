@@ -5,6 +5,7 @@ import { isBuildLanguage, type BuildLanguage } from '../libs/build/build-languag
 import { deployArtifact } from '../libs/deploy/deploy-job';
 import { BaseWorker } from './base.worker';
 import { type DeployRequestedJob, RenderLiteQueue } from './contracts';
+import { socketService } from '../module/socket';
 
 export class DeployWorker extends BaseWorker<DeployRequestedJob> {
   protected readonly queueName = RenderLiteQueue.DEPLOY_REQUESTED;
@@ -39,14 +40,26 @@ export class DeployWorker extends BaseWorker<DeployRequestedJob> {
         await prisma.deploymentLog.create({
           data: { deploymentId, type, log: p },
         });
+        try {
+          socketService.emitToDeployment(deploymentId, 'deployment:log', {
+            deploymentId,
+            type,
+            chunk: p,
+          });
+        } catch {}
       }
     };
 
+    const setStatus = async (status: string) => {
+      await prisma.deployment.update({ where: { id: deploymentId }, data: { status } });
+      try {
+        socketService.emitToDeployment(deploymentId, 'deployment:status', { deploymentId, status });
+        socketService.emitToProject(projectId, 'project:updated', { projectId });
+      } catch {}
+    };
+
     try {
-      await prisma.deployment.update({
-        where: { id: deploymentId },
-        data: { status: 'deploying' },
-      });
+      await setStatus('deploying');
 
       const buildLanguage: BuildLanguage = isBuildLanguage(payload.buildLanguage)
         ? payload.buildLanguage
@@ -71,10 +84,7 @@ export class DeployWorker extends BaseWorker<DeployRequestedJob> {
         onStderr: (c) => void appendLog('stderr', c),
       });
 
-      await prisma.deployment.update({
-        where: { id: deploymentId },
-        data: { status: 'live' },
-      });
+      await setStatus('live');
 
       // Persist the host port on the project so the proxy/domain layer can route to it.
       if (result.hostPort != null) {
@@ -96,10 +106,7 @@ export class DeployWorker extends BaseWorker<DeployRequestedJob> {
       );
     } catch (err) {
       logger.error({ err, deploymentId, projectId, correlationId }, 'Deploy job failed');
-      await prisma.deployment.update({
-        where: { id: deploymentId },
-        data: { status: 'deploy_failed' },
-      });
+      await setStatus('deploy_failed');
       await appendLog(
         'stderr',
         `\nDeploy failed: ${err instanceof Error ? err.message : String(err)}\n`,

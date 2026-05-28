@@ -4,12 +4,11 @@ import jwt from 'jsonwebtoken';
 import { encrypt, getEnv } from '../../utlis';
 import { logger } from '../../middlewares/httplogger.middleware';
 export class AuthService {
-  constructor(private githubService: GithubService) {}
+  constructor(private githubService: GithubService) { }
 
   public async registerUser({ code }: { code: string }) {
     const accessToken = await this.githubService.getGithubToken(code);
 
-    // 2️⃣ Fetch GitHub user
     const githubUser = await this.githubService.getGithubUser(accessToken);
     logger.debug(
       { githubUser: { id: githubUser.id, login: githubUser.login } },
@@ -30,7 +29,6 @@ export class AuthService {
     });
 
     if (existingAccount) {
-      // 🔁 Update token + basic profile info
       await prisma.account.update({
         where: {
           provider_providerAccountId: {

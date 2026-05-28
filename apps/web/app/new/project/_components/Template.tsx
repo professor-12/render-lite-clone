@@ -53,7 +53,6 @@ export default function Template() {
 
   const handleDeploy = (name: string) => {
     setDeploying(name);
-    setTimeout(() => setDeploying(null), 1500);
   };
 
   return (
@@ -104,10 +103,9 @@ export default function Template() {
               onClick={() => handleDeploy(tpl.name)}
               disabled={deploying === tpl.name}
               className={`ml-3 inline-flex flex-shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12px] font-medium transition-all
-                ${
-                  deploying === tpl.name
-                    ? 'cursor-default bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/25'
-                    : 'border border-white/[0.1] bg-transparent text-brand-muted-soft opacity-0 group-hover:opacity-100 hover:bg-brand-cream hover:text-black hover:border-brand-cream'
+                ${deploying === tpl.name
+                  ? 'cursor-default bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/25'
+                  : 'border border-white/[0.1] bg-transparent text-brand-muted-soft opacity-0 group-hover:opacity-100 hover:bg-brand-cream hover:text-black hover:border-brand-cream'
                 }`}
             >
               {deploying === tpl.name ? (

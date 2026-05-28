@@ -44,7 +44,7 @@ export default function RootLayout({ children }: Props) {
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
-          enableSystem
+          forcedTheme="dark"
           disableTransitionOnChange
         >
           <QueryProvider>{children}</QueryProvider>
