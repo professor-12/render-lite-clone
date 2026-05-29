@@ -14,6 +14,7 @@ import { renderLiteWorkerRegistry } from './workers/workers.module';
 import { socketService } from './module/socket';
 import path from 'path';
 import { captureException, flushSentry, initSentry } from './libs/sentry';
+import { staticHostMiddleware } from './module/static-host/static-host.middleware';
 
 const PORT = process.env.PORT || 8080;
 
@@ -35,6 +36,7 @@ async function bootstrap() {
     }),
   );
   app.use(httpLogger);
+  app.use(staticHostMiddleware());
   app.use(express.static(path.join(__dirname, 'public')));
   app.use(defaultJsonContentType);
   app.use(express.urlencoded({ extended: true }));

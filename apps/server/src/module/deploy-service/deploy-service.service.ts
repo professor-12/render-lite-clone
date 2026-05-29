@@ -1,10 +1,32 @@
-import { randomUUID } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import { prisma } from '../../libs/prisma';
 import type { CreateProjectBody } from '../../validators/deploy.validator';
 import { logger } from '../../libs/logger';
 import { mapProjectToListItem } from '../../utils/project-list.mapper';
 import type { BuildLanguage } from '../../libs/build/build-language';
 import { renderLiteJobsPublisher } from '../../workers/renderlite-jobs.publisher';
+
+function slugifyDomainBase(name: string): string {
+  const base = name
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+  return base || 'site';
+}
+
+async function generateUniqueDomain(name: string): Promise<string> {
+  const base = slugifyDomainBase(name).slice(0, 40);
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const suffix = randomBytes(3).toString('hex');
+    const candidate = `${base}-${suffix}`;
+    const existing = await prisma.project.findUnique({ where: { domain: candidate } });
+    if (!existing) return candidate;
+  }
+  return `${base}-${randomBytes(6).toString('hex')}`;
+}
 
 export class DeployServiceService {
   public listProjectsForUser = async (userId: string) => {
@@ -133,6 +155,8 @@ export class DeployServiceService {
       ? 'docker'
       : (validatedData.buildLanguage as BuildLanguage);
 
+    const domain = await generateUniqueDomain(validatedData.name);
+
     const project = await prisma.project.create({
       data: {
         name: validatedData.name.trim(),
@@ -148,6 +172,7 @@ export class DeployServiceService {
         env: validatedData.env,
         image: '',
         port: 3000,
+        domain,
         userId,
       },
     });

@@ -14,9 +14,6 @@ import {
   stopAndRemoveContainer,
 } from './docker-runtime';
 
-const STATIC_NGINX_IMAGE = 'nginx:alpine';
-const STATIC_NGINX_CONTAINER_PORT = 80;
-
 export type DeployJobInput = {
   /** Stable identifier used as the container name (one running container per project). */
   projectId: string;
@@ -119,27 +116,12 @@ export async function deployArtifact(input: DeployJobInput): Promise<DeployJobRe
     let workdir: string | undefined;
     let binds: Array<{ host: string; container: string; readOnly?: boolean }> | undefined;
     let commandOverride: string | undefined;
-    let effectiveContainerPort = containerPort;
 
     if (projectType === 'static') {
-      if (artifactKind !== 'zip') {
-        throw new Error(`Static deploys require a zip artifact, got: ${artifactKind}`);
-      }
-      const extractDir = path.join(workRoot, 'extracted');
-      onStdout?.(`Extracting static site artifact...\n`);
-      await extractZip({ zipPath: artifactPath, destDir: extractDir, onStdout, onStderr });
+      throw new Error('Static projects are served in-process and should not reach the deploy worker');
+    }
 
-      imageRef = STATIC_NGINX_IMAGE;
-      effectiveContainerPort = STATIC_NGINX_CONTAINER_PORT;
-      binds = [
-        {
-          host: path.resolve(extractDir),
-          container: '/usr/share/nginx/html',
-          readOnly: true,
-        },
-      ];
-      onStdout?.(`Serving static assets via ${STATIC_NGINX_IMAGE} on container port ${STATIC_NGINX_CONTAINER_PORT}.\n`);
-    } else if (artifactKind === 'docker-image-tar') {
+    if (artifactKind === 'docker-image-tar') {
       onStdout?.(`Loading docker image from tar...\n`);
       imageRef = await loadDockerImageFromTar({ tarPath: artifactPath, onStdout, onStderr });
       onStdout?.(`Loaded image: ${imageRef}\n`);
@@ -165,11 +147,11 @@ export async function deployArtifact(input: DeployJobInput): Promise<DeployJobRe
       commandOverride = startCommand.trim() || 'tail -f /dev/null';
     }
 
-    onStdout?.(`Starting container ${containerName} (image=${imageRef}, port=${effectiveContainerPort})...\n`);
+    onStdout?.(`Starting container ${containerName} (image=${imageRef}, port=${containerPort})...\n`);
     const { containerId, hostPort } = await runDetachedContainer({
       name: containerName,
       image: imageRef,
-      containerPort: effectiveContainerPort,
+      containerPort,
       env,
       workdir,
       binds,

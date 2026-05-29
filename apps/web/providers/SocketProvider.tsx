@@ -1,5 +1,5 @@
 'use client';
-
+import Cookies from 'js-cookie'
 import {
   createContext,
   useContext,
@@ -18,7 +18,7 @@ type SocketContextValue = {
 const SocketContext = createContext<SocketContextValue | null>(null);
 
 export function SocketProvider({ children }: PropsWithChildren) {
-  const socket = useMemo(() => { const token = document.cookie.split('; ').find(row => row.startsWith('renderLite-access='))!; return getSocket(token); }, []);
+  const socket = useMemo(() => { const token = Cookies.get('renderLite-access'); return getSocket(token! as string); }, []);
   const [isConnected, setIsConnected] = useState<boolean>(socket.connected);
 
   useEffect(() => {

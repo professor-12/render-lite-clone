@@ -73,10 +73,6 @@ export type RunContainerResult = {
   hostPort: number | null;
 };
 
-/**
- * Start a detached container. Returns the container id and the auto-assigned host port for
- * the published containerPort (resolved via `docker port`).
- */
 export async function runDetachedContainer({
   name,
   image,

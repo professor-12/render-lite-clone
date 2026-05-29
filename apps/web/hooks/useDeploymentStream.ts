@@ -24,7 +24,6 @@ export function useDeploymentStream(deploymentId: string | null | undefined, han
   const queryClient = useQueryClient();
 
   const handlersRef = useRef<Handlers | undefined>(handlers);
-  handlersRef.current = handlers;
 
   useEffect(() => {
     if (!deploymentId) return;

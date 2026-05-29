@@ -82,25 +82,60 @@ export class BuildWorker extends BaseWorker<BuildRequestedJob> {
         onStderr: (c) => void appendLog('stderr', c),
       });
 
+      const isStatic = payload.projectType === 'static';
+      const nextStatus = isStatic ? 'live' : 'queued_deploy';
+
       const updatedDeployment = await prisma.deployment.update({
         where: { id: deploymentId },
         data: {
-          status: 'queued_deploy',
+          status: nextStatus,
           image: result.artifactUrl,
         },
-        select: { projectId: true, startCommand: true, rootDir: true, outDir: true, env: true, port: true },
+        select: {
+          projectId: true,
+          startCommand: true,
+          rootDir: true,
+          outDir: true,
+          env: true,
+          port: true,
+          project: { select: { domain: true } },
+        },
       });
+
+      if (isStatic) {
+        const host = process.env.STATIC_SERVE_HOST || `localhost:${process.env.PORT || 8080}`;
+        const liveUrl = updatedDeployment.project.domain
+          ? `http://${updatedDeployment.project.domain}.${host}`
+          : '';
+        if (liveUrl) {
+          await prisma.deployment.update({
+            where: { id: deploymentId },
+            data: { live_url: liveUrl },
+          });
+        }
+      }
+
       try {
         socketService.emitToDeployment(deploymentId, 'deployment:status', {
           deploymentId,
-          status: 'queued_deploy',
+          status: nextStatus,
         });
         socketService.emitToProject(updatedDeployment.projectId, 'project:updated', {
           projectId: updatedDeployment.projectId,
         });
-      } catch {}
-      await appendLog('stdout', 'Build successfully done 🥳🙌🏽');
-      await appendLog('stdout', 'Publishing your deployment... 🚀');
+      } catch { }
+      if (payload.buildCommand) {
+        await appendLog('stdout', 'Build successfully done 🥳🙌🏽');
+        await appendLog('stdout', isStatic ? 'Static site is live 🚀' : 'Publishing your deployment... 🚀');
+      }
+
+      if (isStatic) {
+        logger.info(
+          { deploymentId, correlationId, artifactKind: result.artifactKind },
+          'Build job finished, static site marked live',
+        );
+        return;
+      }
 
       const deployJob = {
         correlationId: correlationId ?? randomUUID(),
