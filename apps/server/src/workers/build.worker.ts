@@ -129,8 +129,8 @@ export class BuildWorker extends BaseWorker<BuildRequestedJob> {
       } catch { }
       if (payload.buildCommand) {
         await appendLog('stdout', 'Build successfully done 🥳🙌🏽');
-        await appendLog('stdout', isStatic ? 'Static site is live 🚀' : 'Publishing your deployment... 🚀');
       }
+      await appendLog('stdout', isStatic ? 'Site is live 🚀' : 'Publishing your deployment... 🚀');
 
       if (isStatic) {
         logger.info(

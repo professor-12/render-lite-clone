@@ -1,6 +1,7 @@
 import express, { Router } from 'express';
 import authRouter from '../auth/auth.route';
 import githubAppRouter from '../github_app/github_app.route';
+import githubWebhookRouter from '../github_webhook/github_webhook.route';
 import detectServiceRouter from '../detect-service/detect-service.route';
 import deployServiceRoute from '../deploy-service/deploy-service.route';
 import { redis } from '../../libs/redis';
@@ -54,6 +55,7 @@ router.get('/metrics', (_req, res) => {
 
 router.use('/auth', authRouter);
 router.use('/github', githubAppRouter);
+router.use('/github', githubWebhookRouter);
 router.use('/', detectServiceRouter);
 router.use('/project', deployServiceRoute);
 export default router;

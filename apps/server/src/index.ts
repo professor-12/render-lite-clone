@@ -40,7 +40,18 @@ async function bootstrap() {
   app.use(express.static(path.join(__dirname, 'public')));
   app.use(defaultJsonContentType);
   app.use(express.urlencoded({ extended: true }));
-  app.use(express.json({ limit: '10mb' }));
+  app.use(
+    express.json({
+      limit: '10mb',
+      // Capture the raw body for routes that need byte-exact verification
+      // (e.g. GitHub webhook HMAC signatures).
+      verify: (req, _res, buf) => {
+        if (req.url?.includes('/github/webhook')) {
+          (req as express.Request).rawBody = buf;
+        }
+      },
+    }),
+  );
   app.use('/api/v1', appRoute);
   app.use(errorHandler);
 
