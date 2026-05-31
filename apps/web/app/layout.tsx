@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono, Instrument_Serif } from 'next/font/google';
 import { ReactNode } from 'react';
+import NextTopLoader from 'nextjs-toploader';
 import './globals.css';
 import QueryProvider from '@/providers/QueryProvider';
 import { ThemeProvider } from '@/components/theme-provider';
@@ -41,6 +42,7 @@ export default function RootLayout({ children }: Props) {
       suppressHydrationWarning
     >
       <body className="antialiased">
+        <NextTopLoader color="#fff" showSpinner={false} />
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

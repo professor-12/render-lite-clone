@@ -1,3 +1,4 @@
+import gh from 'parse-github-url';
 import { AppError } from '../../errors/Apperror';
 import { mapGithubRuntimeToBuildLanguage } from '../../libs/build/build-language';
 import { logger } from '../../libs/logger';
@@ -18,7 +19,7 @@ class DetectServiceService {
     const githubInstallation = githubAccount.githubInstallations.find(({ accountLogin }) => {
       return accountLogin === owner;
     });
-    logger.debug({ githubInstallation }, 'GitHub installation found');
+
     if (!githubInstallation) {
       throw new AppError('GitHub installation not found', 400);
     }
@@ -28,7 +29,6 @@ class DetectServiceService {
       owner: owner,
     });
 
-    logger.debug({ repository }, 'Repository found');
     const { default_branch: branch, name: repo_name } = repository as GithubRepository;
     const detected = await githubClientService.getBuildCommand({
       installationId: githubInstallation.installationId,
@@ -44,12 +44,16 @@ class DetectServiceService {
     };
   };
   private extractOwnerAndRepo(githubUrl: string) {
-    const match = githubUrl.match(/github\.com\/([^\/]+)\/([^\/]+)/);
-    if (!match) throw new AppError('Invalid GitHub URL', 400);
+    // parse-github-url normalises every form (https, ssh, with/without .git,
+    // .../tree/<branch> deep links) and strips the .git suffix for us.
+    const parsed = gh(githubUrl);
+    if (!parsed?.owner || !parsed?.name) {
+      throw new AppError('Invalid GitHub URL', 400);
+    }
 
     return {
-      owner: match[1],
-      repo: match[2],
+      owner: parsed.owner,
+      repo: parsed.name,
     };
   }
 }

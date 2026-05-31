@@ -1,7 +1,6 @@
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { randomUUID } from 'node:crypto';
 import { uploadFileToCloudflareR2, uploadRawFileToCloudinary } from '../media/cloudinary-uploader';
 import type { BuildLanguage } from './build-language';
 import { zipDirectory } from './archive';
@@ -9,6 +8,11 @@ import { shallowCloneGithubRepo } from './clone-github';
 import { runShellCommand } from './run-command';
 import { runInstallAndBuildInDocker } from './docker-isolated-build';
 import { sanitizeRelativeDir } from './sanitize-relative-dir';
+
+/** Keep only characters that are safe inside an R2 object key path segment. */
+function sanitizeKeySegment(value: string) {
+  return value.replace(/[^\w.-]+/g, '_');
+}
 
 function inferDockerImageTag(buildCommand: string) {
   const parts = buildCommand.split(/\s+/).filter(Boolean);
@@ -37,6 +41,9 @@ export async function runBuildJobAndUpload({
   buildCommand,
   outDir,
   buildLanguage,
+  projectType,
+  projectId,
+  deploymentId,
   onStdout,
   onStderr,
 }: {
@@ -47,9 +54,16 @@ export async function runBuildJobAndUpload({
   buildCommand: string;
   outDir?: string;
   buildLanguage: BuildLanguage;
+  projectType: 'static' | 'dynamic';
+  projectId: string;
+  deploymentId: string;
   onStdout?: (chunk: string) => void;
   onStderr?: (chunk: string) => void;
 }): Promise<BuildJobResult> {
+  // Artifacts are named by their owning project + deployment so the object key is
+  // self-identifying in R2 (renderlite/builds/<projectId>/<deploymentId>.<ext>) instead of an
+  // opaque random UUID. The extension distinguishes a zip workspace from a docker image tar.
+  const artifactSlug = `${sanitizeKeySegment(projectId)}/${sanitizeKeySegment(deploymentId)}`;
   const workRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'renderlite-build-'));
   const repoDir = path.join(workRoot, 'repo');
   const artifactDir = path.join(workRoot, 'artifact');
@@ -81,7 +95,7 @@ export async function runBuildJobAndUpload({
       onStdout?.(`\n$ ${saveCmd}\n`);
       await runShellCommand({ command: saveCmd, cwd: repoDir, onStdout, onStderr });
 
-      const publicId = `docker-image-${randomUUID()}`;
+      const publicId = artifactSlug;
 
       onStdout?.(`Uploading ${outFile}...\n`);
       const uploaded = await uploadFileToCloudflareR2({
@@ -108,8 +122,14 @@ export async function runBuildJobAndUpload({
       onStderr,
     });
 
+    // `outDir` only has meaning for static sites: it names the publish directory whose
+    // contents we serve as files. For dynamic services there is no single folder to serve —
+    // they must ship the whole built workspace (incl. node_modules) so the start command can
+    // boot at deploy time. So we only honour outDir when the project is static, and we keep
+    // dependencies in the dynamic artifact.
+    const isStatic = projectType === 'static';
     const safeOutDir = sanitizeRelativeDir(outDir);
-    const buildOutputDir = safeOutDir ? path.join(repoDir, safeOutDir) : null;
+    const buildOutputDir = isStatic && safeOutDir ? path.join(repoDir, safeOutDir) : null;
     let directoryToZip = repoDir;
 
     if (buildOutputDir) {
@@ -126,18 +146,20 @@ export async function runBuildJobAndUpload({
     }
 
     const zipFile = path.join(artifactDir, 'build.zip');
-    const zippingWholeRepo = directoryToZip === repoDir;
+    // Static publish dirs carry no deps, so exclude heavy dirs for a lean artifact.
+    // Dynamic apps need node_modules at runtime, so keep them.
+    const excludeHeavyDirs = isStatic;
     onStdout?.(
-      `\nPackaging ${path.relative(repoDir, directoryToZip) || '.'}${zippingWholeRepo ? ' (excluding .git, node_modules, .pnpm)' : ''
+      `\nPackaging ${path.relative(repoDir, directoryToZip) || '.'}${excludeHeavyDirs ? ' (excluding .git, node_modules, .pnpm)' : ' (including dependencies)'
       }...\n`,
     );
     await zipDirectory({
       sourceDir: directoryToZip,
       outFile: zipFile,
-      excludeHeavyDirs: zippingWholeRepo,
+      excludeHeavyDirs,
     });
 
-    const publicId = `build-${randomUUID()}`;
+    const publicId = artifactSlug;
     const uploaded = await uploadFileToCloudflareR2({
       filePath: zipFile,
       publicId,

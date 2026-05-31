@@ -35,20 +35,6 @@ export async function runInstallAndBuildInDocker(opts: {
     lines.push(`cd ${bashSingleQuote(safeRoot)}`);
   }
 
-  if (buildLanguage === 'javascript') {
-    lines.push(
-      'export RENDERLITE_TOOL_ROOT="${RENDERLITE_TOOL_ROOT:-/tmp/renderlite-js-tools}"',
-      'mkdir -p "$RENDERLITE_TOOL_ROOT"',
-      'export PATH="$RENDERLITE_TOOL_ROOT/bin:$PATH"',
-      'if ! command -v pnpm >/dev/null 2>&1; then',
-      '  npm install -g pnpm@9 --prefix="$RENDERLITE_TOOL_ROOT"',
-      'fi',
-      'if ! command -v yarn >/dev/null 2>&1; then',
-      '  npm install -g yarn@1.22.22 --prefix="$RENDERLITE_TOOL_ROOT"',
-      'fi',
-    );
-  }
-
   if (installCommand.trim()) {
     lines.push(installCommand.trim());
   }

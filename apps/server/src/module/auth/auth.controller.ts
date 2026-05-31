@@ -6,7 +6,7 @@ import { getEnv } from '../../utlis';
 process.env.JWT_SECRET;
 
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
   public gitLogout: RequestHandler = asyncHandler(async (req: Request, res: Response) => {
     res.clearCookie('renderLite', {
       httpOnly: true,

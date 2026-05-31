@@ -42,13 +42,34 @@ function statusTone(status: string) {
 let liveRowCounter = 0;
 const nextLiveRowId = (deploymentId: string) => `live:${deploymentId}:${++liveRowCounter}`;
 
+function fmtLogTime(iso: string) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '--:--:--';
+  return d.toLocaleTimeString(undefined, {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
+}
+
 function LogLine({ row }: { row: DeploymentLogRow }) {
+  const isError = row.type === 'stderr';
   return (
-    <div className="flex gap-3 py-1">
-      <span className="w-16 shrink-0 font-mono text-[11px] text-[#525252]">
-        {row.type.toUpperCase()}
+    <div
+      className={`flex gap-3 py-1 ${isError ? '-mx-5 border-l-2 border-red-500 bg-red-500/10 px-5' : ''
+        }`}
+    >
+      <span
+        className={`shrink-0 font-mono text-[11px] ${isError ? 'text-red-400' : 'text-[#525252]'
+          }`}
+      >
+        [{fmtLogTime(row.createdAt)}]
       </span>
-      <pre className="min-w-0 flex-1 whitespace-pre-wrap wrap-break-word font-mono text-[12px] leading-5 text-foreground/90">
+      <pre
+        className={`min-w-0 flex-1 whitespace-pre-wrap wrap-break-word font-mono text-[12px] leading-5 ${isError ? 'text-red-300' : 'text-foreground/90'
+          }`}
+      >
         {row.log}
       </pre>
     </div>
@@ -62,7 +83,7 @@ export function DeploymentLogsView({ deploymentId }: { deploymentId: string }) {
   const [loadingLogs, setLoadingLogs] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  /** Tracks log ids seen so socket events don't duplicate rows from the initial fetch. */
+
   const seenIdsRef = useRef<Set<string>>(new Set());
 
   const atBottomRef = useRef(true);
@@ -92,30 +113,28 @@ export function DeploymentLogsView({ deploymentId }: { deploymentId: string }) {
     setRows([]);
     setLoadingLogs(true);
     setError(null);
-
     (async () => {
-      const MAX_PAGES = 100;
       try {
         let cursor: string | null = null;
-        for (let page = 0; page < MAX_PAGES; page++) {
-          const data = await fetchDeploymentLogs(deploymentId, cursor, controller.signal);
-          if (controller.signal.aborted) return;
+        const data = await fetchDeploymentLogs(deploymentId, cursor, controller.signal);
+        if (controller.signal.aborted) return;
 
-          if (data.logs.length > 0) {
-            setRows((prev) => {
-              const next = [...prev];
-              for (const row of data.logs) {
-                if (!seenIdsRef.current.has(row.id)) {
-                  seenIdsRef.current.add(row.id);
-                  next.push(row);
-                }
+        if (data.logs.length > 0) {
+          setRows((prev) => {
+            const next = [...prev];
+            for (const row of data.logs) {
+              if (!seenIdsRef.current.has(row.id)) {
+                seenIdsRef.current.add(row.id);
               }
-              return next;
-            });
-          }
-          if (!data.nextCursor) break;
-          cursor = data.nextCursor;
+              next.push(row);
+
+            }
+            return next;
+          });
         }
+
+        cursor = data.nextCursor;
+
         if (!controller.signal.aborted) setError(null);
       } catch (e) {
         if (controller.signal.aborted) return;
@@ -164,18 +183,15 @@ export function DeploymentLogsView({ deploymentId }: { deploymentId: string }) {
         <div className="min-w-0">
           <Link
             href="/dashboard/projects"
-            className="text-[12.5px] text-muted-foreground transition-colors hover:text-foreground"
+            className="text-[12.5px] text-muted-foreground transition-colors flex items-center gap-2 hover:text-foreground"
           >
-            ← Projects
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-arrow-left-from-line-icon lucide-arrow-left-from-line"><path d="m9 6-6 6 6 6" /><path d="M3 12h14" /><path d="M21 19V5" /></svg> Projects
           </Link>
           <h1 className="mt-3 truncate text-[26px] font-medium tracking-[-0.025em] text-foreground">
             {deployment?.project?.name ?? (
               <span className="">Deploying…</span>
             )}
           </h1>
-          <p className="mt-1 font-mono text-[12px] text-muted-foreground">
-            id · {deploymentId}
-          </p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -188,8 +204,8 @@ export function DeploymentLogsView({ deploymentId }: { deploymentId: string }) {
           </span>
           {deployment?.status === 'build_failed' && (
             <Button
-              onClick={() => redeploy.mutate()}
-              disabled={redeploy.isPending}
+              onClick={() => { setRows([]); redeploy.mutate() }}
+              disabled={redeploy.isPending || deployment.status !== 'build_failed'}
               className="ml-2 cursor-pointer gap-3 flex items-center"
             >
               <span className={redeploy.isPending ? 'animate-spin' : ''}>

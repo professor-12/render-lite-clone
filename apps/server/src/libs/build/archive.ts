@@ -2,13 +2,18 @@ import archiver from 'archiver';
 import fs from 'node:fs';
 import path from 'node:path';
 
-/** Skip walking into these paths (minimatch on paths relative to sourceDir). */
-const HEAVY_DIR_SKIP = ['**/.git', '**/node_modules', '**/.pnpm'];
+/** Always skipped: VCS metadata is never useful in a deploy artifact. */
+const ALWAYS_SKIP = ['**/.git'];
+/** Additionally skipped when excludeHeavyDirs is set (static sites carry no deps). */
+const HEAVY_DIR_SKIP = ['**/node_modules', '**/.pnpm'];
 
 export async function zipDirectory({
   sourceDir,
   outFile,
-  /** When true, do not descend into .git / node_modules / .pnpm (full-repo fallback only). */
+  /**
+   * When true, also skip node_modules / .pnpm. Use for static publish dirs (no deps needed).
+   * Leave false for dynamic apps so the start command can boot against bundled dependencies.
+   */
   excludeHeavyDirs,
 }: {
   sourceDir: string;
@@ -26,19 +31,16 @@ export async function zipDirectory({
     archive.on('error', reject);
 
     archive.pipe(output);
-    if (excludeHeavyDirs) {
-      archive.glob(
-        '**/*',
-        {
-          cwd: sourceDir,
-          dot: true,
-          skip: HEAVY_DIR_SKIP,
-        },
-        {},
-      );
-    } else {
-      archive.directory(sourceDir, false);
-    }
+    const skip = excludeHeavyDirs ? [...ALWAYS_SKIP, ...HEAVY_DIR_SKIP] : ALWAYS_SKIP;
+    archive.glob(
+      '**/*',
+      {
+        cwd: sourceDir,
+        dot: true,
+        skip,
+      },
+      {},
+    );
     archive.finalize().catch(reject);
   });
 }

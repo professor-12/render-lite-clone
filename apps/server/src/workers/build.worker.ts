@@ -78,6 +78,9 @@ export class BuildWorker extends BaseWorker<BuildRequestedJob> {
         buildCommand: payload.buildCommand,
         outDir: payload.outDir,
         buildLanguage,
+        projectType: payload.projectType,
+        projectId: deployment.projectId,
+        deploymentId,
         onStdout: (c) => void appendLog('stdout', c),
         onStderr: (c) => void appendLog('stderr', c),
       });
